@@ -7,11 +7,11 @@
 #include "../external/cpp/inc/GL/freeglut.h"
 
 //tensegrity
-#include "inc/GPU/IBO.h"
-#include "inc/GPU/VBO.h"
-#include "inc/GPU/VAO.h"
-#include "inc/GPU/Shader.h"
-#include "inc/GPU/Program.h"
+#include "inc/GPU/IBO.hpp"
+#include "inc/GPU/VBO.hpp"
+#include "inc/GPU/VAO.hpp"
+#include "inc/GPU/Shader.hpp"
+#include "inc/GPU/Program.hpp"
 
 //data
 static gpu::IBO ibo;

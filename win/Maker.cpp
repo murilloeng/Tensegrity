@@ -4,7 +4,7 @@
 #include <algorithm>
 
 //maker
-#include "Maker.h"
+#include "Maker.hpp"
 
 //constructors
 Maker::Maker(void) : 
@@ -404,7 +404,7 @@ void Maker::setup(int argc, char** argv)
 	}
 	//files
 	find_files(m_path_uic, "ui/", ".ui");
-	find_files(m_path_inc, "inc/", ".h");
+	find_files(m_path_inc, "inc/", ".hpp");
 	find_files(m_path_src, "src/", ".cpp");
 	find_files(m_path_rsc, "rsc/", ".qrc");
 }
@@ -483,7 +483,7 @@ void Maker::find_dependencies(std::vector<std::filesystem::path>& list, std::fil
 //string
 std::filesystem::path Maker::inc_to_obj(std::filesystem::path path)
 {
-	path = replace(path, ".h", ".obj");
+	path = replace(path, ".hpp", ".obj");
 	path = replace(path, "inc/", "build/" + m_mode + "/moc/");
 	return path;
 }
@@ -505,13 +505,13 @@ std::filesystem::path Maker::ext_to_dll(std::filesystem::path path)
 }
 std::filesystem::path Maker::uic_to_inc(std::filesystem::path path)
 {
-	path = replace(path, ".ui", ".h");
+	path = replace(path, ".ui", ".hpp");
 	path = replace(path, "ui/", "build/uic/");
 	return path;
 }
 std::filesystem::path Maker::inc_to_src(std::filesystem::path path)
 {
-	path = replace(path, ".h", ".cpp");
+	path = replace(path, ".hpp", ".cpp");
 	path = replace(path, "inc/", "build/moc/");
 	return path;
 }

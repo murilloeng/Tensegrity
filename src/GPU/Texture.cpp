@@ -6,7 +6,7 @@
 #include "../external/cpp/inc/stb_image.h"
 
 //tensegrity
-#include "inc/GPU/Texture.h"
+#include "inc/GPU/Texture.hpp"
 
 namespace gpu
 {

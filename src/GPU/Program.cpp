@@ -7,8 +7,8 @@
 #include "../external/cpp/inc/GL/glew.h"
 
 //tensegrity
-#include "inc/GPU/Shader.h"
-#include "inc/GPU/Program.h"
+#include "inc/GPU/Shader.hpp"
+#include "inc/GPU/Program.hpp"
 
 namespace gpu
 {

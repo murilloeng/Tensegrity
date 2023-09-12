@@ -2,7 +2,7 @@
 #include "../external/cpp/inc/GL/glew.h"
 
 //tensegrity
-#include "inc/GPU/VBO.h"
+#include "inc/GPU/VBO.hpp"
 
 namespace gpu
 {

@@ -1,10 +1,10 @@
 *
 !*/
-!*.h
 !*.md
 !*.gp
 !*.bat
 !*.cpp
+!*.hpp
 !*.frag
 !*.vert
 !*.json

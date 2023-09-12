@@ -2,14 +2,14 @@
 
 //os
 #ifdef _WIN32
-#include "Windows.h"
+#include <Windows.h>
 #endif
 
 //std
 #include <string>
 
 //ext
-#include "GL/gl.h"
+#include <gl/GL.h>
 
 namespace gpu
 {
