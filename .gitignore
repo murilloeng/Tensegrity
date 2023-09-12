@@ -7,4 +7,5 @@
 !*.cpp
 !*.frag
 !*.vert
+!*.json
 !.gitignore

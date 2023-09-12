@@ -4,6 +4,8 @@
 void setup_dlls(Maker& maker)
 {
 	maker.m_path_dll.clear();
+	maker.m_path_dll.push_back(maker.m_edll + "glew32.dll");
+	maker.m_path_dll.push_back(maker.m_edll + "freeglut.dll");
 }
 void setup_libs_debug(Maker& maker)
 {
@@ -18,6 +20,8 @@ void setup_libs(Maker& maker)
 	maker.m_libs.clear();
 	maker.m_libs += "glu32.lib ";
 	maker.m_libs += "opengl32.lib ";
+	maker.m_libs += maker.m_elib + "glew32.lib ";
+	maker.m_libs += maker.m_elib + "freeglut.lib ";
 	maker.m_mode.compare("debug") == 0 ? setup_libs_debug(maker) : setup_libs_release(maker);
 }
 

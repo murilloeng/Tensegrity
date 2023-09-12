@@ -364,9 +364,9 @@ void Maker::setup(int argc, char** argv)
 {
 	//data
 	m_cxx = "cl ";
-	m_incs = "/I .. ";
-	m_elib = "../../external/cpp/lib/x64/";
-	m_edll = "../../external/cpp/dll/x64/";
+	m_incs = "/I . ";
+	m_elib = "../external/cpp/lib/x64/";
+	m_edll = "../external/cpp/dll/x64/";
 	m_qlib = "C:/Qt/6.4.3/msvc2019_64/lib/";
 	m_lnks = "/IGNORE:4099 /STACK:104857600 ";
 	m_defs = "/D \"NOMINMAX\" /D \"_USE_MATH_DEFINES\" ";
@@ -501,7 +501,7 @@ std::filesystem::path Maker::rsc_to_obj(std::filesystem::path path)
 }
 std::filesystem::path Maker::ext_to_dll(std::filesystem::path path)
 {
-	return replace(path, "../../external/cpp/dll/x64/", "dist/" + m_mode + "/");
+	return replace(path, "../external/cpp/dll/x64/", "dist/" + m_mode + "/");
 }
 std::filesystem::path Maker::uic_to_inc(std::filesystem::path path)
 {
