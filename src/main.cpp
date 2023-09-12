@@ -6,18 +6,24 @@
 #include "../external/cpp/inc/GL/glew.h"
 #include "../external/cpp/inc/GL/freeglut.h"
 
-//tensegrity
+//gpu
 #include "inc/GPU/IBO.hpp"
 #include "inc/GPU/VBO.hpp"
 #include "inc/GPU/VAO.hpp"
 #include "inc/GPU/Shader.hpp"
 #include "inc/GPU/Program.hpp"
 
+//draw
+#include "inc/draw/Cable.hpp"
+#include "inc/draw/Canvas.hpp"
+
 //data
 static gpu::IBO ibo;
 static gpu::VBO vbo;
 static gpu::VAO vao;
 static gpu::Program program;
+
+static draw::Canvas canvas;
 
 void setup(void)
 {
@@ -26,10 +32,13 @@ void setup(void)
 	program.m_fragment->m_path = "shd/base.frag";
 	//program
 	program.setup();
+	//canvas
+	canvas.m_objects.push_back(new draw::Cable);
 	//buffers
-	ibo.m_size = 6;
-	vbo.m_vertices = 4;
+	canvas.setup();
 	vbo.m_sizes = {3, 3};
+	vbo.m_vertices = canvas.m_vertices;
+	ibo.m_size = canvas.m_points + 2 * canvas.m_lines + 3 * canvas.m_triangles;
 	//setup
 	ibo.setup();
 	vbo.setup();
@@ -44,18 +53,9 @@ void setup(void)
 	vbo.allocate();
 	ibo.allocate();
 	//data
-	const float vbo_data[] = {
-		-0.9, -0.9, 0, 0, 0, 1,
-		+0.9, -0.9, 0, 0, 0, 1,
-		+0.9, +0.9, 0, 0, 0, 1,
-		-0.9, +0.9, 0, 0, 0, 1
-	};
-	const unsigned ibo_data[] = {
-		0, 1, 2,
-		0, 2, 3
-	};
-	vbo.transfer(vbo_data);
-	ibo.transfer(ibo_data);
+	canvas.draw();
+	vbo.transfer(canvas.m_vbo_data);
+	ibo.transfer(canvas.m_ibo_data);
 	//unbind
 	vao.unbind();
 	ibo.unbind();
@@ -71,7 +71,7 @@ void callback_display(void)
 	vbo.bind();
 	ibo.bind();
 	//draw
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 	//unbind
 	vao.unbind();
 	vbo.unbind();

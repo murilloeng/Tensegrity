@@ -19,14 +19,21 @@ namespace draw
 		//destructor
 		~Canvas(void);
 
-		//setup
+		//draw
+		void draw(void);
 		void setup(void);
+
+		//affine
+		void move(unsigned, unsigned, const float*);
+		void rotate(unsigned, unsigned, const float*, const float*);
 
 		//data
 		unsigned m_lines;
 		unsigned m_points;
+		unsigned m_vertices;
 		unsigned m_triangles;
 
+		float m_box[6];
 		float* m_vbo_data;
 		unsigned* m_ibo_data;
 
