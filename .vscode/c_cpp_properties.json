@@ -17,8 +17,7 @@
 			"name": "Win32",
 			"includePath":
 			[
-				"${workspaceFolder}",
-				"${workspaceFolder}/../external/cpp/inc"
+				"${workspaceFolder}"
 			],
 			"defines":
 			[

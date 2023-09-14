@@ -30,7 +30,6 @@ namespace draw
 		};
 		memcpy(m_canvas->m_vbo_data + m_index_vertices, vbo_data, 18 * sizeof(float));
 		memcpy(m_canvas->m_ibo_data + m_index_triangles, ibo_data, 3 * sizeof(unsigned));
-		move(dx);
 	}
 	unsigned Cable::lines(void) const
 	{

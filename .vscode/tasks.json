@@ -4,65 +4,9 @@
 	[
 		{
 			"args": [],
-			"label": "mat",
 			"type": "shell",
+			"label": "make",
 			"group": "build",
-			"options": 
-			{
-				"cwd": "${workspaceFolder}/mat"
-			},
-			"linux" : 
-			{
-				"command": "make ${input:mode_lib}"
-			},
-			"windows" : 
-			{
-				"command": "./make ${input:mode_lib}"
-			},
-			"presentation": 
-			{
-				"echo": false,
-				"clear": true,
-				"focus": true,
-				"panel": "dedicated",
-				"showReuseMessage": false,
-			}
-		},
-		{
-			"args": [],
-			"label": "fea",
-			"type": "shell",
-			"group": "build",
-			"options": 
-			{
-				"cwd": "${workspaceFolder}/fea"
-			},
-			"linux" : 
-			{
-				"command": "make ${input:mode_lib}"
-			},
-			"windows" : 
-			{
-				"command": "./make ${input:mode_lib}"
-			},
-			"presentation": 
-			{
-				"echo": false,
-				"clear": true,
-				"focus": true,
-				"panel": "dedicated",
-				"showReuseMessage": false,
-			}
-		},
-		{
-			"args": [],
-			"label": "ben",
-			"type": "shell",
-			"group": "build",
-			"options": 
-			{
-				"cwd": "${workspaceFolder}/ben"
-			},
 			"linux" : 
 			{
 				"command": "make ${input:mode_out}"
@@ -76,64 +20,12 @@
 				"echo": false,
 				"clear": true,
 				"focus": true,
-				"panel": "dedicated",
-				"showReuseMessage": false,
-			}
-		},
-		{
-			"args": [],
-			"label": "gui",
-			"type": "shell",
-			"group": "build",
-			"options": 
-			{
-				"cwd": "${workspaceFolder}/gui"
-			},
-			"linux" : 
-			{
-				"command": "make ${input:mode_out}"
-			},
-			"windows" : 
-			{
-				"command": "./make ${input:mode_out}"
-			},
-			"presentation": 
-			{
-				"echo": false,
-				"clear": true,
-				"focus": true,
-				"panel": "dedicated",
-				"showReuseMessage": false,
-			}
-		},
-		{
-			"type": "shell",
-			"group": "build",
-			"label": "gnuplot",
-			"command": "gnuplot",
-			"args": ["-p","${file}"],
-			"options": 
-			{
-				"cwd": "${fileDirname}"
-			},
-			"presentation": 
-			{
-				"echo": false,
-				"clear": true,
-				"focus": true,
-				"reveal": "silent",
 				"panel": "dedicated",
 				"showReuseMessage": false,
 			}
 		}
 	],
 	"inputs": [
-		{
-			"id": "mode_lib",
-			"default": "m=r",
-			"description": "Mode:",
-			"type": "promptString"
-		},
 		{
 			"id": "mode_out",
 			"default": "run m=r",

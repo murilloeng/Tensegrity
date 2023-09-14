@@ -110,8 +110,8 @@ namespace math
 		//data
 		float c1[3], c2[3];
 		const float tn = norm(tr);
-		const float f1 = funt(tn, 1);
-		const float f2 = funt(tn, 2);
+		const float f1 = fn(tn, 1);
+		const float f2 = fn(tn, 2);
 		//setup
 		for(unsigned i = 0; i < 3; i++) vb[i] -= xc[i];
 		//rotate
