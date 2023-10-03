@@ -1,5 +1,5 @@
 //data
-nc = 20;
+nc = 5;
 t = 2.00e-02;
 r = 5.00e-01;
 e = 2.50e-01;
@@ -53,6 +53,45 @@ color([1, 0, 0])
 			translate([r, 0, 0])
 			{
 				cylinder(h = ht, r = rc, $fn = 20);
+			}
+		}
+	}
+}
+translate([rc / 2, 0, hr - hc / 2])
+{
+	rotate([90, 0, 0])
+	{
+		scale([1, 1, 0.01])
+		{
+			color([0, 0, 0])
+			{
+				text("hc", size = 0.1, valign = "center");
+			}
+		}
+	}
+}
+translate([e + t / 2, 0, hr / 2])
+{
+	rotate([90, 0, 0])
+	{
+		scale([1, 1, 0.01])
+		{
+			color([0, 0, 0])
+			{
+				text("hr", size = 0.1, valign = "center");
+			}
+		}
+	}
+}
+translate([r + t / 2, 0, ht / 2])
+{
+	rotate([90, 0, 0])
+	{
+		scale([1, 1, 0.01])
+		{
+			color([0, 0, 0])
+			{
+				text("ht", size = 0.1, valign = "center");
 			}
 		}
 	}
