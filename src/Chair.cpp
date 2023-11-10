@@ -9,7 +9,7 @@
 
 //constructors
 Chair::Chair(void) : 
-	m_e(5.00e-01), m_t0(0.00e+00), m_Rr(1.00e+00), m_Ht(1.00e+00), m_Hc(5.00e-01), m_Ec(8.00e+10), m_dc(1.00e-03), m_nc(3)
+	m_e(2.00e-01), m_t0(0.00e+00), m_Rr(4.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), m_nc(3)
 {
 	return;
 }
@@ -20,60 +20,84 @@ Chair::~Chair(void)
 	return;
 }
 
-//geometry
-double Chair::Hr(void) const
-{
-	return (m_Ht + m_Hc) / 2;
-}
-double Chair::Ac(void) const
-{
-	return M_PI * m_dc * m_dc / 4;
-}
-
 //strain
 double Chair::stretch(unsigned index) const
 {
-	return 0;
+	const math::vec3 z1 = position(index, 0, 0);
+	const math::vec3 z2 = position(index, 1, 0);
+	const math::vec3 x1 = position(index, 0, 1);
+	const math::vec3 x2 = position(index, 1, 1);
+	return (x2 - x1).norm() / (z2 - z1).norm();
 }
-double Chair::strain_measure(unsigned) const
+double Chair::strain_measure(unsigned index) const
 {
-	return 0;
+	return log(stretch(index));
 }
-double Chair::strain_hessian(unsigned) const
+double Chair::strain_hessian(unsigned index) const
 {
-	return 0;
+	return -1 / pow(stretch(index), 2);
 }
-double Chair::strain_gradient(unsigned) const
+double Chair::strain_gradient(unsigned index) const
 {
-	return 0;
+	return 1 / stretch(index);
 }
 
 //position
-void Chair::position(double* position, unsigned index, bool level, bool configuration) const
+math::vec3 Chair::position(unsigned index, bool level, bool configuration) const
 {
-	//data
-	const double t = 2 * M_PI * index / m_nc;
-	//position
 	if(!level || !configuration)
 	{
-		position[0] = (index != 0) * m_Rr * cos(t);
-		position[1] = (index != 0) * m_Rr * sin(t);
-		position[2] = (index == 0) * (Hr() - level * m_Hc) + (index != 0) * level * m_Ht;
+		math::vec3 x;
+		const double Hr = (m_Ht + m_Hc) / 2;
+		x[2] = (index == 0) * (Hr - level * m_Hc) + (index != 0) * level * m_Ht;
+		x[0] = (index != 0) * m_Rr * cos(2 * M_PI * index / m_nc + level * m_t0);
+		x[1] = (index != 0) * m_Rr * sin(2 * M_PI * index / m_nc + level * m_t0);
+		return x;
 	}
 	else
 	{
-		math::vec3 x(position);
-		this->position(position, index, true, false);
-		x = math::vec3(m_x) + math::vec3(m_t).rotate(x - math::vec3(0, 0, m_Ht));
+		return m_x + m_t.rotate(position(index, 1, 0) - math::vec3(0, 0, m_Ht));
 	}
 }
 
 //formulation
-void Chair::stiffness(double*) const
+math::matrix Chair::stiffness(void) const
 {
+	//data
+	math::matrix K(6, 6, math::mode::zeros);
+	//stiffness
 
+	//return
+	return K;
 }
-void Chair::internal_force(double*) const
+math::vector Chair::internal_force(void) const
 {
-
+	//data
+	math::vector fi(6, math::mode::zeros);
+	const double Ac = M_PI * m_dc * m_dc / 4;
+	//internal force
+	for(unsigned i = 0; i < m_nc; i++)
+	{
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
+		const math::vec3 x1 = position(i, 0, 1);
+		const math::vec3 x2 = position(i, 1, 1);
+		//lenght
+		const double L = (z2 - z1).norm();
+		const double l = (x2 - x1).norm();
+		const math::vec3 tc = (x2 - x1) / l;
+		//strain
+		const double a = l / L;
+		const double e = log(a);
+		const double de = 1 / a;
+		const double he = -1 / a / a;
+		//stress
+		const double s = fmax(0, m_Ec * e);
+		//internal force
+		math::vec3(fi.data() + 0) += s * Ac * de * tc;
+		math::vec3(fi.data() + 3) += s * Ac * de * (x2 - m_x).cross(tc);
+	}
+	//return
+	return fi;
 }

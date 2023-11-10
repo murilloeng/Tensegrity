@@ -35,6 +35,7 @@ int main(int argc, char** argv)
 	if(!maker.m_clean)
 	{
 		setup_libs(maker);
+		setup_dlls(maker);
 		maker.build_src();
 		maker.build_dll();
 		maker.build_exe();
