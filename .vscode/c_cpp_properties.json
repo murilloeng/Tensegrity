@@ -18,7 +18,9 @@
 			"includePath":
 			[
 				"${workspaceFolder}",
-				"${workspaceFolder}/../Math"
+				"${workspaceFolder}/..",
+				"${workspaceFolder}/../Math",
+				"${workspaceFolder}/../Canvas"
 			],
 			"defines":
 			[
