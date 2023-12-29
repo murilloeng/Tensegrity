@@ -138,11 +138,9 @@ void Tensegrity::draw_model_disks(canvas::Scene* scene) const
 	//disk 2
 	disk_2->radius(Rr);
 	disk_2->height(tr);
+	disk_2->shift({0, 0, Ht});
 	disk_2->color_fill({0, 0, 1});
 	disk_2->color_stroke({0, 0, 0});
-	//affine
-	disk_1->shift({0, 0, tr / 2});
-	disk_2->shift({0, 0, 3 * tr / 2 + Ht});
 	//scene
 	scene->add_object(disk_1);
 	scene->add_object(disk_2);
@@ -156,7 +154,7 @@ void Tensegrity::draw_model_links(canvas::Scene* scene) const
 	const float Rr = m_Rr;
 	const float Ht = m_Ht;
 	const float Hc = m_Hc;
-	const float Hr = (Ht + Hc) / 2;
+	const float Hr = (Ht + Hc - tl) / 2;
 	canvas::objects::Cube* link_1 = new canvas::objects::Cube;
 	canvas::objects::Cube* link_2 = new canvas::objects::Cube;
 	canvas::objects::Cube* link_3 = new canvas::objects::Cube;
@@ -171,14 +169,14 @@ void Tensegrity::draw_model_links(canvas::Scene* scene) const
 	link_3->color_stroke({0, 0, 0});
 	link_4->color_stroke({0, 0, 0});
 	//affine
-	link_1->sizes({tl, tl, Hr + tl});
-	link_3->sizes({tl, tl, Hr + tl});
+	link_1->sizes({tl, tl, Hr});
+	link_3->sizes({tl, tl, Hr});
 	link_2->sizes({er - tl / 2, tl, tl});
 	link_4->sizes({er - tl / 2, tl, tl});
-	link_1->shift({er, 0, tr + (Hr + tl) / 2});
-	link_3->shift({-er, 0, tr + Ht - (Hr + tl) / 2});
-	link_2->shift({er / 2 - tl / 4, 0, tr + Hr + tl / 2});
-	link_4->shift({tl / 4 - er / 2, 0, tr + Hr - tl / 2 - Hc});
+	link_1->shift({er, 0, (Hr + tr) / 2});
+	link_2->shift({er / 2 - tl / 4, 0, Hr});
+	link_3->shift({-er, 0, Ht - (Hr + tr) / 2});
+	link_4->shift({tl / 4 - er / 2, 0, tr + Hr - Hc});
 	//scene
 	scene->add_object(link_1);
 	scene->add_object(link_2);
@@ -196,7 +194,7 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 	const float Hc = m_Hc;
 	const float Hr = (Ht + Hc) / 2;
 	canvas::objects::Latex* latex[5];
-	const char* anchor[] = {"NC", "CW", "SC", "CW", "CE"};
+	const char* anchor[] = {"NC", "CW", "SC", "CE", "CW"};
 	const char* source[] = {"$ R_r $", "$ H_t $", "$ e_r $", "$ H_r $", "$ H_c $"};
 	//latex
 	for(unsigned i = 0; i < 5; i++)
@@ -210,11 +208,11 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 		latex[i]->rotate({M_PI_2, 0, 0});
 		scene->add_object(latex[i]);
 	}
-	latex[0]->shift({Rr / 2, 0, -tl});
-	latex[1]->shift({Rr + tl, 0, tr + Ht / 2});
-	latex[2]->shift({er / 2, 0, tr + Hr + 2 * tl});
-	latex[3]->shift({er + 3 * tl / 2, 0, tr + Hr / 2});
-	latex[4]->shift({-tl, 0, tr + Hr - Hc / 2});
+	latex[1]->shift({Rr + tl, 0, Ht / 2});
+	latex[2]->shift({er / 2, 0, tr + Hr});
+	latex[0]->shift({Rr / 2, 0, -tl - tr / 2});
+	latex[4]->shift({er + tl + tl / 2, 0, Hr - Hc / 2});
+	latex[3]->shift({-Rr - tl, 0, Ht - Hr / 2 + tl / 4});
 }
 void Tensegrity::draw_model_cables(canvas::Scene* scene) const
 {
@@ -229,19 +227,18 @@ void Tensegrity::draw_model_cables(canvas::Scene* scene) const
 	//inner
 	cable = new canvas::objects::Line;
 	cable->color_stroke("dark green");
-	cable->point(0, {0, 0, tr + Hr});
-	cable->point(1, {0, 0, tr + Hr - Hc});
+	cable->point(0, {0, 0, Hr - tl});
+	cable->point(1, {0, 0, Hr + tr - Hc});
 	scene->add_object(cable);
 	//outer
 	for(unsigned i = 0; i < m_nc; i++)
 	{
 		cable = new canvas::objects::Line;
 		cable->color_stroke("dark green");
-		cable->point(0, {Rr * cosf(2 * M_PI * i / m_nc), Rr * sinf(2 * M_PI * i / m_nc), tr});
-		cable->point(1, {Rr * cosf(2 * M_PI * i / m_nc), Rr * sinf(2 * M_PI * i / m_nc), tr + Ht});
+		cable->point(0, {Rr * cosf(2 * M_PI * i / m_nc), Rr * sinf(2 * M_PI * i / m_nc), tr / 2});
+		cable->point(1, {Rr * cosf(2 * M_PI * i / m_nc), Rr * sinf(2 * M_PI * i / m_nc), Ht - tr / 2});
 		scene->add_object(cable);
 	}
-	
 }
 void Tensegrity::draw_model_guides(canvas::Scene* scene) const
 {
@@ -270,18 +267,18 @@ void Tensegrity::draw_model_guides(canvas::Scene* scene) const
 		scene->add_object(lines[i]);
 	}
 	//guide Rr
-	lines[0]->point(0, {0, 0, -tl});
-	lines[0]->point(1, {Rr, 0, -tl});
+	lines[0]->point(0, {0, 0, -tl - tr / 2});
+	lines[0]->point(1, {Rr, 0, -tl - tr / 2});
 	//guide Ht
-	lines[1]->point(0, {Rr + tl, 0, tr});
-	lines[1]->point(1, {Rr + tl, 0, tr + Ht});
+	lines[1]->point(0, {Rr + tl, 0, 0});
+	lines[1]->point(1, {Rr + tl, 0, Ht});
 	//guide er
-	lines[2]->point(0, {0, 0, tr + Hr + 2 * tl});
-	lines[2]->point(1, {er, 0, tr + Hr + 2 * tl});
+	lines[2]->point(0, {0, 0, tr + Hr});
+	lines[2]->point(1, {er, 0, tr + Hr});
 	//guide Hr
-	lines[3]->point(0, {er + 3 * tl / 2, 0, tr});
-	lines[3]->point(1, {er + 3 * tl / 2, 0, tr + Hr});
+	lines[3]->point(0, {-Rr - tl, 0, Ht});
+	lines[3]->point(1, {-Rr - tl, 0, Ht - Hr + tl / 2});
 	//guide Hc
-	lines[4]->point(0, {-tl, 0, tr + Hr});
-	lines[4]->point(1, {-tl, 0, tr + Hr - Hc});
+	lines[4]->point(0, {er + tl + tl / 2, 0, Hr - tl / 2});
+	lines[4]->point(1, {er + tl + tl / 2, 0, Hr + tl / 2 - Hc});
 }
