@@ -29,8 +29,10 @@ public:
 	math::vec3 position(unsigned, bool, bool) const;
 
 	//formulation
+	math::vector residue(void) const;
+	math::matrix inertia(void) const;
+	math::matrix damping(void) const;
 	math::matrix stiffness(void) const;
-	math::vector internal_force(void) const;
 
 private:
 	//draw
@@ -42,7 +44,6 @@ private:
 
 public:
 	//data
-	double m_b0;
 	double m_er;
 	double m_tl;
 	double m_tr;
@@ -52,6 +53,16 @@ public:
 	double m_Ec;
 	double m_dc;
 	unsigned m_nc;
-	math::vec3 m_x;
-	math::quat m_q;
+
+	double* m_state_data;
+	double* m_velocity_data;
+	double* m_acceleration_data;
+
+	double m_state_old[7];
+	double m_state_new[7];
+	double* m_velocity_old[6];
+	double* m_velocity_new[6];
+	double* m_acceleration_old[6];
+	double* m_acceleration_new[6];
+	
 };

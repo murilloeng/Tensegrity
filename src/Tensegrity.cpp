@@ -15,16 +15,25 @@
 
 //constructors
 Tensegrity::Tensegrity(void) : 
-	m_b0(0.00e+00), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), 
-	m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), m_nc(3)
+	m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), 
+	m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), 
+	m_nc(3), m_state_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
 {
-	return;
+	memset(m_state_old, 0, 7 * sizeof(double));
+	memset(m_state_new, 0, 7 * sizeof(double));
+	m_state_old[3] = m_state_new[3] = 1.00e+00;
+	memset(m_velocity_old, 0, 6 * sizeof(double));
+	memset(m_velocity_new, 0, 6 * sizeof(double));
+	memset(m_acceleration_old, 0, 6 * sizeof(double));
+	memset(m_acceleration_new, 0, 6 * sizeof(double));
 }
 
 //destructor
 Tensegrity::~Tensegrity(void)
 {
-	return;
+	delete[] m_state_data;
+	delete[] m_velocity_data;
+	delete[] m_acceleration_data;
 }
 
 //draw
@@ -68,28 +77,19 @@ math::vec3 Tensegrity::position(unsigned index, bool level, bool configuration) 
 	{
 		math::vec3 x;
 		const double Hr = (m_Ht + m_Hc) / 2;
+		x[0] = (index != 0) * m_Rr * cos(2 * M_PI * index / m_nc);
+		x[1] = (index != 0) * m_Rr * sin(2 * M_PI * index / m_nc);
 		x[2] = (index == 0) * (Hr - level * m_Hc) + (index != 0) * level * m_Ht;
-		x[0] = (index != 0) * m_Rr * cos(2 * M_PI * index / m_nc + level * m_b0);
-		x[1] = (index != 0) * m_Rr * sin(2 * M_PI * index / m_nc + level * m_b0);
 		return x;
 	}
 	else
 	{
-		return m_x + m_q.rotate(position(index, 1, 0) - math::vec3(0, 0, m_Ht));
+		// return m_x + m_q.rotate(position(index, 1, 0) - math::vec3(0, 0, m_Ht));
 	}
 }
 
 //formulation
-math::matrix Tensegrity::stiffness(void) const
-{
-	//data
-	math::matrix K(6, 6, math::mode::zeros);
-	//stiffness
-
-	//return
-	return K;
-}
-math::vector Tensegrity::internal_force(void) const
+math::vector Tensegrity::residue(void) const
 {
 	//data
 	math::vector fi(6, math::mode::zeros);
@@ -115,10 +115,19 @@ math::vector Tensegrity::internal_force(void) const
 		const double s = fmax(0, m_Ec * e);
 		//internal force
 		math::vec3(fi.data() + 0) += s * Ac * de * tc;
-		math::vec3(fi.data() + 3) += s * Ac * de * (x2 - m_x).cross(tc);
+		// math::vec3(fi.data() + 3) += s * Ac * de * (x2 - m_x).cross(tc);
 	}
 	//return
 	return fi;
+}
+math::matrix Tensegrity::stiffness(void) const
+{
+	//data
+	math::matrix K(6, 6, math::mode::zeros);
+	//stiffness
+
+	//return
+	return K;
 }
 
 //draw
