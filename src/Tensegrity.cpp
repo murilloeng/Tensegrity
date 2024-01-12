@@ -16,8 +16,8 @@
 //constructors
 Tensegrity::Tensegrity(void) : 
 	m_nc(3), m_type(0), m_steps(1000), 
-	m_T(1300e+00), m_pr(4.00e+02), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), 
-	m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), 
+	m_T(1.00e+00), m_pr(4.00e+02), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), 
+	m_br(2.00e-01), m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), 
 	m_state_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
 {
 	memset(m_state_old, 0, 7 * sizeof(double));
@@ -93,7 +93,19 @@ math::vec3 Tensegrity::position(unsigned index, bool level, bool configuration) 
 }
 
 //formulation
-math::vector Tensegrity::residue(void) const
+void Tensegrity::compute_energy(void)
+{
+	//data
+	const math::vec3 v(m_velocity_new + 0);
+	const math::vec3 w(m_velocity_new + 3);
+	//kinetic
+	m_energy_data[3 * m_step + 0] = m_M * v.inner(v) / 2 + w.inner(m_J * w) / 2;
+}
+void Tensegrity::compute_acceleration(void)
+{
+	return;
+}
+void Tensegrity::residue(math::vector& r) const
 {
 	//data
 	math::vector fi(6, math::mode::zeros);
@@ -121,17 +133,28 @@ math::vector Tensegrity::residue(void) const
 		math::vec3(fi.data() + 0) += s * Ac * de * tc;
 		// math::vec3(fi.data() + 3) += s * Ac * de * (x2 - m_x).cross(tc);
 	}
-	//return
-	return fi;
 }
-math::matrix Tensegrity::stiffness(void) const
+void Tensegrity::inertia(math::matrix& M) const
 {
 	//data
-	math::matrix K(6, 6, math::mode::zeros);
-	//stiffness
-
-	//return
-	return K;
+	const math::quat q(m_state_new + 3);
+	//inertia
+	M.zeros();
+	M(0, 0) = M(1, 1) = M(2, 2) = m_M;
+	M.span(3, 3) = q.rotation() * m_J;
+}
+void Tensegrity::damping(math::matrix& C) const
+{
+	//data
+	const math::quat q(m_state_new + 3);
+	const math::vec3 w(m_velocity_new + 3);
+	//damping
+	C.zeros();
+	C.span(3, 3) = q.rotation() * (w.spin() * m_J - (m_J * w).spin());
+}
+void Tensegrity::stiffness(math::matrix& K) const
+{
+	return;
 }
 
 //solver
@@ -145,18 +168,18 @@ void Tensegrity::setup(void)
 	const double M2 = m_pr * Hr * m_tl * m_tl;
 	const double M3 = m_pr * m_er * m_tl * m_tl;
 	//center
-	m_M = M1 + M2 + M3;
 	const math::vec3 z1(0, 0, m_Ht);
-	const math::vec3 z2(m_er, 0, m_Ht - Hr / 2);
-	const math::vec3 z3(m_er / 2, 0, m_Ht - Hr);
-	m_zc = (M1 * z1 + M2 * z2 + M3 * z3) / m_M;
+	const math::vec3 z2(0, m_er, m_Ht - Hr / 2);
+	const math::vec3 z3(0, m_er / 2, m_Ht - Hr);
+	m_zc = (M1 * z1 + M2 * z2 + M3 * z3) / (M1 + M2 + M3);
 	//inertia
 	m_J.zeros();
+	m_M = M1 + M2 + M3;
 	m_J(2, 2) += M2 * m_tl * m_tl / 6;
-	m_J(0, 0) += M3 * m_tl * m_tl / 6;
 	m_J(0, 0) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
 	m_J(1, 1) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
-	m_J(1, 1) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
+	m_J(1, 1) += M3 * m_tl * m_tl / 6;
+	m_J(0, 0) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
 	m_J(2, 2) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
 	m_J -= M1 * (z1 - m_zc).spin() * (z1 - m_zc).spin();
 	m_J -= M2 * (z2 - m_zc).spin() * (z2 - m_zc).spin();
@@ -164,6 +187,19 @@ void Tensegrity::setup(void)
 	m_J(2, 2) += M1 * (m_type ? m_Rr * m_Rr / 2 : (m_ar * m_ar + m_br * m_br) / 12);
 	m_J(0, 0) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_br * m_br) / 12);
 	m_J(1, 1) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_ar * m_ar) / 12);
+	//allocate
+	m_step = 0;
+	delete[] m_state_data;
+	delete[] m_energy_data;
+	delete[] m_velocity_data;
+	delete[] m_acceleration_data;
+	m_state_data = new double[7 * (m_steps + 1)];
+	m_energy_data = new double[3 * (m_steps + 1)];
+	m_velocity_data = new double[6 * (m_steps + 1)];
+	m_acceleration_data = new double[6 * (m_steps + 1)];
+	memcpy(m_state_new, m_state_old, 7 * sizeof(double));
+	memcpy(m_velocity_new, m_velocity_old, 6 * sizeof(double));
+	memcpy(m_acceleration_new, m_acceleration_old, 6 * sizeof(double));
 }
 void Tensegrity::solve_static(void)
 {

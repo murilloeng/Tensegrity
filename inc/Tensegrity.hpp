@@ -33,10 +33,12 @@ public:
 	math::vec3 position(unsigned, bool, bool) const;
 
 	//formulation
-	math::vector residue(void) const;
-	math::matrix inertia(void) const;
-	math::matrix damping(void) const;
-	math::matrix stiffness(void) const;
+	void compute_energy(void);
+	void compute_acceleration(void);
+	void residue(math::vector&) const;
+	void inertia(math::matrix&) const;
+	void damping(math::matrix&) const;
+	void stiffness(math::matrix&) const;
 
 	//solver
 	void setup(void);
@@ -67,6 +69,7 @@ public:
 	double m_dc;
 	unsigned m_nc;
 	unsigned m_type;
+	unsigned m_step;
 	unsigned m_steps;
 
 	double* m_state_data;
@@ -79,10 +82,10 @@ public:
 	math::vec3 m_zc;
 	double m_state_old[7];
 	double m_state_new[7];
-	double* m_velocity_old[6];
-	double* m_velocity_new[6];
-	double* m_acceleration_old[6];
-	double* m_acceleration_new[6];
+	double m_velocity_old[6];
+	double m_velocity_new[6];
+	double m_acceleration_old[6];
+	double m_acceleration_new[6];
 	std::vector<math::vec3> m_ae;
 	std::vector<std::function<math::vec3(double)>> m_fe;
 };
