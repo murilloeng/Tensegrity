@@ -24,6 +24,7 @@ void setup_libs_release(Maker& maker)
 }
 void setup_libs(Maker& maker)
 {
+	maker.m_libs += "opengl32.lib ";
 	maker.m_libs += maker.m_elib + "glew32.lib ";
 	maker.m_libs += maker.m_elib + "libblas.lib ";
 	maker.m_libs += maker.m_elib + "freeglut.lib ";

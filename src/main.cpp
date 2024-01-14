@@ -4,19 +4,21 @@
 //Tensegrity
 #include "inc/Tensegrity.hpp"
 
-//canvas
-#include "Canvas/lib/inc/Managers/Glut.hpp"
-
-int main(int argc, char** argv)
+void translation_3_1(void)
 {
 	//data
 	Tensegrity tensegrity;
-	canvas::Glut app(argc, argv, "../Canvas/lib/shd/");
-	//scene
-	tensegrity.draw_model(app.scene());
-	app.scene()->update(true);
-	//start
-	app.start();
+	//setup
+	tensegrity.m_ak.push_back(math::vec3(0, 0, 0.5));
+	tensegrity.m_pk.push_back([] (double) { return math::vec3(0, 0, 1); });
+	//solve
+	tensegrity.solve();
+}
+
+int main(int argc, char** argv)
+{
+	//test
+	translation_3_1();
 	//return
 	return EXIT_SUCCESS;
 }
