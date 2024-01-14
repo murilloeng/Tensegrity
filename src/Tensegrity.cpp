@@ -19,7 +19,7 @@
 
 //constructors
 Tensegrity::Tensegrity(void) : 
-	m_solver(new Solver(this)), m_a0(1.00e-03), 
+	m_solver(new Solver(this)), m_a0(1.00e-05), 
 	m_br(2.00e-01), m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), 
 	m_nc(3), m_type(0), m_pr(4.00e+02), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01)
 {
@@ -119,9 +119,9 @@ void Tensegrity::compute_inertia(void)
 	//inertia
 	m_J.zeros();
 	m_J(2, 2) += M2 * m_tl * m_tl / 6;
+	m_J(1, 1) += M3 * m_tl * m_tl / 6;
 	m_J(0, 0) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
 	m_J(1, 1) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
-	m_J(1, 1) += M3 * m_tl * m_tl / 6;
 	m_J(0, 0) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
 	m_J(2, 2) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
 	m_J -= M1 * (z1 - m_zc).spin() * (z1 - m_zc).spin();

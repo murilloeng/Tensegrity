@@ -8,6 +8,7 @@
 //constructors
 Solver::Solver(Tensegrity* tensegrity) : 
 	m_tensegrity(tensegrity), m_step_max(1000), m_type(0), m_iteration_max(10), m_T(1.00e+00), 
+	m_state_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr),
 	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6)
 {
 	memset(m_state_old, 0, 7 * sizeof(double));
@@ -31,6 +32,7 @@ Solver::~Solver(void)
 //solve
 void Solver::solve(void)
 {
+	setup();
 	!m_type ? solve_static() : solve_dynamic();
 }
 
