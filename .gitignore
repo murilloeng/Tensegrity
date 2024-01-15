@@ -6,6 +6,5 @@
 !*.cpp
 !*.hpp
 !*.sln
-!*.json
 !*.vcxproj
 !.gitignore
