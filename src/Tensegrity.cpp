@@ -23,7 +23,7 @@ Tensegrity::Tensegrity(void) :
 	m_br(2.00e-01), m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), 
 	m_nc(3), m_type(0), m_pr(4.00e+02), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01)
 {
-	return;
+	sprintf(m_label, "Tensegrity");
 }
 
 //destructor

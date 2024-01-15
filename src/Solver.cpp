@@ -8,8 +8,8 @@
 //constructors
 Solver::Solver(Tensegrity* tensegrity) : 
 	m_tensegrity(tensegrity), m_step_max(1000), m_type(0), m_iteration_max(10), m_T(1.00e+00), 
-	m_state_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr),
-	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6)
+	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6), 
+	m_state_data(nullptr), m_solver_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
 {
 	memset(m_state_old, 0, 7 * sizeof(double));
 	memset(m_state_new, 0, 7 * sizeof(double));
@@ -24,6 +24,7 @@ Solver::Solver(Tensegrity* tensegrity) :
 Solver::~Solver(void)
 {
 	delete[] m_state_data;
+	delete[] m_solver_data;
 	delete[] m_energy_data;
 	delete[] m_velocity_data;
 	delete[] m_acceleration_data;
@@ -40,16 +41,19 @@ void Solver::solve(void)
 void Solver::setup(void)
 {
 	//setup
+	m_step = 0;
 	m_l_new = m_l_old = 0;
 	m_tensegrity->compute_mass();
 	m_tensegrity->compute_center();
 	m_tensegrity->compute_inertia();
 	//memory
 	delete[] m_state_data;
+	delete[] m_solver_data;
 	delete[] m_energy_data;
 	delete[] m_velocity_data;
 	delete[] m_acceleration_data;
 	m_state_data = new double[7 * (m_step_max + 1)];
+	m_solver_data = new double[1 * (m_step_max + 1)];
 	m_energy_data = new double[3 * (m_step_max + 1)];
 	m_velocity_data = new double[6 * (m_step_max + 1)];
 	m_acceleration_data = new double[6 * (m_step_max + 1)];
@@ -67,10 +71,34 @@ void Solver::record(void)
 	memcpy(m_state_data + 7 * m_step, m_state_new, 7 * sizeof(double));
 	memcpy(m_velocity_data + 6 * m_step, m_velocity_new, 6 * sizeof(double));
 	memcpy(m_acceleration_data + 6 * m_step, m_acceleration_new, 6 * sizeof(double));
+	m_solver_data[m_step] = !m_type ? m_l_new : m_step * m_T / m_step_max;
 }
 void Solver::finish(void)
 {
-
+	//data
+	const unsigned sizes[] = {7, 1, 3, 6, 6};
+	const char* labels[] = {"state", "solver", "energy", "velocity", "acceleration"};
+	const double* data[] = {m_state_data, m_solver_data, m_energy_data, m_velocity_data, m_acceleration_data};
+	//write
+	for(unsigned i = 0; i < 5; i++)
+	{
+		//path
+		char path[200];
+		sprintf(path, "data/%s_%s.txt", m_tensegrity->m_label, labels[i]);
+		//file
+		FILE* file = fopen(path, "w");
+		//write
+		for(unsigned j = 0; j < m_step_max; j++)
+		{
+			for(unsigned k = 0; k < sizes[i]; k++)
+			{
+				fprintf(file, "%+.6e ", data[i][sizes[i] * j + k]);
+			}
+			fprintf(file, "\n");
+		}
+		//close
+		fclose(file);
+	}
 }
 void Solver::update(void)
 {
@@ -102,9 +130,10 @@ void Solver::update_state(void)
 void Solver::solve_static(void)
 {
 	//loop
+	record();
 	m_tensegrity->stiffness(m_Kt);
 	m_tensegrity->external_force(m_fe);
-	for(m_step = 0; m_step < m_step_max; m_step++)
+	for(m_step = 1; m_step <= m_step_max; m_step++)
 	{
 		//predictor
 		m_Kt.solve(m_dxt, m_fe);
@@ -135,16 +164,17 @@ void Solver::solve_static(void)
 			m_l_new = m_l_old + m_dl;
 		}
 	}
+	finish();
 }
 void Solver::solve_dynamic(void)
 {
-
+	return;
 }
 
 //formulation
 void Solver::compute_load_predictor(void)
 {
-	if(m_step != 0)
+	if(m_step != 1)
 	{
 		m_dl = math::sign(m_dxt.inner(m_dx)) * m_dx.norm() / m_dxt.norm();
 	}

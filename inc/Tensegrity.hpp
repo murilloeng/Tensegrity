@@ -81,6 +81,7 @@ public:
 	double m_a0;
 	unsigned m_nc;
 	unsigned m_type;
+	char m_label[200];
 
 	Solver* m_solver;
 
