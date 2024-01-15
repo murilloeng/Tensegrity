@@ -68,6 +68,7 @@ private:
 	Tensegrity* m_tensegrity;
 
 	double* m_state_data;
+	double* m_cables_data;
 	double* m_solver_data;
 	double* m_energy_data;
 	double* m_velocity_data;

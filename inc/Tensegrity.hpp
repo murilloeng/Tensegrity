@@ -22,6 +22,11 @@ public:
 	//destructor
 	~Tensegrity(void);
 
+	//compute
+	void compute_mass(void);
+	void compute_center(void);
+	void compute_inertia(void);
+
 	//draw
 	void draw_model(canvas::Scene*) const;
 
@@ -30,10 +35,7 @@ public:
 
 private:
 	//compute
-	void compute_mass(void);
-	void compute_center(void);
 	void compute_energy(void);
-	void compute_inertia(void);
 	void compute_acceleration(void);
 	
 	//formulation

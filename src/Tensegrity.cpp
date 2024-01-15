@@ -20,8 +20,8 @@
 //constructors
 Tensegrity::Tensegrity(void) : 
 	m_solver(new Solver(this)), m_a0(1.00e-05), 
-	m_br(2.00e-01), m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), 
-	m_nc(3), m_type(0), m_pr(4.00e+02), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01)
+	m_ar(2.00e-01), m_br(2.00e-01), m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_dc(1.00e-03), 
+	m_nc(3), m_type(0), m_pr(4.00e+02), m_Ec(8.00e+10), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02)
 {
 	sprintf(m_label, "Tensegrity");
 }
@@ -30,18 +30,6 @@ Tensegrity::Tensegrity(void) :
 Tensegrity::~Tensegrity(void)
 {
 	delete m_solver;
-}
-
-//draw
-void Tensegrity::draw_model(canvas::Scene* scene) const
-{
-	draw_model_disks(scene);
-	draw_model_links(scene);
-	draw_model_latex(scene);
-	draw_model_cables(scene);
-	draw_model_guides(scene);
-	scene->background({1, 1, 1, 1});
-	scene->camera().rotation({M_PI_2, 0, 0});
 }
 
 //compute
@@ -71,6 +59,48 @@ void Tensegrity::compute_center(void)
 	const math::vec3 z3(0, m_er / 2, m_Ht - Hr);
 	m_zc = (M1 * z1 + M2 * z2 + M3 * z3) / (M1 + M2 + M3);
 }
+void Tensegrity::compute_inertia(void)
+{
+	//data
+	const double Hr = (m_Ht + m_Hc) / 2;
+	const double Ar = m_type ? m_ar * m_br : M_PI * m_Rr * m_Rr;
+	//mass
+	const double M1 = m_pr * Ar * m_tr;
+	const double M2 = m_pr * Hr * m_tl * m_tl;
+	const double M3 = m_pr * m_er * m_tl * m_tl;
+	//center
+	const math::vec3 z1(0, 0, m_Ht);
+	const math::vec3 z2(0, m_er, m_Ht - Hr / 2);
+	const math::vec3 z3(0, m_er / 2, m_Ht - Hr);
+	//inertia
+	m_J.zeros();
+	m_J(2, 2) += M2 * m_tl * m_tl / 6;
+	m_J(1, 1) += M3 * m_tl * m_tl / 6;
+	m_J(0, 0) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
+	m_J(1, 1) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
+	m_J(0, 0) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
+	m_J(2, 2) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
+	m_J -= M1 * (z1 - m_zc).spin() * (z1 - m_zc).spin();
+	m_J -= M2 * (z2 - m_zc).spin() * (z2 - m_zc).spin();
+	m_J -= M3 * (z3 - m_zc).spin() * (z3 - m_zc).spin();
+	m_J(2, 2) += M1 * (m_type ? m_Rr * m_Rr / 2 : (m_ar * m_ar + m_br * m_br) / 12);
+	m_J(0, 0) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_br * m_br) / 12);
+	m_J(1, 1) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_ar * m_ar) / 12);
+}
+
+//draw
+void Tensegrity::draw_model(canvas::Scene* scene) const
+{
+	draw_model_disks(scene);
+	draw_model_links(scene);
+	draw_model_latex(scene);
+	draw_model_cables(scene);
+	draw_model_guides(scene);
+	scene->background({1, 1, 1, 1});
+	scene->camera().rotation({M_PI_2, 0, 0});
+}
+
+//compute
 void Tensegrity::compute_energy(void)
 {
 	//data
@@ -102,34 +132,6 @@ void Tensegrity::compute_energy(void)
 		const math::vec3 b = m_zc + u + q.rotate(m_ak[i] - m_zc);
 		data[3 * s + 2] -= b.inner(f);
 	}
-}
-void Tensegrity::compute_inertia(void)
-{
-	//data
-	const double Hr = (m_Ht + m_Hc) / 2;
-	const double Ar = m_type ? m_ar * m_br : M_PI * m_Rr * m_Rr;
-	//mass
-	const double M1 = m_pr * Ar * m_tr;
-	const double M2 = m_pr * Hr * m_tl * m_tl;
-	const double M3 = m_pr * m_er * m_tl * m_tl;
-	//center
-	const math::vec3 z1(0, 0, m_Ht);
-	const math::vec3 z2(0, m_er, m_Ht - Hr / 2);
-	const math::vec3 z3(0, m_er / 2, m_Ht - Hr);
-	//inertia
-	m_J.zeros();
-	m_J(2, 2) += M2 * m_tl * m_tl / 6;
-	m_J(1, 1) += M3 * m_tl * m_tl / 6;
-	m_J(0, 0) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
-	m_J(1, 1) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
-	m_J(0, 0) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
-	m_J(2, 2) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
-	m_J -= M1 * (z1 - m_zc).spin() * (z1 - m_zc).spin();
-	m_J -= M2 * (z2 - m_zc).spin() * (z2 - m_zc).spin();
-	m_J -= M3 * (z3 - m_zc).spin() * (z3 - m_zc).spin();
-	m_J(2, 2) += M1 * (m_type ? m_Rr * m_Rr / 2 : (m_ar * m_ar + m_br * m_br) / 12);
-	m_J(0, 0) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_br * m_br) / 12);
-	m_J(1, 1) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_ar * m_ar) / 12);
 }
 void Tensegrity::compute_acceleration(void)
 {

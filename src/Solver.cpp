@@ -7,9 +7,10 @@
 
 //constructors
 Solver::Solver(Tensegrity* tensegrity) : 
+	m_state_data(nullptr), m_cables_data(nullptr), m_solver_data(nullptr), 
+	m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr), 
 	m_tensegrity(tensegrity), m_step_max(1000), m_type(0), m_iteration_max(10), m_T(1.00e+00), 
-	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6), 
-	m_state_data(nullptr), m_solver_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
+	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6)
 {
 	memset(m_state_old, 0, 7 * sizeof(double));
 	memset(m_state_new, 0, 7 * sizeof(double));
@@ -24,6 +25,7 @@ Solver::Solver(Tensegrity* tensegrity) :
 Solver::~Solver(void)
 {
 	delete[] m_state_data;
+	delete[] m_cables_data;
 	delete[] m_solver_data;
 	delete[] m_energy_data;
 	delete[] m_velocity_data;
@@ -48,6 +50,7 @@ void Solver::setup(void)
 	m_tensegrity->compute_inertia();
 	//memory
 	delete[] m_state_data;
+	delete[] m_cables_data;
 	delete[] m_solver_data;
 	delete[] m_energy_data;
 	delete[] m_velocity_data;
@@ -57,6 +60,7 @@ void Solver::setup(void)
 	m_energy_data = new double[3 * (m_step_max + 1)];
 	m_velocity_data = new double[6 * (m_step_max + 1)];
 	m_acceleration_data = new double[6 * (m_step_max + 1)];
+	m_cables_data = new double[(m_tensegrity->m_nc + 1) * (m_step_max + 1)];
 	//initial
 	memcpy(m_state_new, m_state_old, 7 * sizeof(double));
 	memcpy(m_state_data, m_state_old, 7 * sizeof(double));
@@ -71,16 +75,22 @@ void Solver::record(void)
 	memcpy(m_state_data + 7 * m_step, m_state_new, 7 * sizeof(double));
 	memcpy(m_velocity_data + 6 * m_step, m_velocity_new, 6 * sizeof(double));
 	memcpy(m_acceleration_data + 6 * m_step, m_acceleration_new, 6 * sizeof(double));
+	//solver
 	m_solver_data[m_step] = !m_type ? m_l_new : m_step * m_T / m_step_max;
+	//cables
+	for(unsigned i = 0; i <= m_tensegrity->m_nc; i++)
+	{
+		m_cables_data[(m_tensegrity->m_nc + 1) * m_step + i] = m_tensegrity->cable_force(i);
+	}
 }
 void Solver::finish(void)
 {
 	//data
-	const unsigned sizes[] = {7, 1, 3, 6, 6};
-	const char* labels[] = {"state", "solver", "energy", "velocity", "acceleration"};
-	const double* data[] = {m_state_data, m_solver_data, m_energy_data, m_velocity_data, m_acceleration_data};
+	const unsigned sizes[] = {7, m_tensegrity->m_nc + 1, 1, 3, 6, 6};
+	const char* labels[] = {"state", "cables", "solver", "energy", "velocity", "acceleration"};
+	const double* data[] = {m_state_data, m_cables_data, m_solver_data, m_energy_data, m_velocity_data, m_acceleration_data};
 	//write
-	for(unsigned i = 0; i < 5; i++)
+	for(unsigned i = 0; i < 6; i++)
 	{
 		//path
 		char path[200];
