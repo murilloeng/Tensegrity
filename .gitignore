@@ -7,4 +7,5 @@
 !*.hpp
 !*.sln
 !*.json
+!*.vcxproj
 !.gitignore
