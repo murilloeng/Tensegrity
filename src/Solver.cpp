@@ -6,10 +6,10 @@
 #include "inc/Tensegrity.hpp"
 
 //constructors
-Solver::Solver(Tensegrity* tensegrity) : 
+Solver::Solver(Tensegrity* tensegrity) : m_log(true), 
 	m_state_data(nullptr), m_cables_data(nullptr), m_solver_data(nullptr), 
 	m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr), 
-	m_tensegrity(tensegrity), m_step_max(1000), m_type(0), m_iteration_max(10), m_T(1.00e+00), 
+	m_tensegrity(tensegrity), m_step_max(1000), m_type(0), m_iteration_max(10), m_T(1.00e+00), m_dl(1.00e-03), 
 	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6)
 {
 	memset(m_state_old, 0, 7 * sizeof(double));
@@ -45,8 +45,6 @@ void Solver::setup(void)
 	//setup
 	m_step = 0;
 	m_l_new = m_l_old = 0;
-	m_tensegrity->compute_mass();
-	m_tensegrity->compute_center();
 	m_tensegrity->compute_inertia();
 	//memory
 	delete[] m_state_data;
@@ -140,7 +138,7 @@ void Solver::update_state(void)
 void Solver::solve_static(void)
 {
 	//loop
-	record();
+	if(m_log) record();
 	m_tensegrity->stiffness(m_Kt);
 	m_tensegrity->external_force(m_fe);
 	for(m_step = 1; m_step <= m_step_max; m_step++)
@@ -160,8 +158,11 @@ void Solver::solve_static(void)
 			m_r = m_l_new * m_fe - m_fi;
 			if(m_r.norm() < 1e-5 * m_fe.norm())
 			{
-				printf("step: %04d iterations: %04d load: %+.2e\n", m_step, m_iteration, m_l_new);
-				record();
+				if(m_log)
+				{
+					printf("step: %04d iterations: %04d load: %+.2e\n", m_step, m_iteration, m_l_new);
+					record();
+				}
 				update();
 				break;
 			}
@@ -173,8 +174,10 @@ void Solver::solve_static(void)
 			update_state();
 			m_l_new = m_l_old + m_dl;
 		}
+		printf("Iterations failed!\n");
+		return;
 	}
-	finish();
+	if(m_log) finish();
 }
 void Solver::solve_dynamic(void)
 {
@@ -184,16 +187,18 @@ void Solver::solve_dynamic(void)
 //formulation
 void Solver::compute_load_predictor(void)
 {
-	if(m_step != 1)
-	{
-		m_dl = math::sign(m_dxt.inner(m_dx)) * m_dx.norm() / m_dxt.norm();
-	}
+	return;
+	// if(m_step != 1)
+	// {
+	// 	m_dl = math::sign(m_dxt.inner(m_dx)) * m_dx.norm() / m_dxt.norm();
+	// }
 }
 void Solver::compute_load_corrector(void)
 {
-	const double s = m_ddxt.inner(m_dx);
-	const double a = m_ddxt.inner(m_ddxt);
-	const double b = m_ddxt.inner(m_ddxr + m_dx);
-	const double c = m_ddxr.inner(m_ddxr + 2 * m_dx);
-	m_ddl = -b / a + math::sign(s) * sqrt(pow(b / a, 2) - c / a);
+	m_ddl = 0;
+	// const double s = m_ddxt.inner(m_dx);
+	// const double a = m_ddxt.inner(m_ddxt);
+	// const double b = m_ddxt.inner(m_ddxr + m_dx);
+	// const double c = m_ddxr.inner(m_ddxr + 2 * m_dx);
+	// m_ddl = -b / a + math::sign(s) * sqrt(pow(b / a, 2) - c / a);
 }

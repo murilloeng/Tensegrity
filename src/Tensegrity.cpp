@@ -32,32 +32,48 @@ Tensegrity::~Tensegrity(void)
 	delete m_solver;
 }
 
-//compute
-void Tensegrity::compute_mass(void)
+//draw
+void Tensegrity::draw_model(canvas::Scene* scene) const
 {
-	//data
-	const double Hr = (m_Ht + m_Hc) / 2;
-	const double Ar = m_type ? m_ar * m_br : M_PI * m_Rr * m_Rr;
-	//mass
-	const double M1 = m_pr * Ar * m_tr;
-	const double M2 = m_pr * Hr * m_tl * m_tl;
-	const double M3 = m_pr * m_er * m_tl * m_tl;
-	m_M = M1 + M2 + M3;
+	draw_model_disks(scene);
+	draw_model_links(scene);
+	draw_model_latex(scene);
+	draw_model_cables(scene);
+	draw_model_guides(scene);
+	scene->background({1, 1, 1, 1});
+	scene->camera().rotation({float(M_PI), 0, 0});
 }
-void Tensegrity::compute_center(void)
+
+//compute
+void Tensegrity::compute_energy(void)
 {
 	//data
-	const double Hr = (m_Ht + m_Hc) / 2;
-	const double Ar = m_type ? m_ar * m_br : M_PI * m_Rr * m_Rr;
-	//mass
-	const double M1 = m_pr * Ar * m_tr;
-	const double M2 = m_pr * Hr * m_tl * m_tl;
-	const double M3 = m_pr * m_er * m_tl * m_tl;
-	//center
-	const math::vec3 z1(0, 0, m_Ht);
-	const math::vec3 z2(0, m_er, m_Ht - Hr / 2);
-	const math::vec3 z3(0, m_er / 2, m_Ht - Hr);
-	m_zc = (M1 * z1 + M2 * z2 + M3 * z3) / (M1 + M2 + M3);
+	const double T = m_solver->m_T;
+	const unsigned s = m_solver->m_step;
+	const unsigned ns = m_solver->m_step_max;
+	const math::vec3 zr(0, 0, m_Ht);
+	const math::vec3 ur(m_solver->m_state_new + 0);
+	const math::quat qr(m_solver->m_state_new + 3);
+	const math::vec3 vr(m_solver->m_velocity_new + 0);
+	const math::vec3 wr(m_solver->m_velocity_new + 3);
+	//kinetic
+	double* data = m_solver->m_energy_data;
+	data[3 * s + 0] = (m_M * vr.inner(vr) + 2 * vr.inner(m_J1 * wr) + wr.inner(m_J2 * wr)) / 2;
+	//internal
+	data[3 * s + 1] = 0;
+	for(unsigned i = 0; i <= m_nc; i++)
+	{
+		data[3 * s + 1] += cable_energy(i);
+	}
+	//external
+	data[3 * s + 2] = 0;
+	const double t = s * T / ns;
+	for(unsigned i = 0; i < m_pk.size(); i++)
+	{
+		const math::vec3 f = m_pk[i](t);
+		const math::vec3 b = zr + ur + qr.rotate(m_ak[i] - zr);
+		data[3 * s + 2] -= b.inner(f);
+	}
 }
 void Tensegrity::compute_inertia(void)
 {
@@ -68,70 +84,26 @@ void Tensegrity::compute_inertia(void)
 	const double M1 = m_pr * Ar * m_tr;
 	const double M2 = m_pr * Hr * m_tl * m_tl;
 	const double M3 = m_pr * m_er * m_tl * m_tl;
+	m_M = M1 + M2 + M3;
 	//center
 	const math::vec3 z1(0, 0, m_Ht);
 	const math::vec3 z2(0, m_er, m_Ht - Hr / 2);
 	const math::vec3 z3(0, m_er / 2, m_Ht - Hr);
+	m_zc = (M1 * z1 + M2 * z2 + M3 * z3) / (M1 + M2 + M3);
 	//inertia
-	m_J.zeros();
-	m_J(2, 2) += M2 * m_tl * m_tl / 6;
-	m_J(1, 1) += M3 * m_tl * m_tl / 6;
-	m_J(0, 0) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
-	m_J(1, 1) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
-	m_J(0, 0) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
-	m_J(2, 2) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
-	m_J -= M1 * (z1 - m_zc).spin() * (z1 - m_zc).spin();
-	m_J -= M2 * (z2 - m_zc).spin() * (z2 - m_zc).spin();
-	m_J -= M3 * (z3 - m_zc).spin() * (z3 - m_zc).spin();
-	m_J(2, 2) += M1 * (m_type ? m_Rr * m_Rr / 2 : (m_ar * m_ar + m_br * m_br) / 12);
-	m_J(0, 0) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_br * m_br) / 12);
-	m_J(1, 1) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_ar * m_ar) / 12);
-}
-
-//draw
-void Tensegrity::draw_model(canvas::Scene* scene) const
-{
-	draw_model_disks(scene);
-	draw_model_links(scene);
-	draw_model_latex(scene);
-	draw_model_cables(scene);
-	draw_model_guides(scene);
-	scene->background({1, 1, 1, 1});
-	scene->camera().rotation({M_PI_2, 0, 0});
-}
-
-//compute
-void Tensegrity::compute_energy(void)
-{
-	//data
-	const double T = m_solver->m_T;
-	const unsigned s = m_solver->m_step;
-	const unsigned ns = m_solver->m_step_max;
-	const double Ac = M_PI * m_dc * m_dc / 4;
-	const math::vec3 u(m_solver->m_state_new + 0);
-	const math::quat q(m_solver->m_state_new + 3);
-	const math::vec3 v(m_solver->m_velocity_new + 0);
-	const math::vec3 w(m_solver->m_velocity_new + 3);
-	//kinetic
-	double* data = m_solver->m_energy_data;
-	data[3 * s + 0] = m_M * v.inner(v) / 2 + w.inner(m_J * w) / 2;
-	//internal
-	data[3 * s + 1] = 0;
-	for(unsigned i = 0; i <= m_nc; i++)
-	{
-		const double L = cable_length(i);
-		const double e = cable_strain_measure(i);
-		if(e > 0) data[3 * s + 1] += m_Ec * e * e * Ac * L / 2;
-	}
-	//external
-	data[3 * s + 2] = 0;
-	const double t = s * T / ns;
-	for(unsigned i = 0; i < m_pk.size(); i++)
-	{
-		const math::vec3 f = m_pk[i](t);
-		const math::vec3 b = m_zc + u + q.rotate(m_ak[i] - m_zc);
-		data[3 * s + 2] -= b.inner(f);
-	}
+	m_J2.zeros();
+	m_J2(2, 2) += M2 * m_tl * m_tl / 6;
+	m_J2(1, 1) += M3 * m_tl * m_tl / 6;
+	m_J2(0, 0) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
+	m_J2(1, 1) += M2 * (Hr * Hr + m_tl * m_tl) / 12;
+	m_J2(0, 0) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
+	m_J2(2, 2) += M3 * (m_tl * m_tl + m_er * m_er) / 12;
+	m_J2 -= M1 * (z1 - m_zc).spin() * (z1 - m_zc).spin();
+	m_J2 -= M2 * (z2 - m_zc).spin() * (z2 - m_zc).spin();
+	m_J2 -= M3 * (z3 - m_zc).spin() * (z3 - m_zc).spin();
+	m_J2(2, 2) += M1 * (m_type ? m_Rr * m_Rr / 2 : (m_ar * m_ar + m_br * m_br) / 12);
+	m_J2(0, 0) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_br * m_br) / 12);
+	m_J2(1, 1) += M1 * (m_type ? m_tr * m_tr / 12 + m_Rr * m_Rr / 4 : (m_tr * m_tr + m_ar * m_ar) / 12);
 }
 void Tensegrity::compute_acceleration(void)
 {
@@ -153,37 +125,36 @@ void Tensegrity::inertia(math::matrix& M) const
 	//data
 	const math::quat q(m_solver->m_state_new + 3);
 	//inertia
-	M.zeros();
-	M(0, 0) = M(1, 1) = M(2, 2) = m_M;
-	M.span(3, 3) = q.rotation() * m_J;
+	M.span(3, 3) = +m_J2;
+	M.span(0, 3) = +m_J1;
+	M.span(3, 0) = -m_J1;
+	M.span(0, 0) = m_M * math::mat3::eye();
 }
 void Tensegrity::damping(math::matrix& C) const
 {
 	//data
-	const math::quat q(m_solver->m_state_new + 3);
-	const math::vec3 w(m_solver->m_velocity_new + 3);
+	const math::vec3 wr(m_solver->m_velocity_new + 3);
 	//damping
 	C.zeros();
-	C.span(3, 3) = q.rotation() * (w.spin() * m_J - (m_J * w).spin());
+	C.span(3, 3) = wr.spin() * m_J2 - (m_J2 * wr).spin();
 }
 void Tensegrity::stiffness(math::matrix& K) const
 {
 	//data
 	K.zeros();
-	const math::quat q(m_solver->m_state_new + 3);
-	const math::vec3 w(m_solver->m_velocity_new + 3);
-	const math::vec3 dw(m_solver->m_acceleration_new + 3);
+	const math::vec3 zr(0, 0, m_Ht);
+	const math::quat qr(m_solver->m_state_new + 3);
 	//internal force
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
 		//cable
 		const double fk = cable_force(i);
-		const double lk = cable_length(i);
+		const double lk = cable_length(i, 1);
 		const double Kk = cable_stiffness(i);
 		const math::vec3 x1 = position(i, 0, 1);
 		const math::vec3 x2 = position(i, 1, 1);
 		const math::vec3 z2 = position(i, 1, 0);
-		const math::vec3 rk = q.rotate(z2 - m_zc);
+		const math::vec3 rk = qr.rotate(z2 - zr);
 		const math::vec3 tk = (x2 - x1).normalize();
 		//matrices
 		const math::mat3 Ak = tk.outer(tk);
@@ -200,18 +171,56 @@ void Tensegrity::stiffness(math::matrix& K) const
 	for(unsigned i = 0; i < m_pk.size(); i++)
 	{
 		//force
-		const math::vec3 ck = q.rotate(m_ak[i] - m_zc);
+		const math::vec3 ck = qr.rotate(m_ak[i] - zr);
 		const math::vec3 pk = m_solver ? m_pk[i](t) : m_solver->m_l_new * m_pk[i](0);
 		//stiffness
 		K.span(3, 3) -= pk.spin() * ck.spin();
 	}
-	//inertial force
-	K.span(3, 3) -= q.rotate(m_J * dw + w.cross(m_J * w)).spin();
 	//parametrization
-	const math::quat q_old(m_solver->m_state_old + 3);
-	const math::vec3 t_new(m_solver->m_dx.data() + 3);
-	K.span(0, 3, 6, 3) = K.span(0, 3, 6, 3) * q_old.rotation() * t_new.rotation_gradient();
+	const math::quat qr_old(m_solver->m_state_old + 3);
+	const math::vec3 tr_inc(m_solver->m_dx.data() + 3);
+	K.span(0, 3, 6, 3) = K.span(0, 3, 6, 3) * qr_old.rotation() * tr_inc.rotation_gradient();
 }
+
+double Tensegrity::kinetic_energy(void) const
+{
+	//data
+	const math::vec3 vr(m_solver->m_velocity_new + 0);
+	const math::vec3 wr(m_solver->m_velocity_new + 3);
+	//return
+	return (m_M * vr.inner(vr) + 2 * vr.inner(m_J1 * wr) + wr.inner(m_J2 * wr)) / 2;
+}
+double Tensegrity::internal_energy(void) const
+{
+	//data
+	double U = 0;
+	//internal energy
+	for(unsigned i = 0; i <= m_nc; i++)
+	{
+		U += cable_energy(i);
+	}
+	//return
+	return U;
+}
+double Tensegrity::potential_energy(void) const
+{
+	//data
+	double V = 0;
+	const double T = m_solver->m_T;
+	const unsigned s = m_solver->m_step;
+	const unsigned ns = m_solver->m_step_max;
+	const double t = m_solver->m_type * s * T / ns;
+	const math::vec3 qr(m_solver->m_state_new + 3);
+	//potential energy
+	const math::vec3 zr(0, 0, m_Ht);
+	for(unsigned i = 0; i < m_pk.size(); i++)
+	{
+		V -= qr.rotate(m_ak[i] - zr).inner(m_pk[i](t));
+	}
+	//return
+	return V;
+}
+
 void Tensegrity::inertial_force(math::vector& fn) const
 {
 	//data
@@ -219,14 +228,14 @@ void Tensegrity::inertial_force(math::vector& fn) const
 	const math::quat q(m_solver->m_state_new + 3);
 	const math::vec3 w(m_solver->m_velocity_new + 0);
 	//inertial force
-	math::vec3(fn.data() + 3) += q.rotate(w.cross(m_J * w));
+	math::vec3(fn.data() + 3) += q.rotate(w.cross(m_J2 * w));
 }
 void Tensegrity::internal_force(math::vector& fi) const
 {
 	//data
 	fi.zeros();
-	const double A = cable_area();
-	const math::quat q(m_solver->m_state_new + 3);
+	const math::vec3 zr(0, 0, m_Ht);
+	const math::quat qr(m_solver->m_state_new + 3);
 	//internal force
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
@@ -237,8 +246,8 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const math::vec3 z2 = position(i, 1, 0);
 		const math::vec3 tk = (x2 - x1).normalize();
 		//internal force
-		math::vec3(fi.data() + 0) += fk * tk;
-		math::vec3(fi.data() + 3) += q.rotate(z2 - m_zc).cross(fk * tk);
+		fi.span(0, 0, 3, 1) += fk * tk;
+		fi.span(3, 0, 3, 1) += qr.rotate(z2 - zr).cross(fk * tk);
 	}
 }
 void Tensegrity::external_force(math::vector& fe) const
@@ -248,13 +257,14 @@ void Tensegrity::external_force(math::vector& fe) const
 	const double T = m_solver->m_T;
 	const unsigned s = m_solver->m_step;
 	const unsigned ns = m_solver->m_step_max;
-	const math::quat q(m_solver->m_state_new + 3);
+	const math::quat qr(m_solver->m_state_new + 3);
 	//external force
 	const double t = s * T / ns;
+	const math::vec3 zr(0, 0, m_Ht);
 	for(unsigned i = 0; i < m_pk.size(); i++)
 	{
 		math::vec3(fe.data() + 0) += m_pk[i](t);
-		math::vec3(fe.data() + 3) += q.rotate(m_ak[i] - m_zc).cross(m_pk[i](t));
+		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i](t));
 	}
 }
 
@@ -268,20 +278,14 @@ double Tensegrity::cable_force(unsigned index) const
 	const double A = cable_area();
 	const double e = cable_strain_measure(index);
 	const double g = cable_strain_gradient(index);
-	return m_Ec * e * (e >= 0) * A * g;
+	return m_Ec * A * e * g * (e >= 0);
 }
 double Tensegrity::cable_energy(unsigned index) const
 {
 	const double A = cable_area();
-	const double L = cable_length(index);
+	const double L = cable_length(index, 0);
 	const double e = cable_strain_measure(index);
-	return m_Ec * e * e * (e >= 0) * A * L / 2;
-}
-double Tensegrity::cable_length(unsigned index) const
-{
-	const math::vec3 z1 = position(index, 0, 0);
-	const math::vec3 z2 = position(index, 1, 0);
-	return (z2 - z1).norm();
+	return m_Ec * A * L * e * e / 2 * (e >= 0);
 }
 double Tensegrity::cable_stretch(unsigned index) const
 {
@@ -289,12 +293,12 @@ double Tensegrity::cable_stretch(unsigned index) const
 	const math::vec3 z2 = position(index, 1, 0);
 	const math::vec3 x1 = position(index, 0, 1);
 	const math::vec3 x2 = position(index, 1, 1);
-	return (x2 - x1).norm() / (z2 - z1).norm() + (index != 0) * m_a0;
+	return (x2 - x1).norm() / (z2 - z1).norm();
 }
 double Tensegrity::cable_stiffness(unsigned index) const
 {
 	const double A = cable_area();
-	const double L = cable_length(index);
+	const double L = cable_length(index, 0);
 	const double e = cable_strain_measure(index);
 	const double h = cable_strain_hessian(index);
 	const double g = cable_strain_gradient(index);
@@ -312,14 +316,20 @@ double Tensegrity::cable_strain_gradient(unsigned index) const
 {
 	return 1 / cable_stretch(index);
 }
+double Tensegrity::cable_length(unsigned index, unsigned configuration) const
+{
+	const math::vec3 z1 = position(index, 0, configuration);
+	const math::vec3 z2 = position(index, 1, configuration);
+	return (z2 - z1).norm();
+}
 
 //draw
 void Tensegrity::draw_model_disks(canvas::Scene* scene) const
 {
 	//data
-	const float tr = m_tr;
-	const float Rr = m_Rr;
-	const float Ht = m_Ht;
+	const float tr = float(m_tr);
+	const float Rr = float(m_Rr);
+	const float Ht = float(m_Ht);
 	canvas::objects::Cylinder* disk_1 = new canvas::objects::Cylinder;
 	canvas::objects::Cylinder* disk_2 = new canvas::objects::Cylinder;
 	//disk 1
@@ -340,12 +350,12 @@ void Tensegrity::draw_model_disks(canvas::Scene* scene) const
 void Tensegrity::draw_model_links(canvas::Scene* scene) const
 {
 	//data
-	const float tl = m_tl;
-	const float er = m_er;
-	const float tr = m_tr;
-	const float Rr = m_Rr;
-	const float Ht = m_Ht;
-	const float Hc = m_Hc;
+	const float tl = float(m_tl);
+	const float er = float(m_er);
+	const float tr = float(m_tr);
+	const float Rr = float(m_Rr);
+	const float Ht = float(m_Ht);
+	const float Hc = float(m_Hc);
 	const float Hr = (Ht + Hc - tl) / 2;
 	canvas::objects::Cube* link_1 = new canvas::objects::Cube;
 	canvas::objects::Cube* link_2 = new canvas::objects::Cube;
@@ -378,12 +388,12 @@ void Tensegrity::draw_model_links(canvas::Scene* scene) const
 void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 {
 	//data
-	const float tl = m_tl;
-	const float er = m_er;
-	const float tr = m_tr;
-	const float Rr = m_Rr;
-	const float Ht = m_Ht;
-	const float Hc = m_Hc;
+	const float tl = float(m_tl);
+	const float er = float(m_er);
+	const float tr = float(m_tr);
+	const float Rr = float(m_Rr);
+	const float Ht = float(m_Ht);
+	const float Hc = float(m_Hc);
 	const float Hr = (Ht + Hc) / 2;
 	canvas::objects::Latex* latex[5];
 	const char* anchor[] = {"NC", "CW", "SC", "CE", "CW"};
@@ -397,7 +407,7 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 		latex[i]->size(2 * tl);
 		latex[i]->anchor(anchor[i]);
 		latex[i]->color_fill({1, 0, 0});
-		latex[i]->rotate({M_PI_2, 0, 0});
+		latex[i]->rotate({float(M_PI), 0, 0});
 		scene->add_object(latex[i]);
 	}
 	latex[1]->shift({Rr + tl, 0, Ht / 2});
@@ -409,11 +419,11 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 void Tensegrity::draw_model_cables(canvas::Scene* scene) const
 {
 	//data
-	const float tl = m_tl;
-	const float tr = m_tr;
-	const float Rr = m_Rr;
-	const float Ht = m_Ht;
-	const float Hc = m_Hc;
+	const float tl = float(m_tl);
+	const float tr = float(m_tr);
+	const float Rr = float(m_Rr);
+	const float Ht = float(m_Ht);
+	const float Hc = float(m_Hc);
 	canvas::objects::Line* cable;
 	const float Hr = (Ht + Hc) / 2;
 	//inner
@@ -427,20 +437,20 @@ void Tensegrity::draw_model_cables(canvas::Scene* scene) const
 	{
 		cable = new canvas::objects::Line;
 		cable->color_stroke("dark green");
-		cable->point(0, {Rr * cosf(2 * M_PI * i / m_nc), Rr * sinf(2 * M_PI * i / m_nc), tr / 2});
-		cable->point(1, {Rr * cosf(2 * M_PI * i / m_nc), Rr * sinf(2 * M_PI * i / m_nc), Ht - tr / 2});
+		cable->point(0, {Rr * cosf(2 * float(M_PI) * i / m_nc), Rr * sinf(2 * float(M_PI) * i / m_nc), tr / 2 });
+		cable->point(1, {Rr * cosf(2 * float(M_PI) * i / m_nc), Rr * sinf(2 * float(M_PI) * i / m_nc), Ht - tr / 2});
 		scene->add_object(cable);
 	}
 }
 void Tensegrity::draw_model_guides(canvas::Scene* scene) const
 {
 	//data
-	const float tl = m_tl;
-	const float er = m_er;
-	const float tr = m_tr;
-	const float Rr = m_Rr;
-	const float Ht = m_Ht;
-	const float Hc = m_Hc;
+	const float tl = float(m_tl);
+	const float er = float(m_er);
+	const float tr = float(m_tr);
+	const float Rr = float(m_Rr);
+	const float Ht = float(m_Ht);
+	const float Hc = float(m_Hc);
 	const float Hr = (Ht + Hc) / 2;
 	canvas::objects::Line* lines[5];
 	//lines

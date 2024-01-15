@@ -21,6 +21,7 @@ public:
 	friend class Tensegrity;
 
 	//data
+	bool m_log;
 	double m_T;
 	double m_dl;
 	unsigned m_type;
@@ -28,8 +29,11 @@ public:
 	unsigned m_iteration_max;
 
 	double m_state_old[7];
+	double m_state_new[7];
 	double m_velocity_old[6];
+	double m_velocity_new[6];
 	double m_acceleration_old[6];
+	double m_acceleration_new[6];
 
 private:
 	//solver
@@ -73,8 +77,4 @@ private:
 	double* m_energy_data;
 	double* m_velocity_data;
 	double* m_acceleration_data;
-
-	double m_state_new[7];
-	double m_velocity_new[6];
-	double m_acceleration_new[6];
 };

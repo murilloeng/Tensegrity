@@ -5,8 +5,6 @@
 !*.bat
 !*.cpp
 !*.hpp
-!*.frag
-!*.vert
+!*.sln
 !*.json
-!*.scad
 !.gitignore
