@@ -5,50 +5,78 @@
 #include "inc/Solver.hpp"
 #include "inc/Tensegrity.hpp"
 
-static void rotation(math::vec3 t)
+static void force_rotation(Tensegrity& tensegrity, math::vec3 t, unsigned ns)
 {
 	//data
 	math::vector fi(6);
-	Tensegrity tensegrity;
-	const unsigned ns = 100;
-	//state
-	tensegrity.m_nc = 4;
+	FILE* file = fopen("force_rotation.txt", "w");
+	//loop
 	for(unsigned i = 0; i <= ns; i++)
 	{
 		//state
-		math::quat(tensegrity.m_solver->m_state_new + 3) = t.quaternion();
+		const math::vec3 ts = double(i) / ns * t;
+		math::quat(tensegrity.m_solver->m_state_new + 3) = ts.quaternion();
 		//formulation
-		printf("%03d ", i);
 		tensegrity.internal_force(fi);
-		for(unsigned i = 0; i < 6; i++)
-		{
-			printf("%+.2e ", fi[i]);
-		}
-		printf("\n");
+		fprintf(file, "%+.6e %+.6e %+.6e ", ts[0], ts[1], ts[2]);
+		fprintf(file, "%+.6e %+.6e %+.6e ", fi[0], fi[1], fi[2]);
+		fprintf(file, "%+.6e %+.6e %+.6e ", fi[3], fi[4], fi[5]);
+		fprintf(file, "\n");
 	}
+	//close
+	fclose(file);
 }
-static void translation(math::vec3 u)
+static void force_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns)
 {
 	//data
 	math::vector fi(6);
-	Tensegrity tensegrity;
-	const unsigned ns = 100;
-	//state
-	tensegrity.m_nc = 4;
+	FILE* file = fopen("force_translation.txt", "w");
+	//loop
 	for(unsigned i = 0; i <= ns; i++)
 	{
 		//state
-		math::vec3(tensegrity.m_solver->m_state_new + 0) = i * u / ns;
+		const math::vec3 ts = double(i) / ns * u;
+		math::vec3(tensegrity.m_solver->m_state_new + 0) = ts;
 		//formulation
-		printf("%03d ", i);
 		tensegrity.internal_force(fi);
-		for(unsigned i = 0; i < 6; i++)
-		{
-			printf("%+.2e ", fi[i]);
-		}
-		printf("\n");
+		fprintf(file, "%+.6e %+.6e %+.6e ", ts[0], ts[1], ts[2]);
+		fprintf(file, "%+.6e %+.6e %+.6e ", fi[0], fi[1], fi[2]);
+		fprintf(file, "%+.6e %+.6e %+.6e ", fi[3], fi[4], fi[5]);
+		fprintf(file, "\n");
 	}
+	//close
+	fclose(file);
 }
+
+static void energy_rotation(Tensegrity& tensegrity, math::vec3 t, unsigned ns)
+{
+	//data
+	FILE* file = fopen("energy_rotation.txt", "w");
+	//loop
+	for(unsigned i = 0; i <= ns; i++)
+	{
+		math::vec3 ts = (2 * double(i) / ns - 1) * t;
+		math::quat(tensegrity.m_solver->m_state_new + 3) = ts.quaternion();
+		fprintf(file, "%+.6e %+.6e %+.6e %+.6e\n", ts[0], ts[1], ts[2], tensegrity.internal_energy());
+	}
+	//close
+	fclose(file);
+}
+static void energy_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns)
+{
+	//data
+	FILE* file = fopen("energy_translation.txt", "w");
+	//loop
+	for(unsigned i = 0; i <= ns; i++)
+	{
+		math::vec3 us = (2 * double(i) / ns - 1) * u;
+		math::vec3(tensegrity.m_solver->m_state_new) = us;
+		fprintf(file, "%+.6e %+.6e %+.6e %+.6e\n", us[0], us[1], us[2], tensegrity.internal_energy());
+	}
+	//close
+	fclose(file);
+}
+
 static void load_vertical(void)
 {
 	//data
@@ -102,13 +130,14 @@ static void load_placement(void)
 	}
 	//close
 	fclose(file);
-	
 }
 
 int main(int argc, char** argv)
 {
+	//data
+	Tensegrity tensegrity;
 	//test
-	translation({1.00e-01, 0, 0});
+	force_rotation(tensegrity, { 0, M_PI / 12, 0 }, 1000);
 	//return
 	return EXIT_SUCCESS;
 }

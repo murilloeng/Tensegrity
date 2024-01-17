@@ -113,12 +113,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..;../..;../../Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;../Math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;../Math/dist/debug/libmath.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;../Canvas/lib/dist/debug/libcanvas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;../Math/x64/Debug/Math.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;../Canvas/lib/dist/debug/libcanvas.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll x64\Debug &gt; nul
@@ -144,7 +144,7 @@ copy ..\external\cpp\dll\x64\libquadmath-0.dll x64\Debug &gt; nul</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;../Math/dist/release/libmath.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;../Canvas/lib/dist/release/libcanvas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;../Math/x64/Release/Math.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;../Canvas/lib/dist/release/libcanvas.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll x64\Debug &gt; nul
