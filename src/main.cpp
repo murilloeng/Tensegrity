@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 	//data
 	Tensegrity tensegrity;
 	//test
-	force_rotation(tensegrity, { 0, M_PI / 12, 0 }, 1000);
+	force_rotation(tensegrity, {0, M_PI / 12, 0}, 1000);
 	//return
 	return EXIT_SUCCESS;
 }
