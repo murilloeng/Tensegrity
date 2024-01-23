@@ -499,8 +499,9 @@ math::vec3 Tensegrity::position(unsigned index, bool level, bool configuration) 
 	}
 	else
 	{
-		const math::vec3 uc(m_solver->m_state_new + 0);
-		const math::quat qc(m_solver->m_state_new + 3);
-		return m_zc + uc + qc.rotate(position(index, 1, 0) - m_zc);
+		const math::vec3 zr(0, 0, m_Ht);
+		const math::vec3 ur(m_solver->m_state_new + 0);
+		const math::quat qr(m_solver->m_state_new + 3);
+		return zr + ur + qr.rotate(position(index, 1, 0) - zr);
 	}
 }

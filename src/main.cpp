@@ -9,7 +9,7 @@ static void force_rotation(Tensegrity& tensegrity, math::vec3 t, unsigned ns)
 {
 	//data
 	math::vector fi(6);
-	FILE* file = fopen("force_rotation.txt", "w");
+	FILE* file = fopen("data/force_rotation.txt", "w");
 	//loop
 	for(unsigned i = 0; i <= ns; i++)
 	{
@@ -30,7 +30,7 @@ static void force_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns)
 {
 	//data
 	math::vector fi(6);
-	FILE* file = fopen("force_translation.txt", "w");
+	FILE* file = fopen("data/force_translation.txt", "w");
 	//loop
 	for(unsigned i = 0; i <= ns; i++)
 	{
@@ -51,7 +51,7 @@ static void force_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns)
 static void energy_rotation(Tensegrity& tensegrity, math::vec3 t, unsigned ns)
 {
 	//data
-	FILE* file = fopen("energy_rotation.txt", "w");
+	FILE* file = fopen("data/energy_rotation.txt", "w");
 	//loop
 	for(unsigned i = 0; i <= ns; i++)
 	{
@@ -65,7 +65,7 @@ static void energy_rotation(Tensegrity& tensegrity, math::vec3 t, unsigned ns)
 static void energy_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns)
 {
 	//data
-	FILE* file = fopen("energy_translation.txt", "w");
+	FILE* file = fopen("data/energy_translation.txt", "w");
 	//loop
 	for(unsigned i = 0; i <= ns; i++)
 	{
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 	//data
 	Tensegrity tensegrity;
 	//test
-	force_rotation(tensegrity, {0, M_PI / 12, 0}, 1000);
+	force_translation(tensegrity, {1.00e-01, 0, 0}, 1000);
 	//return
 	return EXIT_SUCCESS;
 }

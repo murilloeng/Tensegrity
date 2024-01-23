@@ -1,6 +1,0 @@
-{
-	"files.associations": {
-		"*.dat": "plaintext",
-		"vector": "cpp"
-	}
-}

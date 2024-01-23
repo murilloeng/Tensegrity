@@ -9,12 +9,27 @@
 			"group": "build",
 			"linux" : 
 			{
-				"command": "make ${input:mode_out}"
+				"command": "make ${input:make_mode}"
 			},
 			"windows" : 
 			{
-				"command": "./make ${input:mode_out}"
+				"command": "msbuild ${input:msbuild_mode}"
 			},
+			"presentation": 
+			{
+				"echo": false,
+				"clear": true,
+				"focus": true,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+			}
+		},
+		{
+			"args": [],
+			"type": "shell",
+			"group": "build",
+			"label": "gnuplot",
+			"command": "gnuplot -p ${file}",
 			"presentation": 
 			{
 				"echo": false,
@@ -27,10 +42,22 @@
 	],
 	"inputs": [
 		{
-			"id": "mode_out",
+			"id": "make_mode",
 			"default": "run m=r",
-			"description": "Mode:",
-			"type": "promptString"
+			"type": "promptString",
+			"description": "Make mode:"
+		},
+		{
+			"id": "msbuild_mode",
+			"type": "pickString",
+			"description": "MSBuild mode:",
+			"options": 
+			[
+				"/property:Configuration=Debug", 
+				"/property:Configuration=Release", 
+				"/property:Configuration=Debug; x64/Debug/Tensegrity.exe", 
+				"/property:Configuration=Release; x64/Release/Tensegrity.exe"
+			]
 		}
 	]
 }
