@@ -9,7 +9,7 @@
 #include "Math/inc/linear/mat3.hpp"
 
 //canvas
-#include "Canvas/lib/inc/Scene/Scene.hpp"
+#include "Canvas/inc/Scene/Scene.hpp"
 
 class Solver;
 

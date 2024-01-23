@@ -5,13 +5,13 @@
 #include "Math/inc/misc/misc.hpp"
 
 //canvas
-#include "Canvas/lib/inc/Objects/1D/Line.hpp"
-#include "Canvas/lib/inc/Objects/1D/Arrow.hpp"
+#include "Canvas/inc/Objects/1D/Line.hpp"
+#include "Canvas/inc/Objects/1D/Arrow.hpp"
 
-#include "Canvas/lib/inc/Objects/3D/Cube.hpp"
-#include "Canvas/lib/inc/Objects/3D/Cylinder.hpp"
+#include "Canvas/inc/Objects/3D/Cube.hpp"
+#include "Canvas/inc/Objects/3D/Cylinder.hpp"
 
-#include "Canvas/lib/inc/Objects/Image/Latex.hpp"
+#include "Canvas/inc/Objects/Image/Latex.hpp"
 
 //Tensegrity
 #include "inc/Solver.hpp"
