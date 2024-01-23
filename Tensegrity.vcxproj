@@ -123,6 +123,7 @@
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\glew32.dll x64\Debug &gt; nul
+copy ..\external\cpp\dll\x64\freetype.dll x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\liblapack.dll x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\libgfortran-3.dll x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll x64\Debug &gt; nul
