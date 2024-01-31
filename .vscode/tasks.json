@@ -55,6 +55,8 @@
 			[
 				"/property:Configuration=Debug", 
 				"/property:Configuration=Release", 
+				"/property:Configuration=Debug /target:Clean", 
+				"/property:Configuration=Release /target:Clean", 
 				"/property:Configuration=Debug; x64/Debug/Tensegrity.exe", 
 				"/property:Configuration=Release; x64/Release/Tensegrity.exe"
 			]

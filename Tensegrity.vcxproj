@@ -118,7 +118,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;../Math/x64/Debug/Math.lib;../Canvas/x64/Debug/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;x64/Debug/Math.lib;x64/Debug/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll x64\Debug &gt; nul
@@ -146,7 +146,7 @@ copy ..\external\cpp\dll\x64\libquadmath-0.dll x64\Debug &gt; nul</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;../Math/x64/Release/Math.lib;../Canvas/x64/Release/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;x64/Release/Math.lib;x64/Release/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll x64\Release &gt; nul
