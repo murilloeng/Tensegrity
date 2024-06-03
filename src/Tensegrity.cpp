@@ -14,8 +14,8 @@
 #include "Canvas/inc/Objects/Image/Latex.hpp"
 
 //Tensegrity
-#include "inc/Solver.hpp"
-#include "inc/Tensegrity.hpp"
+#include "Tensegrity/inc/Solver.hpp"
+#include "Tensegrity/inc/Tensegrity.hpp"
 
 //constructors
 Tensegrity::Tensegrity(void) : 

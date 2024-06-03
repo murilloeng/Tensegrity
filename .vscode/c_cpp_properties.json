@@ -5,7 +5,8 @@
 			"name": "Linux",
 			"includePath": 
 			[
-				"${workspaceFolder}"
+				"${workspaceFolder}/..",
+				"${workspaceFolder}/../external/cpp/inc"
 			],
 			"defines": [],
 			"cStandard": "gnu17",

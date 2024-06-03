@@ -1,9 +1,10 @@
 //std
+#include <cmath>
 #include <cstdlib>
 
 //Tensegrity
-#include "inc/Solver.hpp"
-#include "inc/Tensegrity.hpp"
+#include "Tensegrity/inc/Solver.hpp"
+#include "Tensegrity/inc/Tensegrity.hpp"
 
 static void force_rotation(Tensegrity& tensegrity, math::vec3 t, unsigned ns)
 {

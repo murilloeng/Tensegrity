@@ -1,7 +1,7 @@
 #pragma once
 
 //math
-#include "../Math/inc/linear/vector.hpp"
+#include "Math/inc/linear/vector.hpp"
 
 class Tensegrity;
 
