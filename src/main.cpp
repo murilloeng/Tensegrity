@@ -2,6 +2,9 @@
 #include <cmath>
 #include <cstdlib>
 
+//canvas
+#include "Canvas/inc/Windows/Glut.hpp"
+
 //Tensegrity
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
@@ -85,9 +88,9 @@ static void load_vertical(void)
 	const double m = 5.00e+01;
 	const double g = 9.81e+00;
 	//setup
-	tensegrity.m_solver->m_dl = 1.00e-02;
-	tensegrity.m_solver->m_step_max = 100;
-	tensegrity.m_ak.push_back(math::vec3(0, 0, 0.5));
+	tensegrity.m_solver->m_dl = 1.00e-03;
+	tensegrity.m_solver->m_step_max = 1000;
+	tensegrity.m_ak.push_back(math::vec3(0.1, 0, tensegrity.m_Ht));
 	tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
 	//solve
 	tensegrity.m_solver->solve();
@@ -137,8 +140,13 @@ int main(int argc, char** argv)
 {
 	//data
 	Tensegrity tensegrity;
+	// canvas::windows::Glut window(argc, argv, "../Canvas/shd/");
+	//draw
+	// tensegrity.draw_model(window.scene());
+	// window.scene()->update(true);
+	// window.start();
 	//test
-	force_translation(tensegrity, {1.00e-01, 0, 0}, 1000);
+	load_vertical();
 	//return
 	return EXIT_SUCCESS;
 }

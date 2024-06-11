@@ -44,7 +44,7 @@ void Solver::setup(void)
 	//setup
 	m_step = 0;
 	m_l_new = m_l_old = 0;
-	m_tensegrity->compute_inertia();
+	if(m_type) m_tensegrity->compute_inertia();
 	//memory
 	delete[] m_state_data;
 	delete[] m_cables_data;
@@ -146,10 +146,10 @@ void Solver::solve_static(void)
 		m_Kt.solve(m_dxt, m_fe);
 		compute_load_predictor();
 		m_dx = m_dl * m_dxt;
-		//update
-		update_state();
-		m_l_new = m_l_old + m_dl;
 		//corrector
+		update_state();
+		m_equilibrium = false;
+		m_l_new = m_l_old + m_dl;
 		for(m_iteration = 0; m_iteration < m_iteration_max; m_iteration++)
 		{
 			m_tensegrity->stiffness(m_Kt);
@@ -159,10 +159,11 @@ void Solver::solve_static(void)
 			{
 				if(m_log)
 				{
-					printf("step: %04d iterations: %04d load: %+.2e\n", m_step, m_iteration, m_l_new);
+					printf("step: %04d iterations: %04d load: %+.2e displacement: %+.2e\n", m_step, m_iteration, m_l_new, m_state_new[2]);
 					record();
 				}
 				update();
+				m_equilibrium = true;
 				break;
 			}
 			m_Kt.solve(m_ddxr, m_r);
@@ -173,8 +174,11 @@ void Solver::solve_static(void)
 			update_state();
 			m_l_new = m_l_old + m_dl;
 		}
-		printf("Iterations failed!\n");
-		return;
+		if(!m_equilibrium)
+		{
+			printf("Iterations failed!\n");
+			return;
+		}
 	}
 	if(m_log) finish();
 }

@@ -16,7 +16,7 @@ else
 endif
 
 #ouput
-out = dist/$(mode)/rigid.out
+out = dist/$(mode)/tensegrity.out
 
 #sources
 src := $(sort $(shell find -path './src/*.cpp'))

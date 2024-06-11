@@ -71,6 +71,7 @@ private:
 
 	Tensegrity* m_tensegrity;
 
+	bool m_equilibrium;
 	double* m_state_data;
 	double* m_cables_data;
 	double* m_solver_data;

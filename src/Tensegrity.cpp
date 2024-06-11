@@ -19,9 +19,8 @@
 
 //constructors
 Tensegrity::Tensegrity(void) : 
-	m_solver(new Solver(this)), m_a0(1.00e-05), 
-	m_ar(2.00e-01), m_br(2.00e-01), m_Rr(2.00e-01), m_Ht(5.00e-01), m_Hc(2.50e-01), m_dc(1.00e-03), 
-	m_nc(3), m_type(0), m_pr(4.00e+02), m_Ec(8.00e+10), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02)
+	m_pr(4.00e+02), m_er(1.00e-01), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), m_br(2.00e-01), m_Rr(2.00e-01), 
+	m_Ht(5.00e-01), m_Hc(2.50e-01), m_Ec(8.00e+10), m_dc(1.00e-03), m_q0(0), m_s0(10), m_nc(3), m_type(0), m_solver(new Solver(this))
 {
 	sprintf(m_label, "Tensegrity");
 }
@@ -172,7 +171,7 @@ void Tensegrity::stiffness(math::matrix& K) const
 	{
 		//force
 		const math::vec3 ck = qr.rotate(m_ak[i] - zr);
-		const math::vec3 pk = m_solver ? m_pk[i](t) : m_solver->m_l_new * m_pk[i](0);
+		const math::vec3 pk = m_solver->m_type ? m_pk[i](t) : m_solver->m_l_new * m_pk[i](0);
 		//stiffness
 		K.span(3, 3) -= pk.spin() * ck.spin();
 	}
@@ -278,14 +277,14 @@ double Tensegrity::cable_force(unsigned index) const
 	const double A = cable_area();
 	const double e = cable_strain_measure(index);
 	const double g = cable_strain_gradient(index);
-	return m_Ec * A * e * g * (e >= 0);
+	return m_Ec * A * e * g * (e >= 0) + m_s0 * A;
 }
 double Tensegrity::cable_energy(unsigned index) const
 {
 	const double A = cable_area();
 	const double L = cable_length(index, 0);
 	const double e = cable_strain_measure(index);
-	return m_Ec * A * L * e * e / 2 * (e >= 0);
+	return m_Ec * A * L * e * e / 2;
 }
 double Tensegrity::cable_stretch(unsigned index) const
 {
@@ -302,7 +301,7 @@ double Tensegrity::cable_stiffness(unsigned index) const
 	const double e = cable_strain_measure(index);
 	const double h = cable_strain_hessian(index);
 	const double g = cable_strain_gradient(index);
-	return m_Ec * A * (g * g + e * h) / L * (e >= 0);
+	return m_Ec * A / L * (g * g + e * h) * (e >= 0);
 }
 double Tensegrity::cable_strain_measure(unsigned index) const
 {
@@ -490,18 +489,18 @@ math::vec3 Tensegrity::position(unsigned index, bool level, bool configuration) 
 {
 	if(!level || !configuration)
 	{
-		math::vec3 x;
 		const double Hr = (m_Ht + m_Hc) / 2;
-		x[0] = (index != 0) * m_Rr * cos(2 * M_PI * index / m_nc);
-		x[1] = (index != 0) * m_Rr * sin(2 * M_PI * index / m_nc);
-		x[2] = (index == 0) * (Hr - level * m_Hc) + (index != 0) * level * m_Ht;
-		return x;
+		return {
+			(index != 0) * m_Rr * cos(2 * M_PI * index / m_nc + m_q0 * level),
+			(index != 0) * m_Rr * sin(2 * M_PI * index / m_nc + m_q0 * level),
+			(index == 0) * (Hr - level * m_Hc) + (index != 0) * level * m_Ht
+		};
 	}
 	else
 	{
 		const math::vec3 zr(0, 0, m_Ht);
 		const math::vec3 ur(m_solver->m_state_new + 0);
 		const math::quat qr(m_solver->m_state_new + 3);
-		return zr + ur + qr.rotate(position(index, 1, 0) - zr);
+		return zr + ur + qr.rotate(position(index, level, 0) - zr);
 	}
 }

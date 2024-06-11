@@ -81,7 +81,8 @@ public:
 	double m_Hc;
 	double m_Ec;
 	double m_dc;
-	double m_a0;
+	double m_q0;
+	double m_s0;
 	unsigned m_nc;
 	unsigned m_type;
 	char m_label[200];
