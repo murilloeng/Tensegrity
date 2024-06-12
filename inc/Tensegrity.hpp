@@ -93,6 +93,7 @@ public:
 	math::mat3 m_J1;
 	math::mat3 m_J2;
 	math::vec3 m_zc;
+	math::matrix m_K0;
 	std::vector<math::vec3> m_ak;
 	std::vector<std::function<math::vec3(double)>> m_pk;
 };

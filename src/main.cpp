@@ -85,12 +85,15 @@ static void load_vertical(void)
 {
 	//data
 	Tensegrity tensegrity;
-	const double m = 5.00e+01;
+	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	//setup
 	tensegrity.m_solver->m_dl = 1.00e-03;
 	tensegrity.m_solver->m_step_max = 1000;
-	tensegrity.m_ak.push_back(math::vec3(0.1, 0, tensegrity.m_Ht));
+	const double r = 0.1;
+	const double t = 0;
+	tensegrity.m_K0(5, 5) = 1e3;
+	tensegrity.m_ak.push_back(math::vec3(r * cos(t), r * sin(t), tensegrity.m_Ht));
 	tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
 	//solve
 	tensegrity.m_solver->solve();
