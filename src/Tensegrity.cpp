@@ -182,8 +182,6 @@ void Tensegrity::stiffness(math::matrix& K) const
 	const math::quat qr_old(m_solver->m_state_old + 3);
 	const math::vec3 tr_inc(m_solver->m_dx.data() + 3);
 	K.span(0, 3, 6, 3) = K.span(0, 3, 6, 3) * qr_old.rotation() * tr_inc.rotation_gradient();
-	// K.print("stiffness matrix", 1e-10);
-	// m_solver->m_dx.print("dx");
 }
 
 double Tensegrity::kinetic_energy(void) const

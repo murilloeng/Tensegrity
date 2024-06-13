@@ -28,6 +28,8 @@ public:
 	unsigned m_step_max;
 	unsigned m_iteration_max;
 
+	math::vector m_dx;
+
 	double m_state_old[7];
 	double m_state_new[7];
 	double m_velocity_old[6];
@@ -64,7 +66,6 @@ private:
 	math::matrix m_Kt;
 	math::matrix m_Ct;
 	math::matrix m_Mt;
-	math::vector m_dx;
 	math::vector m_dxt;
 	math::vector m_ddxt;
 	math::vector m_ddxr;

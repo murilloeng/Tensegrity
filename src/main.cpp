@@ -1,6 +1,10 @@
 //std
 #include <cmath>
+#include <ctime>
 #include <cstdlib>
+
+//math
+#include "Math/inc/misc/misc.hpp"
 
 //canvas
 #include "Canvas/inc/Windows/Glut.hpp"
@@ -81,20 +85,90 @@ static void energy_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns
 	fclose(file);
 }
 
+static Tensegrity test_tensegrity;
+static void fun(double* fi, const double* d)
+{
+	//data
+	math::vector fm(fi, 6);
+	math::vec3 x_new(test_tensegrity.m_solver->m_state_new + 0);
+	math::quat q_new(test_tensegrity.m_solver->m_state_new + 3);
+	const math::quat q_old(test_tensegrity.m_solver->m_state_old + 3);
+	//setup
+	x_new = math::vec3(d + 0);
+	q_new = q_old * math::vec3(d + 3).quaternion();
+	//function
+	test_tensegrity.internal_force(fm);
+}
+static void dfun(double* K, const double* d)
+{
+	//data
+	math::matrix Km(K, 6, 6);
+	math::vec3 x_new(test_tensegrity.m_solver->m_state_new + 0);
+	math::quat q_new(test_tensegrity.m_solver->m_state_new + 3);
+	const math::quat q_old(test_tensegrity.m_solver->m_state_old + 3);
+	math::vec3(test_tensegrity.m_solver->m_dx.data() + 3) = math::vec3(d + 3);
+	//setup
+	x_new = math::vec3(d + 0);
+	q_new = q_old * math::vec3(d + 3).quaternion();
+	//function
+	test_tensegrity.stiffness(Km);
+}
+static void test(void)
+{
+	//data
+	math::vec3 tn;
+	math::vector x(6), fi(6);
+	math::matrix Ka(6, 6), Kn(6, 6), Kr(6, 6);
+	//setup
+	srand(time(nullptr));
+	const unsigned nt = 100000;
+	test_tensegrity.m_Ht = 3.20e-01;
+	test_tensegrity.m_Hc = 1.40e-01;
+	test_tensegrity.m_Rr = 1.40e-01;
+	test_tensegrity.m_Ec = 2.00e+11;
+	test_tensegrity.m_dc = 1.50e-03;
+	test_tensegrity.m_s0 = 1.00e+02;
+	for(unsigned i = 0; i < nt; i++)
+	{
+		//state
+		x.randu();
+		tn.randu();
+		math::quat(test_tensegrity.m_solver->m_state_old + 3) = tn.quaternion();
+		//function
+		dfun(Ka.data(), x.data());
+		math::ndiff(fun, Kn.data(), x.data(), 6, 6, 1e-8);
+		//check
+		if((Ka - Kn).norm() < 1e-5 * Ka.norm())
+		{
+			printf("%d ok\n", i);
+		}
+		else
+		{
+			printf("%d not ok\n", i);
+			break;
+		}
+	}
+}
 static void load_vertical(void)
 {
 	//data
 	Tensegrity tensegrity;
 	const double m = 1.00e+01;
 	const double g = 9.81e+00;
+	tensegrity.m_Ht = 3.20e-01;
+	tensegrity.m_Hc = 1.40e-01;
+	tensegrity.m_Rr = 1.40e-01;
+	tensegrity.m_Ec = 2.00e+11;
+	tensegrity.m_dc = 1.50e-03;
+	tensegrity.m_s0 = 1.00e+02;
 	//setup
+	const double r = 1.00e-01;
+	const double t = 2.00e-01;
 	tensegrity.m_solver->m_dl = 1.00e-03;
 	tensegrity.m_solver->m_step_max = 1000;
-	const double r = 0.1;
-	const double t = 0;
-	tensegrity.m_K0(5, 5) = 1e3;
 	tensegrity.m_ak.push_back(math::vec3(r * cos(t), r * sin(t), tensegrity.m_Ht));
 	tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
+	sprintf(tensegrity.m_label, "test_r_%.2lf_t_%.2lf", r, t);
 	//solve
 	tensegrity.m_solver->solve();
 }
@@ -149,7 +223,8 @@ int main(int argc, char** argv)
 	// window.scene()->update(true);
 	// window.start();
 	//test
-	load_vertical();
+	test();
+	// load_vertical();
 	//return
 	return EXIT_SUCCESS;
 }

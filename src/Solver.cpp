@@ -146,6 +146,7 @@ void Solver::solve_static(void)
 		m_Kt.solve(m_dxt, m_fe);
 		compute_load_predictor();
 		m_dx = m_dl * m_dxt;
+		m_dx.print("dx");
 		//corrector
 		update_state();
 		m_equilibrium = false;
@@ -171,6 +172,7 @@ void Solver::solve_static(void)
 			compute_load_corrector();
 			m_dl += m_ddl;
 			m_dx += m_ddxr + m_ddl * m_ddxt;
+			m_dx.print("dx");
 			update_state();
 			m_l_new = m_l_old + m_dl;
 		}
