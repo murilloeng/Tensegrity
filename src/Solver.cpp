@@ -95,7 +95,7 @@ void Solver::finish(void)
 		//file
 		FILE* file = fopen(path, "w");
 		//write
-		for(unsigned j = 0; j < m_step_max; j++)
+		for(unsigned j = 0; j <= m_step_max; j++)
 		{
 			for(unsigned k = 0; k < sizes[i]; k++)
 			{
@@ -121,6 +121,12 @@ void Solver::restore(void)
 	memcpy(m_velocity_new, m_velocity_old, 6 * sizeof(double));
 	memcpy(m_acceleration_new, m_acceleration_old, 6 * sizeof(double));
 }
+void Solver::clear_state(void)
+{
+	memset(m_state_old, 0, 7 * sizeof(double));
+	memset(m_state_new, 0, 7 * sizeof(double));
+	m_state_old[3] = m_state_new[3] = 1;
+}
 void Solver::update_state(void)
 {
 	//data
@@ -138,15 +144,15 @@ void Solver::solve_static(void)
 {
 	//loop
 	if(m_log) record();
-	m_tensegrity->stiffness(m_Kt);
-	m_tensegrity->external_force(m_fe);
 	for(m_step = 1; m_step <= m_step_max; m_step++)
 	{
+		//setup
+		m_tensegrity->stiffness(m_Kt);
+		m_tensegrity->external_force(m_fe);
 		//predictor
 		m_Kt.solve(m_dxt, m_fe);
 		compute_load_predictor();
 		m_dx = m_dl * m_dxt;
-		m_dx.print("dx");
 		//corrector
 		update_state();
 		m_equilibrium = false;
@@ -155,13 +161,14 @@ void Solver::solve_static(void)
 		{
 			m_tensegrity->stiffness(m_Kt);
 			m_tensegrity->internal_force(m_fi);
+			m_tensegrity->external_force(m_fe);
 			m_r = m_l_new * m_fe - m_fi;
 			if(m_r.norm() < 1e-5 * m_fe.norm())
 			{
 				if(m_log)
 				{
-					printf("step: %04d iterations: %04d load: %+.2e displacement: %+.2e\n", m_step, m_iteration, m_l_new, m_state_new[2]);
 					record();
+					printf("step: %04d iterations: %04d load: %+.2e\n", m_step, m_iteration, m_l_new);
 				}
 				update();
 				m_equilibrium = true;
@@ -172,7 +179,6 @@ void Solver::solve_static(void)
 			compute_load_corrector();
 			m_dl += m_ddl;
 			m_dx += m_ddxr + m_ddl * m_ddxt;
-			m_dx.print("dx");
 			update_state();
 			m_l_new = m_l_old + m_dl;
 		}

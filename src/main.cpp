@@ -86,10 +86,10 @@ static void energy_translation(Tensegrity& tensegrity, math::vec3 u, unsigned ns
 }
 
 static Tensegrity test_tensegrity;
-static void fun(double* fi, const double* d)
+static void fun(double* f, const double* d)
 {
 	//data
-	math::vector fm(fi, 6);
+	math::vector fi(6), fe(6);
 	math::vec3 x_new(test_tensegrity.m_solver->m_state_new + 0);
 	math::quat q_new(test_tensegrity.m_solver->m_state_new + 3);
 	const math::quat q_old(test_tensegrity.m_solver->m_state_old + 3);
@@ -97,7 +97,9 @@ static void fun(double* fi, const double* d)
 	x_new = math::vec3(d + 0);
 	q_new = q_old * math::vec3(d + 3).quaternion();
 	//function
-	test_tensegrity.internal_force(fm);
+	test_tensegrity.internal_force(fi);
+	test_tensegrity.external_force(fe);
+	math::vector(f, 6) = fi - test_tensegrity.m_solver->m_l_new * fe;
 }
 static void dfun(double* K, const double* d)
 {
@@ -106,7 +108,6 @@ static void dfun(double* K, const double* d)
 	math::vec3 x_new(test_tensegrity.m_solver->m_state_new + 0);
 	math::quat q_new(test_tensegrity.m_solver->m_state_new + 3);
 	const math::quat q_old(test_tensegrity.m_solver->m_state_old + 3);
-	math::vec3(test_tensegrity.m_solver->m_dx.data() + 3) = math::vec3(d + 3);
 	//setup
 	x_new = math::vec3(d + 0);
 	q_new = q_old * math::vec3(d + 3).quaternion();
@@ -121,6 +122,10 @@ static void test(void)
 	math::matrix Ka(6, 6), Kn(6, 6), Kr(6, 6);
 	//setup
 	srand(time(nullptr));
+	const double r = 1.00e-01;
+	const double t = 2.00e-01;
+	const double m = 1.00e+01;
+	const double g = 9.81e+00;
 	const unsigned nt = 100000;
 	test_tensegrity.m_Ht = 3.20e-01;
 	test_tensegrity.m_Hc = 1.40e-01;
@@ -128,11 +133,14 @@ static void test(void)
 	test_tensegrity.m_Ec = 2.00e+11;
 	test_tensegrity.m_dc = 1.50e-03;
 	test_tensegrity.m_s0 = 1.00e+02;
+	test_tensegrity.m_ak.push_back({r * cos(t), r * sin(t), test_tensegrity.m_Ht});
+	test_tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
 	for(unsigned i = 0; i < nt; i++)
 	{
 		//state
 		x.randu();
 		tn.randu();
+		math::vector(&test_tensegrity.m_solver->m_l_new, 1).randu(0, 1);
 		math::quat(test_tensegrity.m_solver->m_state_old + 3) = tn.quaternion();
 		//function
 		dfun(Ka.data(), x.data());
@@ -144,6 +152,12 @@ static void test(void)
 		}
 		else
 		{
+			x.print("x");
+			math::vector(test_tensegrity.m_solver->m_state_old, 7).print("state old");
+			math::vector(test_tensegrity.m_solver->m_state_new, 7).print("state new");
+			Ka.print("Ka");
+			Kn.print("Kn");
+			(Ka - Kn).print("Ka - Kn", 1e-7 * Ka.norm());
 			printf("%d not ok\n", i);
 			break;
 		}
@@ -153,24 +167,61 @@ static void load_vertical(void)
 {
 	//data
 	Tensegrity tensegrity;
-	const double m = 1.00e+01;
+	const unsigned nr = 100;
+	const unsigned nt = 100;
+	const double m = 1.00e-01;
 	const double g = 9.81e+00;
 	tensegrity.m_Ht = 3.20e-01;
 	tensegrity.m_Hc = 1.40e-01;
 	tensegrity.m_Rr = 1.40e-01;
 	tensegrity.m_Ec = 2.00e+11;
 	tensegrity.m_dc = 1.50e-03;
-	tensegrity.m_s0 = 1.00e+02;
-	//setup
-	const double r = 1.00e-01;
-	const double t = 2.00e-01;
-	tensegrity.m_solver->m_dl = 1.00e-03;
-	tensegrity.m_solver->m_step_max = 1000;
-	tensegrity.m_ak.push_back(math::vec3(r * cos(t), r * sin(t), tensegrity.m_Ht));
+	tensegrity.m_s0 = 1.00e+05;
+	tensegrity.m_solver->m_log = false;
+	tensegrity.m_solver->m_dl = 1.00e-02;
+	tensegrity.m_solver->m_step_max = 100;
+	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
 	tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
-	sprintf(tensegrity.m_label, "test_r_%.2lf_t_%.2lf", r, t);
-	//solve
-	tensegrity.m_solver->solve();
+	double* state = (double*) alloca(7 * nr * nt * sizeof(double));
+	//loop
+	for(unsigned i = 0; i < nr; i++)
+	{
+		for(unsigned j = 0; j < nt; j++)
+		{
+			//setup
+			tensegrity.m_solver->clear_state();
+			const double t = 2 * M_PI * j / nt;
+			const double r = tensegrity.m_Rr * i / nr;
+			tensegrity.m_ak[0][0] = r * cos(t);
+			tensegrity.m_ak[0][1] = r * sin(t);
+			tensegrity.m_K0[5] = (r == 0) * 1.00e+03;
+			//solve
+			tensegrity.m_solver->solve();
+			if(!tensegrity.m_solver->m_equilibrium) return;
+			//save
+			printf("i: %02d j: %02d r: %+.2e t: %+.2e\n", i, j, r, t * 180 / M_PI);
+			memcpy(state + 7 * (nt * i + j), tensegrity.m_solver->m_state_new, 7 * sizeof(double));
+		}
+	}
+	//file
+	FILE* file = fopen("load_vertical.txt", "w");
+	for(unsigned i = 0; i < nr; i++)
+	{
+		for(unsigned j = 0; j < nt; j++)
+		{
+			//data
+			const double t = 2 * M_PI * j / nt;
+			const double r = tensegrity.m_Rr * i / nr;
+			const math::vec3 u = math::vec3(state + 7 * (nt * i + j) + 0);
+			const math::vec3 v = math::quat(state + 7 * (nt * i + j) + 3).pseudo();
+			//write
+			fprintf(file, "%+.6e %+.6e ", r, t);
+			for(unsigned k = 0; k < 3; k++) fprintf(file, "%+.6e ", u[k]);
+			for(unsigned k = 0; k < 3; k++) fprintf(file, "%+.6e ", v[k]);
+			fprintf(file, "\n");
+		}
+	}
+	fclose(file);
 }
 static void load_placement(void)
 {
@@ -223,8 +274,8 @@ int main(int argc, char** argv)
 	// window.scene()->update(true);
 	// window.start();
 	//test
-	test();
-	// load_vertical();
+	// test();
+	load_vertical();
 	//return
 	return EXIT_SUCCESS;
 }

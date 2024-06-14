@@ -28,8 +28,6 @@ public:
 	unsigned m_step_max;
 	unsigned m_iteration_max;
 
-	math::vector m_dx;
-
 	double m_state_old[7];
 	double m_state_new[7];
 	double m_velocity_old[6];
@@ -37,13 +35,14 @@ public:
 	double m_acceleration_old[6];
 	double m_acceleration_new[6];
 
-private:
+public:
 	//solver
 	void setup(void);
 	void record(void);
 	void finish(void);
 	void update(void);
 	void restore(void);
+	void clear_state(void);
 	void update_state(void);
 	void solve_static(void);
 	void solve_dynamic(void);
@@ -52,6 +51,7 @@ private:
 	void compute_load_predictor(void);
 	void compute_load_corrector(void);
 
+public:
 	//data
 	double m_ddl;
 	double m_l_old;
@@ -66,6 +66,7 @@ private:
 	math::matrix m_Kt;
 	math::matrix m_Ct;
 	math::matrix m_Mt;
+	math::vector m_dx;
 	math::vector m_dxt;
 	math::vector m_ddxt;
 	math::vector m_ddxr;

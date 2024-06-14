@@ -22,9 +22,8 @@ Tensegrity::Tensegrity(void) :
 	m_pr(4.00e+02), m_er(5.00e-02), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), m_br(2.00e-01), m_Rr(1.40e-01), 
 	m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0), m_s0(10), m_nc(3), m_type(0), m_solver(new Solver(this))
 {
-	m_K0.resize(6, 6);
-	m_K0.zeros();
 	sprintf(m_label, "Tensegrity");
+	memset(m_K0, 0, 6 * sizeof(double));
 }
 
 //destructor
@@ -177,10 +176,14 @@ void Tensegrity::stiffness(math::matrix& K) const
 		//stiffness
 		K.span(3, 3) -= pk.spin() * ck.spin();
 	}
+	//stabilization
+	for(unsigned i = 0; i < 6; i++)
+	{
+		K(i, i) += m_K0[i];
+	}
 	//parametrization
-	K += m_K0;
 	const math::quat qr_old(m_solver->m_state_old + 3);
-	const math::vec3 tr_inc(m_solver->m_dx.data() + 3);
+	const math::vec3 tr_inc = qr_old.conjugate(qr).pseudo();
 	K.span(0, 3, 6, 3) = K.span(0, 3, 6, 3) * qr_old.rotation() * tr_inc.rotation_gradient();
 }
 
