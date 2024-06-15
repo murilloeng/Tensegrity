@@ -185,6 +185,18 @@ void Tensegrity::stiffness(math::matrix& K) const
 	const math::quat qr_old(m_solver->m_state_old + 3);
 	const math::vec3 tr_inc = qr_old.conjugate(qr).pseudo();
 	K.span(0, 3, 6, 3) = K.span(0, 3, 6, 3) * qr_old.rotation() * tr_inc.rotation_gradient();
+
+	// math::vector e(6);
+	// math::matrix z(6, 6);
+	// if(!K.eigen_sym(e, z))
+	// {
+	// 	printf("Error computing eigen values!\n");
+	// }
+	// math::vector(m_solver->m_state_old, 7).transpose().print("state old");
+	// math::vector(m_solver->m_state_new, 7).transpose().print("state new");
+	// e.transpose().print("e");
+	// z.print("z", 1e-10);
+	// printf("------------------------------------------------------------------------------------------------------\n");
 }
 
 double Tensegrity::kinetic_energy(void) const
@@ -283,14 +295,14 @@ double Tensegrity::cable_force(unsigned index) const
 	const double A = cable_area();
 	const double e = cable_strain_measure(index);
 	const double g = cable_strain_gradient(index);
-	return m_Ec * e + m_s0 >= 0 ? A * (m_Ec * e + m_s0) * g : 0;
+	return A * (m_Ec * e + m_s0) * g / (m_Ec * e + m_s0 > 0 ? 1 : 1e4);
 }
 double Tensegrity::cable_energy(unsigned index) const
 {
 	const double A = cable_area();
 	const double L = cable_length(index, 0);
 	const double e = cable_strain_measure(index);
-	return m_Ec * e + m_s0 >= 0 ? A * L * (m_Ec * e * e / 2 + m_s0 * e) : 0;
+	return A * L * (m_Ec * e * e / 2 + m_s0 * e) / (m_Ec * e + m_s0 > 0 ? 1 : 1e4);
 }
 double Tensegrity::cable_stretch(unsigned index) const
 {
@@ -307,7 +319,7 @@ double Tensegrity::cable_stiffness(unsigned index) const
 	const double e = cable_strain_measure(index);
 	const double h = cable_strain_hessian(index);
 	const double g = cable_strain_gradient(index);
-	return m_Ec * e + m_s0 >= 0 ? m_Ec * A / L * (g * g + e * h) : 0;
+	return m_Ec * A / L * (g * g + e * h) / (m_Ec * e + m_s0 > 0 ? 1 : 1e4);
 }
 double Tensegrity::cable_strain_measure(unsigned index) const
 {

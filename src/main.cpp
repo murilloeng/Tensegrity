@@ -171,12 +171,14 @@ static void load_vertical(void)
 	const unsigned nt = 100;
 	const double m = 1.00e-01;
 	const double g = 9.81e+00;
+	//setup
+	tensegrity.m_nc = 4;
 	tensegrity.m_Ht = 3.20e-01;
 	tensegrity.m_Hc = 1.40e-01;
 	tensegrity.m_Rr = 1.40e-01;
 	tensegrity.m_Ec = 2.00e+11;
 	tensegrity.m_dc = 1.50e-03;
-	tensegrity.m_s0 = 1.00e+05;
+	tensegrity.m_s0 = 1.00e+00;
 	tensegrity.m_solver->m_log = false;
 	tensegrity.m_solver->m_dl = 1.00e-02;
 	tensegrity.m_solver->m_step_max = 100;
@@ -184,7 +186,7 @@ static void load_vertical(void)
 	tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
 	double* state = (double*) alloca(7 * nr * nt * sizeof(double));
 	//loop
-	for(unsigned i = 0; i < nr; i++)
+	for(unsigned i = 1; i < nr; i++)
 	{
 		for(unsigned j = 0; j < nt; j++)
 		{
@@ -207,19 +209,20 @@ static void load_vertical(void)
 	FILE* file = fopen("load_vertical.txt", "w");
 	for(unsigned i = 0; i < nr; i++)
 	{
-		for(unsigned j = 0; j < nt; j++)
+		for(unsigned j = 0; j <= nt; j++)
 		{
 			//data
 			const double t = 2 * M_PI * j / nt;
 			const double r = tensegrity.m_Rr * i / nr;
-			const math::vec3 u = math::vec3(state + 7 * (nt * i + j) + 0);
-			const math::vec3 v = math::quat(state + 7 * (nt * i + j) + 3).pseudo();
+			const math::vec3 u = math::vec3(state + 7 * (nt * i + j % nt) + 0);
+			const math::vec3 v = math::quat(state + 7 * (nt * i + j % nt) + 3).pseudo();
 			//write
 			fprintf(file, "%+.6e %+.6e ", r, t);
 			for(unsigned k = 0; k < 3; k++) fprintf(file, "%+.6e ", u[k]);
 			for(unsigned k = 0; k < 3; k++) fprintf(file, "%+.6e ", v[k]);
 			fprintf(file, "\n");
 		}
+		fprintf(file, "\n");
 	}
 	fclose(file);
 }
