@@ -172,7 +172,7 @@ static void load_vertical(void)
 	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	//setup
-	tensegrity.m_nc = 4;
+	tensegrity.m_nc = 3;
 	tensegrity.m_Ht = 3.20e-01;
 	tensegrity.m_Hc = 1.40e-01;
 	tensegrity.m_Rr = 1.40e-01;
