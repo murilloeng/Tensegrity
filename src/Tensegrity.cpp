@@ -292,17 +292,19 @@ double Tensegrity::cable_area(void) const
 }
 double Tensegrity::cable_force(unsigned index) const
 {
+	const double a = 2;
 	const double A = cable_area();
 	const double e = cable_strain_measure(index);
 	const double g = cable_strain_gradient(index);
-	return A * (m_Ec * e + m_s0) * g / (m_Ec * e + m_s0 > 0 ? 1 : 1e4);
+	const double s = m_Ec * e * (atan(a * e) / M_PI + 0.5) + m_s0;
+	return A * s * g;
 }
 double Tensegrity::cable_energy(unsigned index) const
 {
 	const double A = cable_area();
 	const double L = cable_length(index, 0);
 	const double e = cable_strain_measure(index);
-	return A * L * (m_Ec * e * e / 2 + m_s0 * e) / (m_Ec * e + m_s0 > 0 ? 1 : 1e4);
+	return A * L * (m_Ec * e * e / 2 + m_s0 * e) / (m_Ec * e + m_s0 > 0 ? 1 : 1e2);
 }
 double Tensegrity::cable_stretch(unsigned index) const
 {
@@ -314,12 +316,15 @@ double Tensegrity::cable_stretch(unsigned index) const
 }
 double Tensegrity::cable_stiffness(unsigned index) const
 {
+	const double a = 2;
 	const double A = cable_area();
 	const double L = cable_length(index, 0);
 	const double e = cable_strain_measure(index);
 	const double h = cable_strain_hessian(index);
 	const double g = cable_strain_gradient(index);
-	return m_Ec * A / L * (g * g + e * h) / (m_Ec * e + m_s0 > 0 ? 1 : 1e4);
+	const double s = m_Ec * e * (atan(a * e) / M_PI + 0.5) + m_s0;
+	const double C = m_Ec * (atan(a * e) / M_PI + 0.5 + a * e / (1 + a * a * e * e));
+	return A / L * (C * g * g + s * h);
 }
 double Tensegrity::cable_strain_measure(unsigned index) const
 {

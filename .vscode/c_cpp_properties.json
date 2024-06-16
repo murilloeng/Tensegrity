@@ -18,10 +18,8 @@
 			"name": "Win32",
 			"includePath":
 			[
-				"${workspaceFolder}",
 				"${workspaceFolder}/..",
-				"${workspaceFolder}/../Math",
-				"${workspaceFolder}/../Canvas"
+				"${workspaceFolder}/../external/cpp/inc"
 			],
 			"defines":
 			[

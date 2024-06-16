@@ -169,7 +169,7 @@ static void load_vertical(void)
 	Tensegrity tensegrity;
 	const unsigned nr = 100;
 	const unsigned nt = 100;
-	const double m = 1.00e-01;
+	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	//setup
 	tensegrity.m_nc = 4;
