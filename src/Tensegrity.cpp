@@ -418,7 +418,7 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 	const float Hc = float(m_Hc);
 	const float Hr = (Ht + Hc) / 2;
 	canvas::objects::Latex* latex[5];
-	const char* anchor[] = {"NC", "CW", "SC", "CE", "CW"};
+	const char* anchor[] = {"SC", "CW", "NC", "CE", "CW"};
 	const char* source[] = {"$ R_r $", "$ H_t $", "$ e_r $", "$ H_r $", "$ H_c $"};
 	//latex
 	for(unsigned i = 0; i < 5; i++)
@@ -429,6 +429,8 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 		latex[i]->size(2 * tl);
 		latex[i]->anchor(anchor[i]);
 		latex[i]->color_fill({1, 0, 0});
+		latex[i]->direction(0, {1, 0, 0});
+		latex[i]->direction(1, {0, 0, 1});
 		latex[i]->rotate({float(M_PI), 0, 0});
 		scene->add_object(latex[i]);
 	}
