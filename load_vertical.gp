@@ -3,7 +3,6 @@ set grid
 set view map
 set key above
 unset surface
-# set terminal x11
 set size ratio 1
 set xlabel "x_1"
 set ylabel "x_2"
