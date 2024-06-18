@@ -91,7 +91,7 @@ static void load_vertical(void)
 	fclose(file);
 	//clock
 	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
-	printf("time: %.2lf s", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
+	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
 }
 
 int main(int argc, char** argv)

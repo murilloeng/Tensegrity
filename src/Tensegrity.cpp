@@ -144,18 +144,33 @@ void Tensegrity::stiffness(math::matrix& K) const
 	K.zeros();
 	const math::vec3 zr(0, 0, m_Ht);
 	const math::quat qr(m_solver->m_state_new + 3);
+	const double A = M_PI * m_dc * m_dc / 4;
 	//internal force
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
-		//cable
-		const double fk = cable_force(i);
-		const double lk = cable_length(i, 1);
-		const double Kk = cable_stiffness(i);
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
 		const math::vec3 x1 = position(i, 0, 1);
 		const math::vec3 x2 = position(i, 1, 1);
-		const math::vec3 z2 = position(i, 1, 0);
 		const math::vec3 rk = qr.rotate(z2 - zr);
 		const math::vec3 tk = (x2 - x1).normalize();
+		//lengths
+		const double Lk = (z2 - z1).norm();
+		const double lk = (x2 - x1).norm();
+		//stretch
+		const double ak = lk / Lk;
+		//strain
+		const double gk = 1 / ak;
+		const double ek = log(ak);
+		const double hk = -1 / ak / ak;
+		//stress
+		const double b = 2;
+		const double sk = m_Ec * ek * (atan(b * ek) / M_PI + 0.5) + m_s0;
+		const double Ck = m_Ec * (atan(b * ek) / M_PI + 0.5 + b * ek / (1 + b * b * ek * ek) / M_PI);
+		//force
+		const double fk = sk * A * gk;
+		const double Kk = A / Lk * (Ck * gk * gk + sk * hk);
 		//matrices
 		const math::mat3 Ak = tk.outer(tk);
 		const math::mat3 Bk = math::mat3::eye() - Ak;
@@ -185,18 +200,6 @@ void Tensegrity::stiffness(math::matrix& K) const
 	const math::quat qr_old(m_solver->m_state_old + 3);
 	const math::vec3 tr_inc = qr_old.conjugate(qr).pseudo();
 	K.span(0, 3, 6, 3) = K.span(0, 3, 6, 3) * qr_old.rotation() * tr_inc.rotation_gradient();
-
-	// math::vector e(6);
-	// math::matrix z(6, 6);
-	// if(!K.eigen_sym(e, z))
-	// {
-	// 	printf("Error computing eigen values!\n");
-	// }
-	// math::vector(m_solver->m_state_old, 7).transpose().print("state old");
-	// math::vector(m_solver->m_state_new, 7).transpose().print("state new");
-	// e.transpose().print("e");
-	// z.print("z", 1e-10);
-	// printf("------------------------------------------------------------------------------------------------------\n");
 }
 
 double Tensegrity::kinetic_energy(void) const
@@ -253,15 +256,29 @@ void Tensegrity::internal_force(math::vector& fi) const
 	fi.zeros();
 	const math::vec3 zr(0, 0, m_Ht);
 	const math::quat qr(m_solver->m_state_new + 3);
+	const double A = M_PI * m_dc * m_dc / 4;
 	//internal force
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
-		//cable
-		const double fk = cable_force(i);
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
 		const math::vec3 x1 = position(i, 0, 1);
 		const math::vec3 x2 = position(i, 1, 1);
-		const math::vec3 z2 = position(i, 1, 0);
 		const math::vec3 tk = (x2 - x1).normalize();
+		//lengths
+		const double Lk = (z2 - z1).norm();
+		const double lk = (x2 - x1).norm();
+		//stretch
+		const double ak = lk / Lk;
+		//strain
+		const double gk = 1 / ak;
+		const double ek = log(ak);
+		//stress
+		const double b = 2;
+		const double sk = m_Ec * ek * (atan(b * ek) / M_PI + 0.5) + m_s0;
+		//axial force
+		const double fk = sk * A * gk;
 		//internal force
 		fi.span(0, 0, 3, 1) += fk * tk;
 		fi.span(3, 0, 3, 1) += qr.rotate(z2 - zr).cross(fk * tk);
