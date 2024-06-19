@@ -14,6 +14,18 @@
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
+static Tensegrity test_tensegrity;
+
+static void setup(Tensegrity& tensegrity)
+{
+	tensegrity.m_nc = 3;
+	tensegrity.m_Ht = 3.20e-01;
+	tensegrity.m_Hc = 1.40e-01;
+	tensegrity.m_Rr = 1.40e-01;
+	tensegrity.m_Ec = 2.00e+11;
+	tensegrity.m_dc = 1.50e-03;
+	tensegrity.m_s0 = 0.00e+00;
+}
 static void draw(const Tensegrity& tensegrity, int argc, char** argv)
 {
 	//data
@@ -24,6 +36,72 @@ static void draw(const Tensegrity& tensegrity, int argc, char** argv)
 	window.scene()->update(true);
 	//main loop
 	window.start();
+}
+static void energy(bool type, unsigned index, double v1, double v2)
+{
+	//data
+	Tensegrity tensegrity;
+	const unsigned ns = 1000;
+	FILE* file = fopen("data/energy.txt", "w");
+	//energy
+	setup(tensegrity);
+	for(unsigned i = 0; i <= ns; i++)
+	{
+		const double v = v1 + (v2 - v1) * i / ns;
+		if(!type)
+		{
+			tensegrity.m_solver->m_state_new[index] = v;
+		}
+		else
+		{
+			tensegrity.m_solver->m_state_new[3] = cos(v / 2);
+			tensegrity.m_solver->m_state_new[index + 4] = sin(v / 2);
+		}
+		fprintf(file, "%+.6e %+.6e\n", v, tensegrity.internal_energy());
+	}
+	//close
+	fclose(file);
+}
+static void internal_force(bool type, unsigned index, double v1, double v2)
+{
+	//data
+	math::vector fi(6);
+	Tensegrity tensegrity;
+	const unsigned ns = 1000;
+	FILE* file = fopen("data/force.txt", "w");
+	//energy
+	setup(tensegrity);
+	for(unsigned i = 0; i <= ns; i++)
+	{
+		const double v = v1 + (v2 - v1) * i / ns;
+		if(!type)
+		{
+			tensegrity.m_solver->m_state_new[index] = v;
+		}
+		else
+		{
+			tensegrity.m_solver->m_state_new[3] = cos(v / 2);
+			tensegrity.m_solver->m_state_new[index + 4] = sin(v / 2);
+		}
+		fprintf(file, "%+.6e ", v);
+		tensegrity.internal_force(fi);
+		for(unsigned i = 0; i < 6; i++) fprintf(file, "%+.6e ", fi[i]);
+		fprintf(file, "\n");
+	}
+	//close
+	fclose(file);
+}
+void fun_stiffness(double* U, const double* x)
+{
+	
+}
+void fun_internal_force(double* U, const double* x)
+{
+	
+}
+void fun_internal_energy(double* U, const double* x)
+{
+
 }
 static void load_vertical(void)
 {
@@ -36,12 +114,7 @@ static void load_vertical(void)
 	using namespace std::chrono;
 	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 	//setup
-	tensegrity.m_nc = 3;
-	tensegrity.m_Ht = 3.20e-01;
-	tensegrity.m_Hc = 1.40e-01;
-	tensegrity.m_Rr = 1.40e-01;
-	tensegrity.m_Ec = 2.00e+11;
-	tensegrity.m_dc = 1.50e-03;
+	setup(tensegrity);
 	tensegrity.m_s0 = 1.00e+00;
 	tensegrity.m_solver->m_log = false;
 	tensegrity.m_solver->m_dl = 1.00e-02;
@@ -94,10 +167,40 @@ static void load_vertical(void)
 	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
 }
 
+void test_energy(void)
+{
+	//data
+	Tensegrity tensegrity;
+	//setup
+	tensegrity.m_nc = 3;
+	tensegrity.m_Ht = 3.20e-01;
+	tensegrity.m_Hc = 1.40e-01;
+	tensegrity.m_Rr = 1.40e-01;
+	tensegrity.m_Ec = 2.00e+11;
+	tensegrity.m_dc = 1.50e-03;
+	tensegrity.m_s0 = 0.00e+00;
+	//energy
+	const double t = 1e-5;
+	tensegrity.m_solver->m_state_new[3] = cos(t / 2);
+	tensegrity.m_solver->m_state_new[5] = sin(t / 2);
+	printf("U: %+.2e\n", tensegrity.internal_energy());
+}
+
 int main(int argc, char** argv)
 {
 	//test
-	load_vertical();
+	if(argc != 1)
+	{
+		const double a = atoi(argv[2]) == 0 ? 0.12 : M_PI / 3;
+		if(atoi(argv[1]) == 0)
+		{
+			energy(atoi(argv[2]), atoi(argv[3]), -a, a);
+		}
+		else
+		{
+			internal_force(atoi(argv[2]), atoi(argv[3]), -a, a);
+		}
+	}
 	//return
 	return EXIT_SUCCESS;
 }

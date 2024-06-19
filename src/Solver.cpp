@@ -77,7 +77,7 @@ void Solver::record(void)
 	//cables
 	for(unsigned i = 0; i <= m_tensegrity->m_nc; i++)
 	{
-		m_cables_data[(m_tensegrity->m_nc + 1) * m_step + i] = m_tensegrity->cable_force(i);
+		m_cables_data[(m_tensegrity->m_nc + 1) * m_step + i] = 0;
 	}
 }
 void Solver::finish(void)

@@ -47,17 +47,6 @@ private:
 	void compute_inertia(void);
 	void compute_acceleration(void);
 
-	//cables
-	double cable_area(void) const;
-	double cable_force(unsigned) const;
-	double cable_energy(unsigned) const;
-	double cable_stretch(unsigned) const;
-	double cable_stiffness(unsigned) const;
-	double cable_strain_measure(unsigned) const;
-	double cable_strain_hessian(unsigned) const;
-	double cable_strain_gradient(unsigned) const;
-	double cable_length(unsigned, unsigned) const;
-
 	//draw
 	void draw_model_disks(canvas::Scene*) const;
 	void draw_model_links(canvas::Scene*) const;

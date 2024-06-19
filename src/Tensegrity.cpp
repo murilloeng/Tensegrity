@@ -60,11 +60,7 @@ void Tensegrity::compute_energy(void)
 	double* data = m_solver->m_energy_data;
 	data[3 * s + 0] = (m_M * vr.inner(vr) + 2 * vr.inner(m_J1 * wr) + wr.inner(m_J2 * wr)) / 2;
 	//internal
-	data[3 * s + 1] = 0;
-	for(unsigned i = 0; i <= m_nc; i++)
-	{
-		data[3 * s + 1] += cable_energy(i);
-	}
+	data[3 * s + 1] = internal_energy();
 	//external
 	data[3 * s + 2] = 0;
 	const double t = s * T / ns;
@@ -166,8 +162,8 @@ void Tensegrity::stiffness(math::matrix& K) const
 		const double hk = -1 / ak / ak;
 		//stress
 		const double b = 2;
-		const double sk = m_Ec * ek * (atan(b * ek) / M_PI + 0.5) + m_s0;
-		const double Ck = m_Ec * (atan(b * ek) / M_PI + 0.5 + b * ek / (1 + b * b * ek * ek) / M_PI);
+		const double sk = fmax(m_Ec * ek + m_s0, 0);
+		const double Ck = m_Ec * (m_Ec * ek + m_s0 >= 0);
 		//force
 		const double fk = sk * A * gk;
 		const double Kk = A / Lk * (Ck * gk * gk + sk * hk);
@@ -214,10 +210,24 @@ double Tensegrity::internal_energy(void) const
 {
 	//data
 	double U = 0;
+	const double Ac = M_PI * m_dc * m_dc / 4;
 	//internal energy
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
-		U += cable_energy(i);
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
+		const math::vec3 x1 = position(i, 0, 1);
+		const math::vec3 x2 = position(i, 1, 1);
+		//lengths
+		const double Lk = (z2 - z1).norm();
+		const double lk = (x2 - x1).norm();
+		//stretch
+		const double ak = lk / Lk;
+		//strain
+		const double ek = log(ak) + m_s0 / m_Ec;
+		//energy
+		U += m_Ec * Ac * Lk / 2 * ek * ek * (ek > 0);
 	}
 	//return
 	return U;
@@ -276,7 +286,7 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const double ek = log(ak);
 		//stress
 		const double b = 2;
-		const double sk = m_Ec * ek * (atan(b * ek) / M_PI + 0.5) + m_s0;
+		const double sk = fmax(m_Ec * ek + m_s0, 0);
 		//axial force
 		const double fk = sk * A * gk;
 		//internal force
@@ -300,66 +310,6 @@ void Tensegrity::external_force(math::vector& fe) const
 		math::vec3(fe.data() + 0) += m_pk[i](t);
 		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i](t));
 	}
-}
-
-//cables
-double Tensegrity::cable_area(void) const
-{
-	return M_PI * m_dc * m_dc / 4;
-}
-double Tensegrity::cable_force(unsigned index) const
-{
-	const double a = 2;
-	const double A = cable_area();
-	const double e = cable_strain_measure(index);
-	const double g = cable_strain_gradient(index);
-	const double s = m_Ec * e * (atan(a * e) / M_PI + 0.5) + m_s0;
-	return A * s * g;
-}
-double Tensegrity::cable_energy(unsigned index) const
-{
-	const double A = cable_area();
-	const double L = cable_length(index, 0);
-	const double e = cable_strain_measure(index);
-	return A * L * (m_Ec * e * e / 2 + m_s0 * e) / (m_Ec * e + m_s0 > 0 ? 1 : 1e2);
-}
-double Tensegrity::cable_stretch(unsigned index) const
-{
-	const math::vec3 z1 = position(index, 0, 0);
-	const math::vec3 z2 = position(index, 1, 0);
-	const math::vec3 x1 = position(index, 0, 1);
-	const math::vec3 x2 = position(index, 1, 1);
-	return (x2 - x1).norm() / (z2 - z1).norm();
-}
-double Tensegrity::cable_stiffness(unsigned index) const
-{
-	const double a = 2;
-	const double A = cable_area();
-	const double L = cable_length(index, 0);
-	const double e = cable_strain_measure(index);
-	const double h = cable_strain_hessian(index);
-	const double g = cable_strain_gradient(index);
-	const double s = m_Ec * e * (atan(a * e) / M_PI + 0.5) + m_s0;
-	const double C = m_Ec * (atan(a * e) / M_PI + 0.5 + a * e / (1 + a * a * e * e));
-	return A / L * (C * g * g + s * h);
-}
-double Tensegrity::cable_strain_measure(unsigned index) const
-{
-	return log(cable_stretch(index));
-}
-double Tensegrity::cable_strain_hessian(unsigned index) const
-{
-	return -1 / pow(cable_stretch(index), 2);
-}
-double Tensegrity::cable_strain_gradient(unsigned index) const
-{
-	return 1 / cable_stretch(index);
-}
-double Tensegrity::cable_length(unsigned index, unsigned configuration) const
-{
-	const math::vec3 z1 = position(index, 0, configuration);
-	const math::vec3 z2 = position(index, 1, configuration);
-	return (z2 - z1).norm();
 }
 
 //draw
