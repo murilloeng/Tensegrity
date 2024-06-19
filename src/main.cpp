@@ -37,55 +37,70 @@ static void draw(const Tensegrity& tensegrity, int argc, char** argv)
 	//main loop
 	window.start();
 }
-static void energy(bool type, unsigned index, double v1, double v2)
+static void energy(void)
 {
 	//data
 	Tensegrity tensegrity;
 	const unsigned ns = 1000;
+	const double ul = 1.00e-01;
+	const double tl = M_PI / 3;
 	FILE* file = fopen("data/energy.txt", "w");
 	//energy
 	setup(tensegrity);
 	for(unsigned i = 0; i <= ns; i++)
 	{
-		const double v = v1 + (v2 - v1) * i / ns;
-		if(!type)
+		const double u = 2 * ul * i / ns - ul;
+		const double t = 2 * tl * i / ns - tl;
+		for(unsigned j = 0; j < 3; j++)
 		{
-			tensegrity.m_solver->m_state_new[index] = v;
+			tensegrity.m_solver->clear_state();
+			tensegrity.m_solver->m_state_new[j + 0] = u;
+			fprintf(file, "%+.6e %+.6e ", u, tensegrity.internal_energy());
 		}
-		else
+		for(unsigned j = 0; j < 3; j++)
 		{
-			tensegrity.m_solver->m_state_new[3] = cos(v / 2);
-			tensegrity.m_solver->m_state_new[index + 4] = sin(v / 2);
+			tensegrity.m_solver->clear_state();
+			tensegrity.m_solver->m_state_new[3] = cos(t / 2);
+			tensegrity.m_solver->m_state_new[j + 4] = sin(t / 2);
+			fprintf(file, "%+.6e %+.6e ", u, tensegrity.internal_energy());
 		}
-		fprintf(file, "%+.6e %+.6e\n", v, tensegrity.internal_energy());
+		fprintf(file, "\n");
 	}
 	//close
 	fclose(file);
 }
-static void internal_force(bool type, unsigned index, double v1, double v2)
+static void internal_force(void)
 {
 	//data
 	math::vector fi(6);
 	Tensegrity tensegrity;
 	const unsigned ns = 1000;
+	const double ul = 1.00e-01;
+	const double tl = M_PI / 3;
 	FILE* file = fopen("data/force.txt", "w");
 	//energy
 	setup(tensegrity);
 	for(unsigned i = 0; i <= ns; i++)
 	{
-		const double v = v1 + (v2 - v1) * i / ns;
-		if(!type)
+		const double u = 2 * ul * i / ns - ul;
+		const double t = 2 * tl * i / ns - tl;
+		for(unsigned j = 0; j < 3; j++)
 		{
-			tensegrity.m_solver->m_state_new[index] = v;
+			tensegrity.m_solver->clear_state();
+			tensegrity.m_solver->m_state_new[j + 0] = u;
+			tensegrity.internal_force(fi);
+			fprintf(file, "%+.6e ", u);
+			for(unsigned k = 0; k < 6; k++) fprintf(file, "%+.6e ", fi[k]);
 		}
-		else
+		for(unsigned j = 0; j < 3; j++)
 		{
-			tensegrity.m_solver->m_state_new[3] = cos(v / 2);
-			tensegrity.m_solver->m_state_new[index + 4] = sin(v / 2);
+			tensegrity.m_solver->clear_state();
+			tensegrity.m_solver->m_state_new[3] = cos(t / 2);
+			tensegrity.m_solver->m_state_new[j + 4] = sin(t / 2);
+			tensegrity.internal_force(fi);
+			fprintf(file, "%+.6e ", u);
+			for(unsigned k = 0; k < 6; k++) fprintf(file, "%+.6e ", fi[k]);
 		}
-		fprintf(file, "%+.6e ", v);
-		tensegrity.internal_force(fi);
-		for(unsigned i = 0; i < 6; i++) fprintf(file, "%+.6e ", fi[i]);
 		fprintf(file, "\n");
 	}
 	//close
@@ -191,14 +206,13 @@ int main(int argc, char** argv)
 	//test
 	if(argc != 1)
 	{
-		const double a = atoi(argv[2]) == 0 ? 0.12 : M_PI / 3;
 		if(atoi(argv[1]) == 0)
 		{
-			energy(atoi(argv[2]), atoi(argv[3]), -a, a);
+			energy();
 		}
 		else
 		{
-			internal_force(atoi(argv[2]), atoi(argv[3]), -a, a);
+			internal_force();
 		}
 	}
 	//return
