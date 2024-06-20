@@ -29,14 +29,14 @@
 			"type": "shell",
 			"group": "build",
 			"label": "gnuplot",
-			"command": "gnuplot -p -e ${input:gnuplot} ${file}",
+			"command": "gnuplot -p -e ${input:gnuplot 1} -e ${input:gnuplot 2} ${file}",
 			"presentation": 
 			{
-				"echo": false,
+				"echo": true,
 				"clear": true,
 				"focus": true,
 				"panel": "dedicated",
-				"showReuseMessage": false,
+				"showReuseMessage": true
 			}
 		}
 	],
@@ -62,10 +62,16 @@
 			]
 		},
 		{
-			"id": "gnuplot",
-			"default": "index=1",
+			"id": "gnuplot 1",
+			"default": "index_1=1",
 			"type": "promptString",
-			"description": "gnuplot:"
+			"description": "gnuplot index 1:"
+		},
+		{
+			"id": "gnuplot 2",
+			"default": "index_2=1",
+			"type": "promptString",
+			"description": "gnuplot index 2:"
 		},
 	]
 }
