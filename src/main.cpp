@@ -62,7 +62,7 @@ static void energy(void)
 			tensegrity.m_solver->clear_state();
 			tensegrity.m_solver->m_state_new[3] = cos(t / 2);
 			tensegrity.m_solver->m_state_new[j + 4] = sin(t / 2);
-			fprintf(file, "%+.6e %+.6e ", u, tensegrity.internal_energy());
+			fprintf(file, "%+.6e %+.6e ", t, tensegrity.internal_energy());
 		}
 		fprintf(file, "\n");
 	}
@@ -238,7 +238,6 @@ static void load_vertical(void)
 			const double r = tensegrity.m_Rr * i / nr;
 			tensegrity.m_ak[0][0] = r * cos(t);
 			tensegrity.m_ak[0][1] = r * sin(t);
-			tensegrity.m_K0[5] = (r == 0) * 1.00e+03;
 			//solve
 			tensegrity.m_solver->solve();
 			if(!tensegrity.m_solver->m_equilibrium) return;
@@ -271,26 +270,6 @@ static void load_vertical(void)
 	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
 	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
 }
-
-void test_energy(void)
-{
-	//data
-	Tensegrity tensegrity;
-	//setup
-	tensegrity.m_nc = 3;
-	tensegrity.m_Ht = 3.20e-01;
-	tensegrity.m_Hc = 1.40e-01;
-	tensegrity.m_Rr = 1.40e-01;
-	tensegrity.m_Ec = 2.00e+11;
-	tensegrity.m_dc = 1.50e-03;
-	tensegrity.m_s0 = 0.00e+00;
-	//energy
-	const double t = 1e-5;
-	tensegrity.m_solver->m_state_new[3] = cos(t / 2);
-	tensegrity.m_solver->m_state_new[5] = sin(t / 2);
-	printf("U: %+.2e\n", tensegrity.internal_energy());
-}
-
 int main(int argc, char** argv)
 {
 	//test
@@ -307,7 +286,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		fun_test_stiffness();
+		load_vertical();
 	}
 	//return
 	return EXIT_SUCCESS;

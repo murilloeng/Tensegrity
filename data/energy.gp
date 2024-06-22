@@ -6,7 +6,6 @@ labels = "u_1 u_2 u_3 t_1 t_2 t_3"
 #setup
 set grid
 set key above
-set size ratio 1
 set format x '%.2f'
 set format y '%.2e'
 set ylabel "U" norotate
