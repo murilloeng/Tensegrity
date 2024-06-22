@@ -21,6 +21,17 @@
 					"ignoreFailures": true
 				}
 			]
+		},
+		{
+			"name": "(Windows) Launch",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/dist/x64/Debug/Tensegrity.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${fileDirname}",
+			"environment": [],
+			"console": "externalTerminal"
 		}
 	]
 }
