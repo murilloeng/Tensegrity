@@ -224,8 +224,8 @@ static void load_vertical(void)
 	tensegrity.m_solver->m_log = false;
 	tensegrity.m_solver->m_dl = 1.00e-02;
 	tensegrity.m_solver->m_step_max = 100;
+	tensegrity.m_pk.push_back({0, 0, -m * g});
 	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
-	tensegrity.m_pk.push_back([m, g] (double) { return math::vec3(0, 0, -m * g); });
 	double* state = (double*) alloca(7 * nr * nt * sizeof(double));
 	//loop
 	for(unsigned i = 1; i < nr; i++)

@@ -84,5 +84,5 @@ public:
 	math::mat3 m_J2;
 	math::vec3 m_zc;
 	std::vector<math::vec3> m_ak;
-	std::vector<std::function<math::vec3(double)>> m_pk;
+	std::vector<math::vec3> m_pk;
 };

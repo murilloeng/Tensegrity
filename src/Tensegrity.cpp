@@ -66,7 +66,7 @@ void Tensegrity::compute_energy(void)
 	const double t = s * T / ns;
 	for(unsigned i = 0; i < m_pk.size(); i++)
 	{
-		const math::vec3 f = m_pk[i](t);
+		const math::vec3 f = m_pk[i];
 		const math::vec3 b = zr + ur + qr.rotate(m_ak[i] - zr);
 		data[3 * s + 2] -= b.inner(f);
 	}
@@ -178,19 +178,13 @@ void Tensegrity::stiffness(math::matrix& K) const
 		K.span(3, 3) -= rk.spin() * (Kk * Ak + fk / lk * Bk) * rk.spin();
 	}
 	//external force
-	const double t = m_solver->m_step * m_solver->m_T / m_solver->m_step_max;
 	for(unsigned i = 0; i < m_pk.size(); i++)
 	{
 		//force
 		const math::vec3 ck = qr.rotate(m_ak[i] - zr);
-		const math::vec3 pk = m_solver->m_type ? m_pk[i](t) : m_solver->m_l_new * m_pk[i](0);
+		const math::vec3 pk = m_solver->m_l_new * m_pk[i];
 		//stiffness
 		K.span(3, 3) -= pk.spin() * ck.spin();
-	}
-	//stabilization
-	for(unsigned i = 0; i < 6; i++)
-	{
-		K(i, i) += m_K0[i];
 	}
 	//parametrization
 	const math::quat qr_old(m_solver->m_state_old + 3);
@@ -245,7 +239,7 @@ double Tensegrity::potential_energy(void) const
 	const math::vec3 zr(0, 0, m_Ht);
 	for(unsigned i = 0; i < m_pk.size(); i++)
 	{
-		V -= qr.rotate(m_ak[i] - zr).inner(m_pk[i](t));
+		V -= qr.rotate(m_ak[i] - zr).inner(m_pk[i]);
 	}
 	//return
 	return V;
@@ -298,17 +292,13 @@ void Tensegrity::external_force(math::vector& fe) const
 {
 	//data
 	fe.zeros();
-	const double T = m_solver->m_T;
-	const unsigned s = m_solver->m_step;
-	const unsigned ns = m_solver->m_step_max;
 	const math::quat qr(m_solver->m_state_new + 3);
 	//external force
-	const double t = s * T / ns;
 	const math::vec3 zr(0, 0, m_Ht);
 	for(unsigned i = 0; i < m_pk.size(); i++)
 	{
-		math::vec3(fe.data() + 0) += m_pk[i](t);
-		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i](t));
+		math::vec3(fe.data() + 0) += m_pk[i];
+		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i]);
 	}
 }
 
