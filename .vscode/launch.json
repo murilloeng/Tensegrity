@@ -8,11 +8,11 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/dist/debug/tensegrity.out",
 			"args": [],
-			"cwd": "${workspaceFolder}",
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
 			"MIMode": "gdb",
+			"environment": [],
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"cwd": "${workspaceFolder}",
 			"setupCommands":
 			[
 				{
@@ -23,14 +23,14 @@
 			]
 		},
 		{
-			"name": "(Windows) Launch",
+			"name": "VS",
 			"type": "cppvsdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/dist/x64/Debug/Tensegrity.exe",
 			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${fileDirname}",
 			"environment": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
 			"console": "externalTerminal"
 		}
 	]
