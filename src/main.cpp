@@ -228,7 +228,7 @@ static void load_vertical(void)
 	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
 	double* state = (double*) alloca(7 * nr * nt * sizeof(double));
 	//loop
-	for(unsigned i = 1; i < nr; i++)
+	for(unsigned i = 1; i <= nr; i++)
 	{
 		for(unsigned j = 0; j < nt; j++)
 		{
@@ -247,7 +247,7 @@ static void load_vertical(void)
 		}
 	}
 	//file
-	FILE* file = fopen("load_vertical.txt", "w");
+	FILE* file = fopen("data/load_vertical.txt", "w");
 	for(unsigned i = 0; i < nr; i++)
 	{
 		for(unsigned j = 0; j <= nt; j++)

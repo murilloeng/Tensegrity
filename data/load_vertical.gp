@@ -11,4 +11,4 @@ set format y '%.2f'
 set format cb '%.2e'
 set palette rgbformulae 33, 13, 10
 
-splot 'load_vertical.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index + 2)) notitle
+splot 'data/load_vertical.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index_1 + 2)) notitle
