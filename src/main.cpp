@@ -37,7 +37,7 @@ static void draw(const Tensegrity& tensegrity, int argc, char** argv)
 	//main loop
 	window.start();
 }
-static void energy(void)
+static void dof_energy(void)
 {
 	//data
 	Tensegrity tensegrity;
@@ -69,7 +69,7 @@ static void energy(void)
 	//close
 	fclose(file);
 }
-static void internal_force(void)
+static void dof_internal_force(void)
 {
 	//data
 	math::vector fi(6);
@@ -270,11 +270,12 @@ static void load_vertical(void)
 	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
 	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
 }
-static void load_moment(void)
+static void load_horizontal(void)
 {
 	//data
 	Tensegrity tensegrity;
 	const double m = 1.00e+01;
+	const double g = 9.81e+00;
 	using namespace std::chrono;
 	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 	//setup
@@ -283,7 +284,33 @@ static void load_moment(void)
 	tensegrity.m_solver->m_log = true;
 	tensegrity.m_solver->m_dl = 1.00e-02;
 	tensegrity.m_solver->m_step_max = 100;
-	tensegrity.m_mk.push_back({m, 0, 0});
+	tensegrity.m_solver->m_state_old[0] = 2.00e-02;
+	//loads
+	tensegrity.m_ak.push_back({0, 0, 0});
+	tensegrity.m_pk.push_back({m * g, 0, 0});
+	//solve
+	tensegrity.m_solver->solve();
+	//clock
+	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
+	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
+}
+static void load_moment(void)
+{
+	//data
+	Tensegrity tensegrity;
+	const double m = 1.00e+01;
+	const double g = 0.91e+00;
+	const double l = 1.00e+00;
+	using namespace std::chrono;
+	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
+	//setup
+	setup(tensegrity);
+	tensegrity.m_s0 = 1.00e+00;
+	tensegrity.m_solver->m_log = true;
+	tensegrity.m_solver->m_dl = 1.00e-02;
+	tensegrity.m_solver->m_step_max = 100;
+	//loads
+	tensegrity.m_mk.push_back({m * g * l, 0, 0});
 	//solve
 	tensegrity.m_solver->solve();
 	//clock
@@ -293,21 +320,7 @@ static void load_moment(void)
 int main(int argc, char** argv)
 {
 	//test
-	if(argc != 1)
-	{
-		if(atoi(argv[1]) == 0)
-		{
-			energy();
-		}
-		else
-		{
-			internal_force();
-		}
-	}
-	else
-	{
-		load_moment();
-	}
+	load_horizontal();
 	//return
 	return EXIT_SUCCESS;
 }
