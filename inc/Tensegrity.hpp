@@ -85,4 +85,5 @@ public:
 	math::vec3 m_zc;
 	std::vector<math::vec3> m_ak;
 	std::vector<math::vec3> m_pk;
+	std::vector<math::vec3> m_mk;
 };

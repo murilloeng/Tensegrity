@@ -161,7 +161,6 @@ void Tensegrity::stiffness(math::matrix& K) const
 		const double ek = log(ak);
 		const double hk = -1 / ak / ak;
 		//stress
-		const double b = 2;
 		const double sk = fmax(m_Ec * ek + m_s0, 0);
 		const double Ck = m_Ec * (m_Ec * ek + m_s0 >= 0);
 		//force
@@ -279,7 +278,6 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const double gk = 1 / ak;
 		const double ek = log(ak);
 		//stress
-		const double b = 2;
 		const double sk = fmax(m_Ec * ek + m_s0, 0);
 		//axial force
 		const double fk = sk * A * gk;
@@ -299,6 +297,10 @@ void Tensegrity::external_force(math::vector& fe) const
 	{
 		math::vec3(fe.data() + 0) += m_pk[i];
 		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i]);
+	}
+	for(unsigned i = 0; i < m_mk.size(); i++)
+	{
+		math::vec3(fe.data() + 3) += m_mk[i];
 	}
 }
 
