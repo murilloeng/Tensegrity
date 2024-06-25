@@ -13,3 +13,8 @@ set xlabel word(labels, index_1)
 
 #plot
 plot 'data/energy.txt' using (column(i1)) : (column(i2)) with lines linecolor rgb "#0000ff" notitle
+
+#plot
+set terminal pdf
+set output sprintf("data/energy-%s.pdf", word(labels, index_1))
+replot

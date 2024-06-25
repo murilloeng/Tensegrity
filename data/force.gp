@@ -20,3 +20,8 @@ min(a, b) = a < b ? a : b
 max(a, b) = a > b ? a : b
 set yrange [min(GPVAL_Y_MIN, -1) : max(GPVAL_Y_MAX, +1)]
 replot
+
+#plot
+set terminal pdf
+set output sprintf("data/force-%s-%s.pdf", word(labels_1, index_1), word(labels_2, index_2))
+replot

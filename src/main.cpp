@@ -98,7 +98,7 @@ static void dof_internal_force(void)
 			tensegrity.m_solver->m_state_new[3] = cos(t / 2);
 			tensegrity.m_solver->m_state_new[j + 4] = sin(t / 2);
 			tensegrity.internal_force(fi);
-			fprintf(file, "%+.6e ", u);
+			fprintf(file, "%+.6e ", t);
 			for(unsigned k = 0; k < 6; k++) fprintf(file, "%+.6e ", fi[k]);
 		}
 		fprintf(file, "\n");
