@@ -74,6 +74,7 @@ public:
 	double m_s0;
 	unsigned m_nc;
 	unsigned m_type;
+	unsigned m_mask;
 	char m_label[200];
 
 	Solver* m_solver;
