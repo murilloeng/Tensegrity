@@ -48,7 +48,6 @@ void Solver::setup(void)
 	m_step = 0;
 	m_l_new = m_l_old = 0;
 	if(m_type) m_tensegrity->compute_inertia();
-	m_tensegrity->m_mask = pow(2, m_tensegrity->m_nc + 1) - 1;
 	//memory
 	delete[] m_state_data;
 	delete[] m_cables_data;
