@@ -20,7 +20,7 @@
 //constructors
 Tensegrity::Tensegrity(void) : 
 	m_pr(4.00e+02), m_er(5.00e-02), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), m_br(2.00e-01), m_Rr(1.40e-01), 
-	m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0), m_s0(10), m_nc(3), m_type(0), m_mask(0), m_solver(new Solver(this))
+	m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0), m_s0(0), m_nc(3), m_type(0), m_solver(new Solver(this))
 {
 	sprintf(m_label, "Tensegrity");
 	memset(m_K0, 0, 6 * sizeof(double));
@@ -144,39 +144,37 @@ void Tensegrity::stiffness(math::matrix& K) const
 	//internal force
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
-		if(1 << i & m_mask)
-		{
-			//position
-			const math::vec3 z1 = position(i, 0, 0);
-			const math::vec3 z2 = position(i, 1, 0);
-			const math::vec3 x1 = position(i, 0, 1);
-			const math::vec3 x2 = position(i, 1, 1);
-			const math::vec3 rk = qr.rotate(z2 - zr);
-			const math::vec3 tk = (x2 - x1).normalize();
-			//lengths
-			const double Lk = (z2 - z1).norm();
-			const double lk = (x2 - x1).norm();
-			//stretch
-			const double ak = lk / Lk;
-			//strain
-			const double gk = 1 / ak;
-			const double ek = log(ak);
-			const double hk = -1 / ak / ak;
-			//stress
-			const double sk = m_Ec * ek + m_s0;
-			//force
-			const double fk = sk * A * gk;
-			const double Kk = A / Lk * (m_Ec * gk * gk + sk * hk);
-			//matrices
-			const math::mat3 Ak = tk.outer(tk);
-			const math::mat3 Bk = math::mat3::eye() - Ak;
-			//stiffness
-			K.span(0, 0) += Kk * Ak + fk / lk * Bk;
-			K.span(3, 3) += fk * tk.spin() * rk.spin();
-			K.span(0, 3) -= (Kk * Ak + fk / lk * Bk) * rk.spin();
-			K.span(3, 0) += rk.spin() * (Kk * Ak + fk / lk * Bk);
-			K.span(3, 3) -= rk.spin() * (Kk * Ak + fk / lk * Bk) * rk.spin();
-		}
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
+		const math::vec3 x1 = position(i, 0, 1);
+		const math::vec3 x2 = position(i, 1, 1);
+		const math::vec3 rk = qr.rotate(z2 - zr);
+		const math::vec3 tk = (x2 - x1).normalize();
+		//lengths
+		const double Lk = (z2 - z1).norm();
+		const double lk = (x2 - x1).norm();
+		//stretch
+		const double ak = lk / Lk;
+		//strain
+		const double gk = 1 / ak;
+		const double ek = log(ak);
+		const double hk = -1 / ak / ak;
+		//stress
+		const double sk = fmax(m_Ec * ek + m_s0, 0);
+		const double Ck = m_Ec * (m_Ec * ek + m_s0 > 0);
+		//force
+		const double fk = sk * A * gk;
+		const double Kk = A / Lk * (Ck * gk * gk + sk * hk);
+		//matrices
+		const math::mat3 Ak = tk.outer(tk);
+		const math::mat3 Bk = math::mat3::eye() - Ak;
+		//stiffness
+		K.span(0, 0) += Kk * Ak + fk / lk * Bk;
+		K.span(3, 3) += fk * tk.spin() * rk.spin();
+		K.span(0, 3) -= (Kk * Ak + fk / lk * Bk) * rk.spin();
+		K.span(3, 0) += rk.spin() * (Kk * Ak + fk / lk * Bk);
+		K.span(3, 3) -= rk.spin() * (Kk * Ak + fk / lk * Bk) * rk.spin();
 	}
 	//external force
 	for(unsigned i = 0; i < m_pk.size(); i++)
@@ -209,23 +207,20 @@ double Tensegrity::internal_energy(void) const
 	//internal energy
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
-		if(1 << i & m_mask)
-		{
-			//position
-			const math::vec3 z1 = position(i, 0, 0);
-			const math::vec3 z2 = position(i, 1, 0);
-			const math::vec3 x1 = position(i, 0, 1);
-			const math::vec3 x2 = position(i, 1, 1);
-			//lengths
-			const double Lk = (z2 - z1).norm();
-			const double lk = (x2 - x1).norm();
-			//stretch
-			const double ak = lk / Lk;
-			//strain
-			const double ek = log(ak) + m_s0 / m_Ec;
-			//energy
-			U += m_Ec * Ac * Lk / 2 * ek * ek;
-		}
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
+		const math::vec3 x1 = position(i, 0, 1);
+		const math::vec3 x2 = position(i, 1, 1);
+		//lengths
+		const double Lk = (z2 - z1).norm();
+		const double lk = (x2 - x1).norm();
+		//stretch
+		const double ak = lk / Lk;
+		//strain
+		const double ek = log(ak) + m_s0 / m_Ec;
+		//energy
+		U += m_Ec * Ac * Lk / 2 * ek * ek * (ek > 0);
 	}
 	//return
 	return U;
@@ -268,30 +263,27 @@ void Tensegrity::internal_force(math::vector& fi) const
 	//internal force
 	for(unsigned i = 0; i <= m_nc; i++)
 	{
-		if(1 << i & m_mask)
-		{
-			//position
-			const math::vec3 z1 = position(i, 0, 0);
-			const math::vec3 z2 = position(i, 1, 0);
-			const math::vec3 x1 = position(i, 0, 1);
-			const math::vec3 x2 = position(i, 1, 1);
-			const math::vec3 tk = (x2 - x1).normalize();
-			//lengths
-			const double Lk = (z2 - z1).norm();
-			const double lk = (x2 - x1).norm();
-			//stretch
-			const double ak = lk / Lk;
-			//strain
-			const double gk = 1 / ak;
-			const double ek = log(ak);
-			//stress
-			const double sk = m_Ec * ek + m_s0;
-			//axial force
-			const double fk = sk * A * gk;
-			//internal force
-			fi.span(0, 0, 3, 1) += fk * tk;
-			fi.span(3, 0, 3, 1) += qr.rotate(z2 - zr).cross(fk * tk);
-		}
+		//position
+		const math::vec3 z1 = position(i, 0, 0);
+		const math::vec3 z2 = position(i, 1, 0);
+		const math::vec3 x1 = position(i, 0, 1);
+		const math::vec3 x2 = position(i, 1, 1);
+		const math::vec3 tk = (x2 - x1).normalize();
+		//lengths
+		const double Lk = (z2 - z1).norm();
+		const double lk = (x2 - x1).norm();
+		//stretch
+		const double ak = lk / Lk;
+		//strain
+		const double gk = 1 / ak;
+		const double ek = log(ak);
+		//stress
+		const double sk = fmax(m_Ec * ek + m_s0, 0);
+		//axial force
+		const double fk = sk * A * gk;
+		//internal force
+		fi.span(0, 0, 3, 1) += fk * tk;
+		fi.span(3, 0, 3, 1) += qr.rotate(z2 - zr).cross(fk * tk);
 	}
 }
 void Tensegrity::external_force(math::vector& fe) const
