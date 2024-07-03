@@ -145,7 +145,6 @@ void Solver::update_state(void)
 }
 void Solver::solve_static(void)
 {
-	//loop
 	if(m_log) record();
 	for(m_step = 1; m_step <= m_step_max; m_step++)
 	{
