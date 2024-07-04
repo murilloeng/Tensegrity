@@ -5,8 +5,6 @@
 
 class Window : public QMainWindow
 {
-	Q_OBJECT
-
 public:
 	//constructor
 	Window(void);

@@ -24,9 +24,6 @@
     <ClInclude Include="inc\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="build\moc\Solver.cpp" />
-    <ClCompile Include="build\moc\Tensegrity.cpp" />
-    <ClCompile Include="build\moc\Window.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Solver.cpp" />
     <ClCompile Include="src\Tensegrity.cpp" />
@@ -149,7 +146,8 @@ copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>python pre-build.py</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -185,7 +183,8 @@ copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Release &gt; nul
 copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Release &gt; nul</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>python pre-build.py</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
