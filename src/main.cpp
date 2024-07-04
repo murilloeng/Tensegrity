@@ -14,8 +14,6 @@
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
-static Tensegrity test_tensegrity;
-
 static void setup(Tensegrity& tensegrity)
 {
 	tensegrity.m_nc = 3;
@@ -106,50 +104,55 @@ static void dof_internal_force(void)
 	//close
 	fclose(file);
 }
-static void fun_stiffness(double* K, const double* d)
+static void fun_stiffness(double* K, const double* d, void** args)
 {
 	//data
 	math::matrix Km(K, 6, 6);
 	const math::vec3 x(d + 0), t(d + 3);
-	const math::quat q(test_tensegrity.m_solver->m_state_old + 3);
+	Tensegrity* tensegrity = (Tensegrity*) args[0];
+	const math::quat q(tensegrity->m_solver->m_state_old + 3);
 	//state
-	math::vec3(test_tensegrity.m_solver->m_state_new + 0) = x;
-	math::quat(test_tensegrity.m_solver->m_state_new + 3) = q * t.quaternion();
+	math::vec3(tensegrity->m_solver->m_state_new + 0) = x;
+	math::quat(tensegrity->m_solver->m_state_new + 3) = q * t.quaternion();
 	//force
-	test_tensegrity.stiffness(Km);
+	tensegrity->stiffness(Km);
 }
-static void fun_internal_force(double* f, const double* d)
+static void fun_internal_force(double* f, const double* d, void** args)
 {
 	//data
 	math::vector fm(f, 6);
 	const math::vec3 x(d + 0), t(d + 3);
-	const math::quat q(test_tensegrity.m_solver->m_state_old + 3);
+	Tensegrity* tensegrity = (Tensegrity*) args[0];
+	const math::quat q(tensegrity->m_solver->m_state_old + 3);
 	//state
-	math::vec3(test_tensegrity.m_solver->m_state_new + 0) = x;
-	math::quat(test_tensegrity.m_solver->m_state_new + 3) = q * t.quaternion();
+	math::vec3(tensegrity->m_solver->m_state_new + 0) = x;
+	math::quat(tensegrity->m_solver->m_state_new + 3) = q * t.quaternion();
 	//force
-	test_tensegrity.internal_force(fm);
+	tensegrity->internal_force(fm);
 }
-static void fun_internal_energy(double* U, const double* d)
+static void fun_internal_energy(double* U, const double* d, void** args)
 {
 	//data
 	const math::vec3 x(d + 0), t(d + 3);
-	const math::quat q(test_tensegrity.m_solver->m_state_old + 3);
+	Tensegrity* tensegrity = (Tensegrity*) args[0];
+	const math::quat q(tensegrity->m_solver->m_state_old + 3);
 	//state
-	math::vec3(test_tensegrity.m_solver->m_state_new + 0) = x;
-	math::quat(test_tensegrity.m_solver->m_state_new + 3) = q * t.quaternion();
+	math::vec3(tensegrity->m_solver->m_state_new + 0) = x;
+	math::quat(tensegrity->m_solver->m_state_new + 3) = q * t.quaternion();
 	//force
-	U[0] = test_tensegrity.internal_energy();
+	U[0] = tensegrity->internal_energy();
 }
-static void fun_test_force(void)
+static void test_force(void)
 {
 	//data
+	math::quat q;
+	Tensegrity tensegrity;
 	const unsigned nt = 10000;
+	void* args[] = { &tensegrity };
 	math::vector d(6), fa(6), fn(6), fr(6);
 	//test
-	math::quat q;
-	srand(time(nullptr));
-	setup(test_tensegrity);
+	setup(tensegrity);
+	srand((unsigned) time(nullptr));
 	for(unsigned i = 0; i < nt; i++)
 	{
 		//setup
@@ -157,10 +160,10 @@ static void fun_test_force(void)
 		q.randu();
 		const math::vec3 t(d.data() + 3);
 		math::vector(q.data(), 4) = q.unit();
-		math::quat(test_tensegrity.m_solver->m_state_old + 3) = q;
+		math::quat(tensegrity.m_solver->m_state_old + 3) = q;
 		//functions
-		fun_internal_force(fa.data(), d.data());
-		math::ndiff(fun_internal_energy, fn.data(), d.data(), 1, 6, 1e-8);
+		fun_internal_force(fa.data(), d.data(), args);
+		math::ndiff(fun_internal_energy, fn.data(), d.data(), args, 1, 6, 1e-8);
 		math::vec3(fa.data() + 3) *= (q.rotation() * t.rotation_gradient()).transpose();
 		//residue
 		fr = fa - fn;
@@ -175,26 +178,28 @@ static void fun_test_force(void)
 		}
 	}
 }
-static void fun_test_stiffness(void)
+static void test_stiffness(void)
 {
 	//data
+	math::quat q;
 	math::vector d(6);
+	Tensegrity tensegrity;
 	const unsigned nt = 10000;
+	void* args[] = { &tensegrity };
 	math::matrix Ka(6, 6), Kn(6, 6), Kr(6, 6);
 	//test
-	math::quat q;
-	srand(time(nullptr));
-	setup(test_tensegrity);
+	setup(tensegrity);
+	srand((unsigned) time(nullptr));
 	for(unsigned i = 0; i < nt; i++)
 	{
 		//setup
 		d.randu();
 		q.randu();
 		math::vector(q.data(), 4) = q.unit();
-		math::quat(test_tensegrity.m_solver->m_state_old + 3) = q;
+		math::quat(tensegrity.m_solver->m_state_old + 3) = q;
 		//functions
-		fun_stiffness(Ka.data(), d.data());
-		math::ndiff(fun_internal_force, Kn.data(), d.data(), 6, 6, 1e-8);
+		fun_stiffness(Ka.data(), d.data(), args);
+		math::ndiff(fun_internal_force, Kn.data(), d.data(), args, 6, 6, 1e-8);
 		//residue
 		Kr = Ka - Kn;
 		if(Kr.norm() < 1e-5 * fmax(Ka.norm(), 1))
@@ -273,7 +278,7 @@ static void load_vertical(void)
 int main(int argc, char** argv)
 {
 	//test
-	load_vertical();
+	test_force();
 	//return
 	return EXIT_SUCCESS;
 }
