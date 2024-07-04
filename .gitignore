@@ -10,4 +10,4 @@
 !*.vcxproj
 !.gitignore
 !.vscode/*.json
-build/moc/*.cpp
+build/uic/*.hpp

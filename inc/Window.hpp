@@ -3,6 +3,14 @@
 //qt
 #include <QtWidgets/QMainWindow>
 
+//tensegrity
+#include "Tensegrity/inc/Tensegrity.hpp"
+
+namespace Ui
+{
+	class Window;
+}
+
 class Window : public QMainWindow
 {
 public:
@@ -11,4 +19,8 @@ public:
 
 	//destructor
 	~Window(void);
+
+	//data
+	Ui::Window* m_ui;
+	Tensegrity m_tensegrity;
 };

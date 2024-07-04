@@ -37,9 +37,9 @@ void Tensegrity::draw_model(canvas::Scene* scene) const
 {
 	draw_model_disks(scene);
 	draw_model_links(scene);
-	draw_model_latex(scene);
+	// draw_model_latex(scene);
 	draw_model_cables(scene);
-	draw_model_guides(scene);
+	// draw_model_guides(scene);
 	scene->background({1, 1, 1, 1});
 	scene->camera().rotation({float(M_PI), 0, 0});
 }

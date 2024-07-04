@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\Canvas.hpp" />
     <ClInclude Include="inc\Solver.hpp" />
     <ClInclude Include="inc\Tensegrity.hpp" />
     <ClInclude Include="inc\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Solver.cpp" />
     <ClCompile Include="src\Tensegrity.cpp" />
@@ -146,8 +148,7 @@ copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>python pre-build.py</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -183,8 +184,7 @@ copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Release &gt; nul
 copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Release &gt; nul</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>python pre-build.py</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
