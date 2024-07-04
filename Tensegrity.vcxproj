@@ -21,11 +21,16 @@
   <ItemGroup>
     <ClInclude Include="inc\Solver.hpp" />
     <ClInclude Include="inc\Tensegrity.hpp" />
+    <ClInclude Include="inc\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="build\moc\Solver.cpp" />
+    <ClCompile Include="build\moc\Tensegrity.cpp" />
+    <ClCompile Include="build\moc\Window.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Solver.cpp" />
     <ClCompile Include="src\Tensegrity.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -121,12 +126,17 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..;../external/cpp/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../external/cpp/inc;C:\Qt\6.7.0\msvc2019_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus
+ %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;dist/x64/Debug/Math.lib;dist/x64/Debug/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6Gui.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6Core.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6Widgets.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6OpenGL.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6OpenGLWidgets.lib;dist/x64/Debug/Math.lib;dist/x64/Debug/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4204 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll dist\x64\Debug &gt; nul
@@ -138,6 +148,9 @@ copy ..\external\cpp\dll\x64\libgfortran-3.dll dist\x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Debug &gt; nul
 copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python pre-build.py</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -147,14 +160,19 @@ copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..;../external/cpp/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../external/cpp/inc;C:\Qt\6.7.0\msvc2019_64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:__cplusplus
+ %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;dist/x64/Release/Math.lib;dist/x64/Release/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6Gui.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6Core.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6Widgets.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6OpenGL.lib;C:\Qt\6.7.0\msvc2019_64\lib\Qt6OpenGLWidgets.lib;dist/x64/Release/Math.lib;dist/x64/Release/Canvas.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freeglut.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4204 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\external\cpp\dll\x64\libblas.dll dist\x64\Release &gt; nul
@@ -166,6 +184,9 @@ copy ..\external\cpp\dll\x64\libgfortran-3.dll dist\x64\Release &gt; nul
 copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Release &gt; nul
 copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Release &gt; nul</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python pre-build.py</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

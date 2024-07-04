@@ -7,11 +7,15 @@
 //math
 #include "Math/inc/misc/misc.hpp"
 
+//qt
+#include <QtWidgets/QApplication>
+
 //canvas
 #include "Canvas/inc/Windows/Glut.hpp"
 
 //Tensegrity
 #include "Tensegrity/inc/Solver.hpp"
+#include "Tensegrity/inc/Window.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
 static void setup(Tensegrity& tensegrity)
@@ -23,6 +27,19 @@ static void setup(Tensegrity& tensegrity)
 	tensegrity.m_Ec = 2.00e+11;
 	tensegrity.m_dc = 1.50e-03;
 	tensegrity.m_s0 = 0.00e+00;
+}
+static void window(int argc, char** argv)
+{
+	//data
+	Tensegrity tensegrity;
+	QApplication application(argc, argv);
+	//setup
+	setup(tensegrity);
+	//window
+	Window window;
+	window.showMaximized();
+	//application
+	application.exec();
 }
 static void draw(const Tensegrity& tensegrity, int argc, char** argv)
 {
@@ -278,7 +295,7 @@ static void load_vertical(void)
 int main(int argc, char** argv)
 {
 	//test
-	test_force();
+	window(argc, argv);
 	//return
 	return EXIT_SUCCESS;
 }

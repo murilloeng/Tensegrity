@@ -2,6 +2,7 @@
 !*/
 !*.md
 !*.gp
+!*.py
 !*.cpp
 !*.hpp
 !*.sln
@@ -9,3 +10,4 @@
 !*.vcxproj
 !.gitignore
 !.vscode/*.json
+build/moc/*.cpp
