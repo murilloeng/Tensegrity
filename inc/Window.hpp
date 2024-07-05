@@ -20,6 +20,16 @@ public:
 	//destructor
 	~Window(void);
 
+private:
+	//setup
+	void setup(void);
+	void connect(void);
+
+private slots:
+	//slots
+	void slot_edit_model(void);
+
+public:
 	//data
 	Ui::Window* m_ui;
 	Tensegrity m_tensegrity;

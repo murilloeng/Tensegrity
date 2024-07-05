@@ -26,7 +26,7 @@ static void setup(Tensegrity& tensegrity)
 	tensegrity.m_Rr = 1.40e-01;
 	tensegrity.m_Ec = 2.00e+11;
 	tensegrity.m_dc = 1.50e-03;
-	tensegrity.m_s0 = 0.00e+00;
+	tensegrity.m_sr = 0.00e+00;
 }
 static void window(int argc, char** argv)
 {
@@ -34,7 +34,7 @@ static void window(int argc, char** argv)
 	QApplication application(argc, argv);
 	//window
 	Window window;
-	window.showMaximized();
+	window.show();
 	//start
 	application.exec();
 }
@@ -239,7 +239,7 @@ static void load_vertical(void)
 	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 	//setup
 	setup(tensegrity);
-	tensegrity.m_s0 = 1.00e+08;
+	tensegrity.m_sr = 1.00e+08;
 	tensegrity.m_solver->m_log = false;
 	tensegrity.m_solver->m_dl = 1.00e-02;
 	tensegrity.m_solver->m_step_max = 100;

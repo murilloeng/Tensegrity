@@ -72,7 +72,7 @@ public:
 	double m_Ec;
 	double m_dc;
 	double m_q0;
-	double m_s0;
+	double m_sr;
 	unsigned m_nc;
 	unsigned m_type;
 	char m_label[200];

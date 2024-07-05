@@ -20,7 +20,7 @@
 //constructors
 Tensegrity::Tensegrity(void) : 
 	m_pr(4.00e+02), m_er(5.00e-02), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), m_br(2.00e-01), m_Rr(1.40e-01), 
-	m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0), m_s0(0), m_nc(3), m_type(0), m_solver(new Solver(this))
+	m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0), m_sr(0), m_nc(3), m_type(0), m_solver(new Solver(this))
 {
 	sprintf(m_label, "Tensegrity");
 	memset(m_K0, 0, 6 * sizeof(double));
@@ -169,8 +169,8 @@ void Tensegrity::stiffness(math::matrix& K) const
 		const double ek = log(ak);
 		const double hk = -1 / ak / ak;
 		//stress
-		const double sk = fmax(m_Ec * ek + m_s0, 0);
-		const double Ck = m_Ec * (m_Ec * ek + m_s0 > 0);
+		const double sk = fmax(m_Ec * ek + m_sr, 0);
+		const double Ck = m_Ec * (m_Ec * ek + m_sr > 0);
 		//force
 		const double fk = sk * A * gk;
 		const double Kk = A / Lk * (Ck * gk * gk + sk * hk);
@@ -226,7 +226,7 @@ double Tensegrity::internal_energy(void) const
 		//stretch
 		const double ak = lk / Lk;
 		//strain
-		const double ek = log(ak) + m_s0 / m_Ec;
+		const double ek = log(ak) + m_sr / m_Ec;
 		//energy
 		U += m_Ec * Ac * Lk / 2 * ek * ek * (ek > 0);
 	}
@@ -286,7 +286,7 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const double gk = 1 / ak;
 		const double ek = log(ak);
 		//stress
-		const double sk = fmax(m_Ec * ek + m_s0, 0);
+		const double sk = fmax(m_Ec * ek + m_sr, 0);
 		//axial force
 		const double fk = sk * A * gk;
 		//internal force
