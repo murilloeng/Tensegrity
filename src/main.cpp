@@ -30,15 +30,12 @@ static void setup(Tensegrity& tensegrity)
 }
 static void window(int argc, char** argv)
 {
-	//data
-	Tensegrity tensegrity;
+	//application
 	QApplication application(argc, argv);
-	//setup
-	setup(tensegrity);
 	//window
 	Window window;
 	window.showMaximized();
-	//application
+	//start
 	application.exec();
 }
 static void draw(const Tensegrity& tensegrity, int argc, char** argv)

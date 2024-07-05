@@ -35,11 +35,19 @@ Tensegrity::~Tensegrity(void)
 //draw
 void Tensegrity::draw_model(canvas::Scene* scene) const
 {
-	draw_model_disks(scene);
-	draw_model_links(scene);
-	// draw_model_latex(scene);
-	draw_model_cables(scene);
-	// draw_model_guides(scene);
+	draw_disks(scene);
+	draw_links(scene);
+	draw_latex(scene);
+	draw_cables(scene);
+	draw_guides(scene);
+	scene->background({1, 1, 1, 1});
+	scene->camera().rotation({float(M_PI), 0, 0});
+}
+void Tensegrity::draw_configuration(canvas::Scene* scene) const
+{
+	draw_disks(scene, true);
+	draw_links(scene, true);
+	draw_cables(scene, true);
 	scene->background({1, 1, 1, 1});
 	scene->camera().rotation({float(M_PI), 0, 0});
 }
@@ -305,7 +313,7 @@ void Tensegrity::external_force(math::vector& fe) const
 }
 
 //draw
-void Tensegrity::draw_model_disks(canvas::Scene* scene) const
+void Tensegrity::draw_disks(canvas::Scene* scene, bool state) const
 {
 	//data
 	const float tr = float(m_tr);
@@ -328,7 +336,7 @@ void Tensegrity::draw_model_disks(canvas::Scene* scene) const
 	scene->add_object(disk_1);
 	scene->add_object(disk_2);
 }
-void Tensegrity::draw_model_links(canvas::Scene* scene) const
+void Tensegrity::draw_links(canvas::Scene* scene, bool state) const
 {
 	//data
 	const float tl = float(m_tl);
@@ -366,7 +374,7 @@ void Tensegrity::draw_model_links(canvas::Scene* scene) const
 	scene->add_object(link_3);
 	scene->add_object(link_4);
 }
-void Tensegrity::draw_model_latex(canvas::Scene* scene) const
+void Tensegrity::draw_latex(canvas::Scene* scene, bool state) const
 {
 	//data
 	const float tl = float(m_tl);
@@ -399,7 +407,7 @@ void Tensegrity::draw_model_latex(canvas::Scene* scene) const
 	latex[4]->shift({er + tl + tl / 2, 0, Hr - Hc / 2});
 	latex[3]->shift({-Rr - tl, 0, Ht - Hr / 2 + tl / 4});
 }
-void Tensegrity::draw_model_cables(canvas::Scene* scene) const
+void Tensegrity::draw_cables(canvas::Scene* scene, bool state) const
 {
 	//data
 	const float tl = float(m_tl);
@@ -425,7 +433,7 @@ void Tensegrity::draw_model_cables(canvas::Scene* scene) const
 		scene->add_object(cable);
 	}
 }
-void Tensegrity::draw_model_guides(canvas::Scene* scene) const
+void Tensegrity::draw_guides(canvas::Scene* scene, bool state) const
 {
 	//data
 	const float tl = float(m_tl);

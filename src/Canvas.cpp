@@ -40,7 +40,7 @@ void Canvas::initializeGL(void)
 	glLineWidth(2);
 	m_scene = new ::canvas::Scene("../Canvas/shd/");
 	//tensegrity
-	m_tensegrity->draw_model(m_scene);
+	m_tensegrity->draw_configuration(m_scene);
 	m_scene->update(true);
 }
 

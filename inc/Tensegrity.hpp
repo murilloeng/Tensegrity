@@ -24,6 +24,7 @@ public:
 
 	//draw
 	void draw_model(canvas::Scene*) const;
+	void draw_configuration(canvas::Scene*) const;
 
 	//formulation
 	void inertia(math::matrix&) const;
@@ -48,11 +49,11 @@ private:
 	void compute_acceleration(void);
 
 	//draw
-	void draw_model_disks(canvas::Scene*) const;
-	void draw_model_links(canvas::Scene*) const;
-	void draw_model_latex(canvas::Scene*) const;
-	void draw_model_cables(canvas::Scene*) const;
-	void draw_model_guides(canvas::Scene*) const;
+	void draw_disks(canvas::Scene*, bool = false) const;
+	void draw_links(canvas::Scene*, bool = false) const;
+	void draw_latex(canvas::Scene*, bool = false) const;
+	void draw_cables(canvas::Scene*, bool = false) const;
+	void draw_guides(canvas::Scene*, bool = false) const;
 
 	//position
 	math::vec3 position(unsigned, bool, bool) const;
