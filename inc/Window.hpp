@@ -25,7 +25,7 @@ private:
 	void setup(void);
 	void connect(void);
 
-private slots:
+private:
 	//slots
 	void slot_edit_model(void);
 	void slot_edit_state(void);
