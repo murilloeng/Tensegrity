@@ -28,6 +28,7 @@ private:
 private slots:
 	//slots
 	void slot_edit_model(void);
+	void slot_edit_state(void);
 
 public:
 	//data

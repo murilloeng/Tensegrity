@@ -59,6 +59,12 @@ void Window::connect(void)
 	QObject::connect(m_ui->edit_model_dc, &QLineEdit::editingFinished, this, &Window::slot_edit_model);
 	QObject::connect(m_ui->edit_model_Ec, &QLineEdit::editingFinished, this, &Window::slot_edit_model);
 	QObject::connect(m_ui->edit_model_sr, &QLineEdit::editingFinished, this, &Window::slot_edit_model);
+	QObject::connect(m_ui->edit_state_u1, &QLineEdit::editingFinished, this, &Window::slot_edit_state);
+	QObject::connect(m_ui->edit_state_u2, &QLineEdit::editingFinished, this, &Window::slot_edit_state);
+	QObject::connect(m_ui->edit_state_u3, &QLineEdit::editingFinished, this, &Window::slot_edit_state);
+	QObject::connect(m_ui->edit_state_t1, &QLineEdit::editingFinished, this, &Window::slot_edit_state);
+	QObject::connect(m_ui->edit_state_t2, &QLineEdit::editingFinished, this, &Window::slot_edit_state);
+	QObject::connect(m_ui->edit_state_t3, &QLineEdit::editingFinished, this, &Window::slot_edit_state);
 }
 
 //slots
@@ -91,5 +97,42 @@ void Window::slot_edit_model(void)
 				edits[i]->setText(QString::asprintf("%+.2e", r));
 			}
 		}
+	}
+}
+void Window::slot_edit_state(void)
+{
+	bool test = false;
+	math::vector fi(6);
+	QLineEdit* edits[] = {
+		m_ui->edit_state_u1, m_ui->edit_state_u2, m_ui->edit_state_u3,
+		m_ui->edit_state_t1, m_ui->edit_state_t2, m_ui->edit_state_t3
+	};
+	for(unsigned i = 0; i < sizeof(edits) / sizeof(QLineEdit*); i++)
+	{
+		if(QObject::sender() == edits[i])
+		{
+			const double r = m_tensegrity.m_solver->m_dx[i];
+			const double v = edits[i]->text().toDouble(&test);
+			if(test)
+			{
+				m_tensegrity.m_solver->m_dx[i] = v;
+				edits[i]->setText(QString::asprintf("%+.4e", v));
+			}
+			else
+			{
+				edits[i]->setText(QString::asprintf("%+.4e", r));
+			}
+		}
+	}
+	if(test)
+	{
+		m_tensegrity.m_solver->update_state();
+		m_tensegrity.internal_force(fi);
+		m_ui->value_force_f1->setText(QString::asprintf("%+.4e", fi[0]));
+		m_ui->value_force_f2->setText(QString::asprintf("%+.4e", fi[1]));
+		m_ui->value_force_f3->setText(QString::asprintf("%+.4e", fi[2]));
+		m_ui->value_force_m1->setText(QString::asprintf("%+.4e", fi[3]));
+		m_ui->value_force_m2->setText(QString::asprintf("%+.4e", fi[4]));
+		m_ui->value_force_m3->setText(QString::asprintf("%+.4e", fi[5]));
 	}
 }
