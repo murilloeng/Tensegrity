@@ -20,7 +20,7 @@
 
 static void setup(Tensegrity& tensegrity)
 {
-	tensegrity.m_nc = 4;
+	tensegrity.m_nc = 3;
 	tensegrity.m_Ht = 3.20e-01;
 	tensegrity.m_Hc = 1.40e-01;
 	tensegrity.m_Rr = 1.40e-01;
@@ -294,16 +294,16 @@ static void load_vertical_test(void)
 	//data
 	Tensegrity tensegrity;
 	const unsigned nr = 100;
-	const unsigned nt = 100;
-	const double m = 1.00e+00;
+	const unsigned nt = 300;
+	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	using namespace std::chrono;
 	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
 	//setup
 	setup(tensegrity);
+	double* state = new double[6 * nr * nt];
 	tensegrity.m_pk.push_back({0, 0, -m * g});
 	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
-	double* state = (double*) alloca(6 * nr * nt * sizeof(double));
 	//loop
 	for(unsigned i = 0; i < nr; i++)
 	{
@@ -343,6 +343,8 @@ static void load_vertical_test(void)
 	//clock
 	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
 	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
+	//delete
+	delete[] state;
 }
 int main(int argc, char** argv)
 {
