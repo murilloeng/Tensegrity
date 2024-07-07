@@ -319,7 +319,7 @@ static void load_vertical_test(void)
 			tensegrity.m_solver->solve_static_test();
 			if(!tensegrity.m_solver->m_equilibrium) return;
 			//save
-			printf("i: %02d j: %02d r: %+.2e t: %+.2e\n", i, j, r, t * 180 / M_PI);
+			printf("i: %02d j: %03d r: %+.2e t: %+.2e\n", i, j, r, t * 180 / M_PI);
 			memcpy(state + 6 * (nt * i + j), tensegrity.m_solver->m_dx.data(), 6 * sizeof(double));
 		}
 	}
