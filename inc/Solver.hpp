@@ -47,7 +47,10 @@ public:
 	void solve_static(void);
 	void solve_dynamic(void);
 
+	void solve_static_test(void);
+
 	//formulation
+	void compute_residue(void);
 	void compute_load_predictor(void);
 	void compute_load_corrector(void);
 

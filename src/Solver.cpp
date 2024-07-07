@@ -1,12 +1,30 @@
 //std
 #include <cmath>
+#include <functional>
 
 //math
-#include "Math/inc/misc/misc.hpp"
+#include "Math/inc/solvers/bisection.hpp"
 
 //tensegrity
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
+
+double bisection(double s, void** args)
+{
+	//data
+	Solver* solver = (Solver*) args[0];
+	const double dxr = *(double*) args[1];
+	const unsigned index = *(unsigned*) args[2];
+	//state
+	solver->m_dx[index] = dxr + s;
+	//residue
+	solver->update_state();
+	solver->m_tensegrity->internal_force(solver->m_fi);
+	solver->m_tensegrity->external_force(solver->m_fe);
+	solver->m_r = solver->m_fe - solver->m_fi;
+	//return
+	return solver->m_r[index];
+}
 
 //constructors
 Solver::Solver(Tensegrity* tensegrity) : m_log(true), 
@@ -47,6 +65,7 @@ void Solver::setup(void)
 	//setup
 	m_step = 0;
 	m_l_new = m_l_old = 0;
+	m_equilibrium = false;
 	if(m_type) m_tensegrity->compute_inertia();
 	//memory
 	delete[] m_state_data;
@@ -197,7 +216,63 @@ void Solver::solve_dynamic(void)
 	return;
 }
 
+void Solver::solve_static_test(void)
+{
+	//setup
+	setup();
+	m_dx.zeros();
+	update_state();
+	m_tensegrity->internal_force(m_fi);
+	m_tensegrity->external_force(m_fe);
+	//data
+	double dxr;
+	unsigned index = 0;
+	math::bisection solver;
+	const double fr = m_fe.norm();
+	void* args[] = {this, &dxr, &index};
+	//solver
+	m_r = m_fe - m_fi;
+	solver.m_system = bisection;
+	solver.m_tolerance = 1e-5 * fr;
+	//loop
+	for(m_iteration = 0; m_iteration < m_iteration_max; m_iteration++)
+	{
+		if(fabs(m_r[index]) > solver.m_tolerance)
+		{
+			dxr = m_dx[index];
+			solver.m_x1 = solver.m_x2 = 0;
+			m_tensegrity->stiffness(m_Kt);
+			double f1 = bisection(solver.m_x1, args);
+			double f2 = bisection(solver.m_x2, args);
+			double ds = m_r[index] / m_Kt[7 * index];
+			while(f1 * f2 > 0)
+			{
+				solver.m_x2 += ds;
+				f2 = bisection(solver.m_x2, args);
+			}
+			if(!solver.solve(args))
+			{
+				return;
+			}
+			m_dx[index] = dxr + solver.m_xs;
+			if(m_r.max(true) < solver.m_tolerance) break;
+		}
+		index = (index + 1) % 6;
+	}
+	m_equilibrium = true;
+}
+
 //formulation
+void Solver::compute_residue(void)
+{
+	//state
+	update_state();
+	m_tensegrity->stiffness(m_Kt);
+	m_tensegrity->internal_force(m_fi);
+	m_tensegrity->external_force(m_fe);
+	//residue
+	m_r = m_fe - m_fi;
+}
 void Solver::compute_load_predictor(void)
 {
 	return;

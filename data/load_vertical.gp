@@ -5,7 +5,6 @@ set grid
 set view map
 set key above
 unset surface
-set terminal x11
 set xlabel "x_1"
 set ylabel "x_2"
 set size ratio 1
@@ -15,4 +14,4 @@ set format cb '%.2e'
 set title word(labels, index_1)
 set palette rgbformulae 33, 13, 10
 
-splot 'data/load_vertical.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index_1 + 2)) notitle
+splot 'data/load_vertical_test.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index_1 + 2)) notitle

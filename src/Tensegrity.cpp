@@ -170,7 +170,7 @@ void Tensegrity::stiffness(math::matrix& K) const
 		const double hk = -1 / ak / ak;
 		//stress
 		const double sk = fmax(m_Ec * ek + m_sr, 0);
-		const double Ck = m_Ec * (m_Ec * ek + m_sr > 0);
+		const double Ck = m_Ec * (m_Ec * ek + m_sr >= 0);
 		//force
 		const double fk = sk * A * gk;
 		const double Kk = A / Lk * (Ck * gk * gk + sk * hk);
