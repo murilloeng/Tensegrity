@@ -14,4 +14,4 @@ set format cb '%.2e'
 set title word(labels, index_1)
 set palette rgbformulae 33, 13, 10
 
-splot 'data/load_vertical_test.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index_1 + 2)) notitle
+splot 'data/load_vertical.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index_1 + 2)) notitle

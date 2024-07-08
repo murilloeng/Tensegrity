@@ -164,64 +164,8 @@ void Solver::update_state(void)
 }
 void Solver::solve_static(void)
 {
-	if(m_log) record();
-	for(m_step = 1; m_step <= m_step_max; m_step++)
-	{
-		//setup
-		m_tensegrity->stiffness(m_Kt);
-		m_tensegrity->external_force(m_fe);
-		//predictor
-		m_Kt.solve(m_dxt, m_fe);
-		compute_load_predictor();
-		m_dx = m_dl * m_dxt;
-		//corrector
-		update_state();
-		m_equilibrium = false;
-		m_l_new = m_l_old + m_dl;
-		for(m_iteration = 0; m_iteration < m_iteration_max; m_iteration++)
-		{
-			m_tensegrity->stiffness(m_Kt);
-			m_tensegrity->internal_force(m_fi);
-			m_tensegrity->external_force(m_fe);
-			m_r = m_l_new * m_fe - m_fi;
-			if(m_r.norm() < 1e-5 * m_fe.norm())
-			{
-				if(m_log)
-				{
-					record();
-					printf("step: %04d iterations: %04d load: %+.2e\n", m_step, m_iteration, m_l_new);
-				}
-				update();
-				m_equilibrium = true;
-				break;
-			}
-			m_Kt.solve(m_ddxr, m_r);
-			m_Kt.solve(m_ddxt, m_fe);
-			compute_load_corrector();
-			m_dl += m_ddl;
-			m_dx += m_ddxr + m_ddl * m_ddxt;
-			update_state();
-			m_l_new = m_l_old + m_dl;
-		}
-		if(!m_equilibrium)
-		{
-			printf("Iterations failed!\n");
-			return;
-		}
-	}
-	if(m_log) finish();
-}
-void Solver::solve_dynamic(void)
-{
-	return;
-}
-
-void Solver::solve_static_test(void)
-{
 	//setup
-	setup();
 	m_dx.zeros();
-	update_state();
 	m_tensegrity->internal_force(m_fi);
 	m_tensegrity->external_force(m_fe);
 	//data
@@ -260,6 +204,10 @@ void Solver::solve_static_test(void)
 		index = (index + 1) % 6;
 	}
 	m_equilibrium = true;
+}
+void Solver::solve_dynamic(void)
+{
+	return;
 }
 
 //formulation

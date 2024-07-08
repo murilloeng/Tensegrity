@@ -233,70 +233,8 @@ static void load_vertical(void)
 	//data
 	Tensegrity tensegrity;
 	const unsigned nr = 100;
-	const unsigned nt = 100;
-	const double m = 1.00e+01;
-	const double g = 9.81e+00;
-	using namespace std::chrono;
-	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
-	//setup
-	setup(tensegrity);
-	tensegrity.m_sr = 1.00e+08;
-	tensegrity.m_solver->m_log = false;
-	tensegrity.m_solver->m_dl = 1.00e-02;
-	tensegrity.m_solver->m_step_max = 100;
-	tensegrity.m_pk.push_back({0, 0, -m * g});
-	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
-	double* state = (double*) alloca(7 * nr * nt * sizeof(double));
-	//loop
-	for(unsigned i = 0; i < nr; i++)
-	{
-		for(unsigned j = 0; j < nt; j++)
-		{
-			//setup
-			tensegrity.m_solver->clear_state();
-			const double t = 2 * M_PI * j / nt;
-			const double r = tensegrity.m_Rr * (i + 1) / nr;
-			tensegrity.m_ak[0][0] = r * cos(t);
-			tensegrity.m_ak[0][1] = r * sin(t);
-			//solve
-			tensegrity.m_solver->solve();
-			if(!tensegrity.m_solver->m_equilibrium) return;
-			//save
-			printf("i: %02d j: %02d r: %+.2e t: %+.2e\n", i, j, r, t * 180 / M_PI);
-			memcpy(state + 7 * (nt * i + j), tensegrity.m_solver->m_state_new, 7 * sizeof(double));
-		}
-	}
-	//file
-	FILE* file = fopen("data/load_vertical.txt", "w");
-	for(unsigned i = 0; i < nr; i++)
-	{
-		for(unsigned j = 0; j <= nt; j++)
-		{
-			//data
-			const double t = 2 * M_PI * j / nt;
-			const double r = tensegrity.m_Rr * i / nr;
-			const math::vec3 u = math::vec3(state + 7 * (nt * i + j % nt) + 0);
-			const math::vec3 v = math::quat(state + 7 * (nt * i + j % nt) + 3).pseudo();
-			//write
-			fprintf(file, "%+.6e %+.6e ", r, t);
-			for(unsigned k = 0; k < 3; k++) fprintf(file, "%+.6e ", u[k]);
-			for(unsigned k = 0; k < 3; k++) fprintf(file, "%+.6e ", v[k]);
-			fprintf(file, "\n");
-		}
-		fprintf(file, "\n");
-	}
-	fclose(file);
-	//clock
-	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
-	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
-}
-static void load_vertical_test(void)
-{
-	//data
-	Tensegrity tensegrity;
-	const unsigned nr = 100;
 	const unsigned nt = 300;
-	const double m = 1.00e+01;
+	const double m = 3.00e+01;
 	const double g = 9.81e+00;
 	using namespace std::chrono;
 	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
@@ -317,7 +255,7 @@ static void load_vertical_test(void)
 			tensegrity.m_ak[0][0] = r * cos(t);
 			tensegrity.m_ak[0][1] = r * sin(t);
 			//solve
-			tensegrity.m_solver->solve_static_test();
+			tensegrity.m_solver->solve();
 			if(!tensegrity.m_solver->m_equilibrium) return;
 			//save
 			printf("i: %02d j: %03d r: %+.2e t: %+.2e\n", i, j, r, t * 180 / M_PI);
@@ -325,7 +263,7 @@ static void load_vertical_test(void)
 		}
 	}
 	//file
-	FILE* file = fopen("data/load_vertical_test.txt", "w");
+	FILE* file = fopen("data/load_vertical.txt", "w");
 	for(unsigned i = 0; i < nr; i++)
 	{
 		for(unsigned j = 0; j <= nt; j++)
@@ -350,8 +288,8 @@ static void load_vertical_test(void)
 int main(int argc, char** argv)
 {
 	//test
+	load_vertical();
 	// window(argc, argv);
-	load_vertical_test();
 	//return
 	return EXIT_SUCCESS;
 }
