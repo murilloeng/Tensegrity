@@ -285,10 +285,38 @@ static void load_vertical(void)
 	//delete
 	delete[] state;
 }
+static void load_increment(void)
+{
+	//data
+	Tensegrity tensegrity;
+	const unsigned n = 100;
+	const double m = 8.00e+01;
+	const double g = 9.81e+00;
+	//setup
+	setup(tensegrity);
+	tensegrity.m_pk.push_back({0, 0, 0});
+	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
+
+	const double d = tensegrity.m_dc;
+	const double s = tensegrity.m_sy;
+	printf("load limit: %+.2e\n", M_PI * d * d / 4 * s);
+	//loop
+	for(unsigned i = 0; i < n; i++)
+	{
+		//setup
+		tensegrity.m_solver->clear_state();
+		tensegrity.m_pk[0][2] = -m * g * i / (n - 1);
+		//solve
+		tensegrity.m_solver->solve();
+		if(!tensegrity.m_solver->m_equilibrium) return;
+		//save
+		printf("i: %02d p: %+.2e u3: %+.2e\n", i, tensegrity.m_pk[0][2], tensegrity.m_solver->m_state_new[2]);
+	}
+}
 int main(int argc, char** argv)
 {
 	//test
-	load_vertical();
+	load_increment();
 	// window(argc, argv);
 	//return
 	return EXIT_SUCCESS;
