@@ -2,7 +2,7 @@
 import os
 
 #commands
-uic = "c:\\Qt\\6.7.0\\msvc2019_64\\bin\\uic.exe"
+uic = "%QT_HOME%\\bin\\uic.exe"
 
 #uic files
 for root, dirs, files in os.walk("ui"):

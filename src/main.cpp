@@ -350,13 +350,7 @@ static void load_vertical_test(void)
 int main(int argc, char** argv)
 {
 	//test
-	window(argc, argv);
-	// Tensegrity tensegrity;
-	// setup(tensegrity);
-	// tensegrity.m_ak.push_back({0.1, 0.04, 0});
-	// tensegrity.m_pk.push_back({0, 0, -10 * 9.81});
-	// tensegrity.m_solver->m_iteration_max = 1000;
-	// tensegrity.m_solver->solve_static_test();
+	// window(argc, argv);
 	load_vertical_test();
 	//return
 	return EXIT_SUCCESS;
