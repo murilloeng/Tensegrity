@@ -50,9 +50,6 @@ run : $(out)
 
 uic : $(uig)
 
-blar : 
-	@echo $(QT_HOME)
-
 debug : 
 	@gdb $(out) -x gdb.txt
 
