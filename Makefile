@@ -1,8 +1,8 @@
 #qt
-qln = /home/murillo/Qt/6.6.1/gcc_64/lib
-qin = /home/murillo/Qt/6.6.1/gcc_64/include
-uic = /home/murillo/Qt/6.6.1/gcc_64/libexec/uic
-qde = /home/murillo/Qt/6.6.1/gcc_64/mkspecs/linux-g++
+qln = $(QT_HOME)/lib
+qin = $(QT_HOME)/include
+uic = $(QT_HOME)/libexec/uic
+qde = $(QT_HOME)/mkspecs/linux-g++
 
 #compiler
 CXX = g++
@@ -49,6 +49,9 @@ run : $(out)
 	@./$(out)
 
 uic : $(uig)
+
+blar : 
+	@echo $(QT_HOME)
 
 debug : 
 	@gdb $(out) -x gdb.txt
