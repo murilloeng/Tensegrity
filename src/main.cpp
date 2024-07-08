@@ -20,13 +20,14 @@
 
 static void setup(Tensegrity& tensegrity)
 {
-	tensegrity.m_nc = 3;
-	tensegrity.m_Ht = 3.20e-01;
-	tensegrity.m_Hc = 1.40e-01;
-	tensegrity.m_Rr = 1.40e-01;
-	tensegrity.m_Ec = 2.00e+11;
-	tensegrity.m_dc = 1.50e-03;
-	tensegrity.m_sr = 0.00e+00;
+	tensegrity.m_nc = 3;		//number of cables
+	tensegrity.m_Ht = 3.20e-01; //module height
+	tensegrity.m_Hc = 1.40e-01;	//central cable height
+	tensegrity.m_Rr = 1.40e-01;	//plate radius
+	tensegrity.m_Ec = 2.00e+11;	//cables elastic modulus
+	tensegrity.m_dc = 1.50e-03;	//cables diameter
+	tensegrity.m_sr = 0.00e+00;	//pre-tension
+	tensegrity.m_q0 = 0.00e+00; //twist angle
 }
 static void window(int argc, char** argv)
 {
@@ -349,7 +350,7 @@ static void load_vertical_test(void)
 int main(int argc, char** argv)
 {
 	//test
-	// window(argc, argv);
+	window(argc, argv);
 	// Tensegrity tensegrity;
 	// setup(tensegrity);
 	// tensegrity.m_ak.push_back({0.1, 0.04, 0});
