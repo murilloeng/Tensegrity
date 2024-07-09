@@ -229,7 +229,56 @@ static void test_stiffness(void)
 		}
 	}
 }
-static void load_vertical_parameter(void)
+
+static void load_1(void)
+{
+	//data
+	const unsigned np = 100;
+	const double m = 1.00e+01;
+	const double g = 9.81e+00;
+	Tensegrity tensegrity[16];
+	using namespace std::chrono;
+	const time_point<high_resolution_clock> t1 = high_resolution_clock::now();
+	//setup
+	omp_set_num_threads(16);
+	for(unsigned i = 0; i < 16; i++)
+	{
+		setup(tensegrity[i]);
+		tensegrity[i].m_pk.push_back({0, 0, -m * g});
+		tensegrity[i].m_ak.push_back({0, 0, tensegrity[i].m_Ht});
+	}
+	double* state = new double[6 * (np + 1)];
+	//computation
+	#pragma omp parallel for
+	for(unsigned i = 0; i <= np; i++)
+	{
+		//data
+		const unsigned ic = omp_get_thread_num();
+		//setup
+		tensegrity[ic].m_solver->clear_state();
+		tensegrity[ic].m_pk[0][2] = m * g * i / np;
+		//solve
+		tensegrity[ic].m_solver->solve();
+		if(!tensegrity[ic].m_solver->m_equilibrium) continue;
+		//save
+		memcpy(state + 6 * i, tensegrity[ic].m_solver->m_dx.data(), 6 * sizeof(double));
+	}
+	//save
+	FILE* file = fopen("data/load_1.txt", "w");
+	for(unsigned i = 0; i <= np; i++)
+	{
+		fprintf(file, "%+.6e ", m * g * i / np);
+		for(unsigned k = 0; k < 6; k++) fprintf(file, "%+.6e ", state[6 * i + k]);
+		fprintf(file, "\n");
+	}
+	fclose(file);
+	//clock
+	const time_point<high_resolution_clock> t2 = high_resolution_clock::now();
+	printf("time: %.2lf s\n", double(duration_cast<milliseconds>(t2 - t1).count()) / 1e3);
+	//delete
+	delete[] state;
+}
+static void load_3(void)
 {
 	//data
 	const unsigned nr = 100;
@@ -271,14 +320,18 @@ static void load_vertical_parameter(void)
 			tensegrity[ic].m_ak[0][2] = tensegrity[ic].m_Ht;
 			//solve
 			tensegrity[ic].m_solver->solve();
-			if(!tensegrity[ic].m_solver->m_equilibrium) continue;
+			if(!tensegrity[ic].m_solver->m_equilibrium)
+			{
+				printf("Solver failed!\n");
+				continue;
+			}
 			//save
 			memcpy(state + 6 * i, tensegrity[ic].m_solver->m_dx.data(), 6 * sizeof(double));
 		}
 		//path
 		char path[200];
-		printf("p: %02d\n", k);
-		sprintf(path, "data/load_vertical_Ht_%02d.txt", k);
+		printf("k: %02d\n", k);
+		sprintf(path, "data/load_3_%02d.txt", k);
 		//save
 		FILE* file = fopen(path, "w");
 		for(unsigned i = 0; i < nr; i++)
@@ -303,53 +356,10 @@ static void load_vertical_parameter(void)
 	//delete
 	delete[] state;
 }
-static void load_increment(void)
-{
-	//data
-	Tensegrity tensegrity;
-	const unsigned n = 100;
-	const double m = 8.00e+01;
-	const double g = 9.81e+00;
-	double* data = new double[7 * n];
-	//setup
-	setup(tensegrity);
-	tensegrity.m_pk.push_back({0, 0, 0});
-	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
-	//loop
-	for(unsigned i = 0; i < n; i++)
-	{
-		//setup
-		tensegrity.m_solver->clear_state();
-		tensegrity.m_pk[0][2] = -m * g * i / (n - 1);
-		//solve
-		tensegrity.m_solver->solve();
-		if(!tensegrity.m_solver->m_equilibrium) return;
-		//save
-		printf("i: %02d\n", i);
-		for(unsigned j = 0; j < 6; j++)
-		{
-			data[7 * i + j + 1] = tensegrity.m_solver->m_dx[j];
-		}
-		data[7 * i] = tensegrity.m_pk[0][2];
-	}
-	//save
-	FILE* file = fopen("data/load_increment.txt", "w");
-	for(unsigned i = 0; i < n; i++)
-	{
-		for(unsigned j = 0; j < 7; j++)
-		{
-			fprintf(file, "%+.2e ", data[7 * i + j]);
-		}
-		fprintf(file, "\n");
-	}
-	fclose(file);
-	//delete
-	delete[] data;
-}
 int main(int argc, char** argv)
 {
 	//test
-	load_vertical_parameter();
+	load_1();
 	// window(argc, argv);
 	//return
 	return EXIT_SUCCESS;
