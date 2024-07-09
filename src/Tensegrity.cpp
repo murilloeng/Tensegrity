@@ -19,7 +19,7 @@
 
 //constructors
 Tensegrity::Tensegrity(void) : 
-	m_pr(4.00e+02), m_er(5.00e-02), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), m_br(2.00e-01), m_Rr(1.40e-01), m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0.00e+00), m_sr(0.00e+00), m_sy(4.00e+08), m_nc(3), m_type(0), m_solver(new Solver(this))
+	m_pr(4.00e+02), m_er(5.00e-02), m_tl(1.00e-02), m_tr(1.00e-02), m_ar(2.00e-01), m_br(2.00e-01), m_Rr(1.40e-01), m_Ht(3.20e-01), m_Hc(1.40e-01), m_Ec(2.00e+11), m_dc(1.50e-03), m_q0(0.00e+00), m_sr(0.00e+00), m_sy(4.00e+08), m_nc(3), m_type(0), m_inelastic(false), m_solver(new Solver(this))
 {
 	sprintf(m_label, "Tensegrity");
 	memset(m_K0, 0, 6 * sizeof(double));
@@ -285,7 +285,9 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const double gk = 1 / ak;
 		const double ek = log(ak);
 		//stress
-		const double sk = fmax(fmin(m_Ec * ek + m_sr, m_sy), 0);
+		const double se = m_Ec * ek + m_sr;
+		const double sc = se > 0 ? se : 0;
+		const double sk = m_inelastic && (sc > m_sy) ? m_sy : sc;
 		//axial force
 		const double fk = sk * A * gk;
 		//internal force

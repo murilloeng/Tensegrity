@@ -76,6 +76,7 @@ public:
 	double m_sy;
 	unsigned m_nc;
 	unsigned m_type;
+	bool m_inelastic;
 	char m_label[200];
 
 	Solver* m_solver;

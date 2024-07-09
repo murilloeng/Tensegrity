@@ -292,14 +292,11 @@ static void load_increment(void)
 	const unsigned n = 100;
 	const double m = 8.00e+01;
 	const double g = 9.81e+00;
+	double* data = new double[7 * n];
 	//setup
 	setup(tensegrity);
 	tensegrity.m_pk.push_back({0, 0, 0});
 	tensegrity.m_ak.push_back({0, 0, tensegrity.m_Ht});
-
-	const double d = tensegrity.m_dc;
-	const double s = tensegrity.m_sy;
-	printf("load limit: %+.2e\n", M_PI * d * d / 4 * s);
 	//loop
 	for(unsigned i = 0; i < n; i++)
 	{
@@ -310,8 +307,26 @@ static void load_increment(void)
 		tensegrity.m_solver->solve();
 		if(!tensegrity.m_solver->m_equilibrium) return;
 		//save
-		printf("i: %02d p: %+.2e u3: %+.2e\n", i, tensegrity.m_pk[0][2], tensegrity.m_solver->m_state_new[2]);
+		printf("i: %02d\n", i);
+		for(unsigned j = 0; j < 6; j++)
+		{
+			data[7 * i + j + 1] = tensegrity.m_solver->m_dx[j];
+		}
+		data[7 * i] = tensegrity.m_pk[0][2];
 	}
+	//save
+	FILE* file = fopen("data/load_increment.txt", "w");
+	for(unsigned i = 0; i < n; i++)
+	{
+		for(unsigned j = 0; j < 7; j++)
+		{
+			fprintf(file, "%+.2e ", data[7 * i + j]);
+		}
+		fprintf(file, "\n");
+	}
+	fclose(file);
+	//delete
+	delete[] data;
 }
 int main(int argc, char** argv)
 {
