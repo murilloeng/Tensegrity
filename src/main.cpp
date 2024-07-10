@@ -22,12 +22,12 @@
 
 static void setup(Tensegrity& tensegrity)
 {
-	tensegrity.m_nc = 3;		//number of cables
-	tensegrity.m_Ht = 3.20e-01; //module height
-	tensegrity.m_Hc = 1.40e-01;	//central cable height
-	tensegrity.m_Rr = 1.40e-01;	//plate radius
+	tensegrity.m_nc = 3;		//number of cables			3, 4, 5, 6
+	tensegrity.m_Ht = 3.20e-01; //module height				0.32 -> (0.20, 0.44)
+	tensegrity.m_Hc = 1.40e-01;	//central cable height		0.14 -> (0.08, 0.20)
+	tensegrity.m_Rr = 1.40e-01;	//plate radius				0.14 -> (0.08, 0.20)
 	tensegrity.m_Ec = 2.00e+11;	//cables elastic modulus
-	tensegrity.m_dc = 1.50e-03;	//cables diameter
+	tensegrity.m_dc = 1.50e-03;	//cables diameter			0.0015 -> (0.001, 0.002)
 	tensegrity.m_sr = 0.00e+00;	//pre-tension
 	tensegrity.m_q0 = 0.00e+00; //twist angle
 }
@@ -317,7 +317,7 @@ static void load_1(void)
 	double* state = new double[6 * (np + 1)];
 	//computation
 	#pragma omp parallel for
-	for(unsigned i = 0; i <= np; i++)
+	for(int i = 0; i <= np; i++)
 	{
 		//data
 		const unsigned ic = omp_get_thread_num();
@@ -366,7 +366,7 @@ static void load_2(void)
 	double* state = new double[6 * nr * nt];
 	//computation
 	#pragma omp parallel for
-	for(unsigned i = 0; i < nr * nt; i++)
+	for(int i = 0; i < nr * nt; i++)
 	{
 		//data
 		const unsigned ir = i / nt;
@@ -438,7 +438,7 @@ static void load_3(void)
 	{
 		//computation
 		#pragma omp parallel for
-		for(unsigned i = 0; i < nr * nt; i++)
+		for(int i = 0; i < nr * nt; i++)
 		{
 			//data
 			const unsigned ir = i / nt;
@@ -466,7 +466,7 @@ static void load_3(void)
 		//path
 		char path[200];
 		printf("k: %02d\n", k);
-		sprintf(path, "data/load_3_%02d.txt", k);
+		sprintf(path, "data/load_3_Ht_3_%02d.txt", k);
 		//save
 		FILE* file = fopen(path, "w");
 		for(unsigned i = 0; i < nr; i++)
@@ -494,8 +494,8 @@ static void load_3(void)
 int main(int argc, char** argv)
 {
 	//test
-	// load_2();
-	window(argc, argv);
+	load_3();
+	// window(argc, argv);
 	//return
 	return EXIT_SUCCESS;
 }
