@@ -300,7 +300,7 @@ static void vertical_analytic(void)
 static void load_1(void)
 {
 	//data
-	const unsigned np = 100;
+	const int np = 100;
 	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	Tensegrity tensegrity[16];
@@ -348,8 +348,8 @@ static void load_1(void)
 static void load_2(void)
 {
 	//data
-	const unsigned nr = 100;
-	const unsigned nt = 300;
+	const int nr = 100;
+	const int nt = 300;
 	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	Tensegrity tensegrity[16];
@@ -417,9 +417,9 @@ static void load_2(void)
 static void load_3(void)
 {
 	//data
-	const unsigned nr = 100;
-	const unsigned nt = 300;
-	const unsigned np = 100;
+	const int nr = 100;
+	const int nt = 300;
+	const int np = 100;
 	const double m = 1.00e+01;
 	const double g = 9.81e+00;
 	Tensegrity tensegrity[16];
