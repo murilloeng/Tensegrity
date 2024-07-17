@@ -14,4 +14,10 @@ set format cb '%.2e'
 set title word(labels, index_1)
 set palette rgbformulae 33, 13, 10
 
+Rr = 0.14
 splot 'data/load_2.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index_1 + 2)) notitle
+do for [i = 0 : n] {
+	set arrow from 0, 0 to Rr * cos(2 * pi * i / n), Rr * sin(2 * pi * i / n) linecolor rgb "#000000" front nohead
+}
+
+replot

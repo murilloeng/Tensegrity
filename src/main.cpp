@@ -360,6 +360,7 @@ static void load_2(void)
 	for(unsigned i = 0; i < 16; i++)
 	{
 		setup(tensegrity[i]);
+		tensegrity[i].m_nc = 3;
 		tensegrity[i].m_pk.push_back({0, 0, -m * g});
 		tensegrity[i].m_ak.push_back({0, 0, tensegrity[i].m_Ht});
 	}
@@ -494,7 +495,7 @@ static void load_3(void)
 int main(int argc, char** argv)
 {
 	//test
-	load_3();
+	load_2();
 	// window(argc, argv);
 	//return
 	return EXIT_SUCCESS;
