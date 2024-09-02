@@ -4,6 +4,7 @@
 #include <ctime>
 #include <chrono>
 #include <cstdlib>
+#include <algorithm>
 
 //math
 #include "Math/inc/misc/misc.hpp"
@@ -12,13 +13,15 @@
 //qt
 #include <QtWidgets/QApplication>
 
-//canvas
-#include "Canvas/inc/Windows/Glut.hpp"
-
 //Tensegrity
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Window.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
+
+extern "C"
+{
+	void dgesdd_(const char*, const int*, const int*, double*, const int*, double*, double*, const int*, double*, const int*, double*, int*, int*, int*);
+}
 
 static void setup(Tensegrity& tensegrity)
 {
@@ -40,17 +43,6 @@ static void window(int argc, char** argv)
 	window.show();
 	//start
 	application.exec();
-}
-static void draw(const Tensegrity& tensegrity, int argc, char** argv)
-{
-	//data
-	canvas::windows::Glut window(argc, argv, "../Canvas/shd/");
-	//draw
-	tensegrity.draw_model(window.scene());
-	//update
-	window.scene()->update(true);
-	//main loop
-	window.start();
 }
 static void dof_energy(void)
 {
@@ -492,11 +484,40 @@ static void load_3(void)
 	//delete
 	delete[] state;
 }
+
+void test(void)
+{
+	const double r = 0.5;
+	const uint32_t nc = 6;
+	math::vector s(std::min(6U, nc + 1));
+	math::matrix A(6, nc + 1), R(6, 6), Q(nc + 1, nc + 1);
+	for(uint32_t i = 0; i < nc; i++)
+	{
+		A[0 + 6 * (i + 1)] = 0;
+		A[1 + 6 * (i + 1)] = 0;
+		A[5 + 6 * (i + 1)] = 0;
+		A[2 + 6 * (i + 1)] = -1;
+		A[3 + 6 * (i + 1)] = -r * sin(2 * M_PI * i / nc);
+		A[4 + 6 * (i + 1)] = +r * cos(2 * M_PI * i / nc);
+	}
+	A[0 + 6 * 0] = 0;
+	A[1 + 6 * 0] = 0;
+	A[2 + 6 * 0] = 1;
+	A[3 + 6 * 0] = 0;
+	A[4 + 6 * 0] = 0;
+	A[5 + 6 * 0] = 0;
+	A.print("A");
+	A.svd(R, Q, s);
+	R.print("R");
+	Q.transpose().print("Q");
+	s.print("s");
+}
+
+
 int main(int argc, char** argv)
 {
 	//test
-	load_2();
-	// window(argc, argv);
+	test();
 	//return
 	return EXIT_SUCCESS;
 }

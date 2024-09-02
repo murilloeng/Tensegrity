@@ -449,15 +449,15 @@ void Tensegrity::draw_guides(canvas::Scene* scene, bool state) const
 	for(unsigned i = 0; i < sizeof(lines) / sizeof(canvas::objects::Line*); i++)
 	{
 		lines[i] = new canvas::objects::Line;
-		lines[i]->add_arrow(0, false);
-		lines[i]->add_arrow(1, false);
-		lines[i]->arrow(0)->width(0);
-		lines[i]->arrow(1)->width(0);
-		lines[i]->arrow(0)->height(tl);
-		lines[i]->arrow(1)->height(tl);
+		// lines[i]->add_arrow(0, false);
+		// lines[i]->add_arrow(1, false);
+		// lines[i]->arrow(0)->width(0);
+		// lines[i]->arrow(1)->width(0);
+		// lines[i]->arrow(0)->height(tl);
+		// lines[i]->arrow(1)->height(tl);
 		lines[i]->color_stroke({1, 0, 0});
-		lines[i]->arrow(0)->color_stroke({1, 0, 0});
-		lines[i]->arrow(1)->color_stroke({1, 0, 0});
+		// lines[i]->arrow(0)->color_stroke({1, 0, 0});
+		// lines[i]->arrow(1)->color_stroke({1, 0, 0});
 		scene->add_object(lines[i]);
 	}
 	//guide Rr
