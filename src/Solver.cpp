@@ -66,7 +66,6 @@ void Solver::setup(void)
 	m_step = 0;
 	m_l_new = m_l_old = 0;
 	m_equilibrium = false;
-	if(m_type) m_tensegrity->compute_inertia();
 	//memory
 	delete[] m_state_data;
 	delete[] m_cables_data;
@@ -90,7 +89,7 @@ void Solver::setup(void)
 }
 void Solver::record(void)
 {
-	m_tensegrity->compute_energy();
+	// m_tensegrity->compute_energy();
 	memcpy(m_state_data + 7 * m_step, m_state_new, 7 * sizeof(double));
 	memcpy(m_velocity_data + 6 * m_step, m_velocity_new, 6 * sizeof(double));
 	memcpy(m_acceleration_data + 6 * m_step, m_acceleration_new, 6 * sizeof(double));
