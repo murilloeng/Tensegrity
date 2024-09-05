@@ -14,25 +14,22 @@ Tensegrity::Tensegrity(void) : m_nc(3), m_inelastic(false), m_solver(new Solver(
 	//data
 	m_rod_length = 5.00e-02;
 	m_twist_angle = 0.00e+00;
+	m_yield_stress = 0.00e+00;
 	m_height_total = 3.20e-01;
 	m_height_center = 1.40e-01;
 	m_plate_diameter = 2.80e-01;
 	m_plate_thickness = 5.00e-03;
 	m_cables_diameter = 1.50e-03;
+	m_residual_stress = 0.00e+00;
+	m_elastic_modulus = 0.00e+00;
+	//setup
 	sprintf(m_label, "Tensegrity");
 	m_strain_measure = Strain::strain_measure::quadratic;
-	//setup
-	m_Ec = new double[m_nc + 1];
-	m_sr = new double[m_nc + 1];
-	m_sy = new double[m_nc + 1];
 }
 
 //destructor
 Tensegrity::~Tensegrity(void)
 {
-	delete[] m_Ec;
-	delete[] m_sr;
-	delete[] m_sy;
 	delete m_solver;
 }
 
@@ -48,12 +45,6 @@ uint32_t Tensegrity::cables(void) const
 }
 uint32_t Tensegrity::cables(uint32_t nc)
 {
-	delete[] m_Ec;
-	delete[] m_sr;
-	delete[] m_sy;
-	m_Ec = new double[nc + 1];
-	m_sr = new double[nc + 1];
-	m_sy = new double[nc + 1];
 	return m_nc = nc;
 }
 
@@ -73,6 +64,15 @@ double Tensegrity::twist_angle(void) const
 double Tensegrity::twist_angle(double twist_angle)
 {
 	return m_twist_angle = twist_angle;
+}
+
+double Tensegrity::yield_stress(void) const
+{
+	return m_yield_stress;
+}
+double Tensegrity::yield_stress(double yield_stress)
+{
+	return m_yield_stress = yield_stress;
 }
 
 double Tensegrity::height_total(void) const
@@ -120,55 +120,22 @@ double Tensegrity::cables_diameter(double cables_diameter)
 	return m_cables_diameter = cables_diameter;
 }
 
-const double* Tensegrity::yield_stress(double sy)
+double Tensegrity::residual_stress(void) const
 {
-	for(uint32_t i = 0; i <= m_nc; i++)
-	{
-		m_sy[i] = sy;
-	}
-	return m_sy;
+	return m_residual_stress;
 }
-const double* Tensegrity::yield_stress(void) const
+double Tensegrity::residual_stress(double residual_stress)
 {
-	return m_sy;
-}
-const double* Tensegrity::yield_stress(const double* sy)
-{
-	return (const double*) memcpy(m_sy, sy, (m_nc + 1) * sizeof(double));
+	return m_residual_stress = residual_stress;
 }
 
-const double* Tensegrity::residual_stress(double sr)
+double Tensegrity::elastic_modulus(void) const
 {
-	for(uint32_t i = 0; i <= m_nc; i++)
-	{
-		m_sr[i] = sr;
-	}
-	return m_sr;
+	return m_elastic_modulus;
 }
-const double* Tensegrity::residual_stress(void) const
+double Tensegrity::elastic_modulus(double elastic_modulus)
 {
-	return m_sr;
-}
-const double* Tensegrity::residual_stress(const double* sr)
-{
-	return (const double*) memcpy(m_sr, sr, (m_nc + 1) * sizeof(double));
-}
-
-const double* Tensegrity::elastic_modulus(double Ec)
-{
-	for(uint32_t i = 0; i <= m_nc; i++)
-	{
-		m_Ec[i] = Ec;
-	}
-	return m_Ec;
-}
-const double* Tensegrity::elastic_modulus(void) const
-{
-	return m_Ec;
-}
-const double* Tensegrity::elastic_modulus(const double* Ec)
-{
-	return (const double*) memcpy(m_Ec, Ec, (m_nc + 1) * sizeof(double));
+	return m_elastic_modulus = elastic_modulus;
 }
 
 Strain::strain_measure Tensegrity::strain_measure(void) const
@@ -185,6 +152,8 @@ double Tensegrity::internal_energy(void) const
 {
 	//data
 	double U = 0;
+	const double sr = m_residual_stress;
+	const double Ec = m_elastic_modulus;
 	const double dc = m_cables_diameter;
 	const double Ac = M_PI * dc * dc / 4;
 	//internal energy
@@ -202,7 +171,8 @@ double Tensegrity::internal_energy(void) const
 		const double ak = lk / Lk;
 		const double ek = Strain::strain(ak, m_strain_measure);
 		//energy
-		U += Ac * Lk * (m_Ec[k] / 2 * ek * ek + ak * m_sr[k]);
+		const uint32_t nk = k == 0 ? m_nc : 1;
+		U += Ac * Lk * (Ec / 2 * ek * ek + nk * ak * sr);
 	}
 	//return
 	return U;
@@ -231,6 +201,8 @@ void Tensegrity::stiffness(math::matrix& K) const
 {
 	//data
 	K.zeros();
+	const double sr = m_residual_stress;
+	const double Ec = m_elastic_modulus;
 	const double dc = m_cables_diameter;
 	const double Ac = M_PI * dc * dc / 4;
 	const math::mat3 I = math::mat3::eye();
@@ -255,8 +227,9 @@ void Tensegrity::stiffness(math::matrix& K) const
 		const double hk = Strain::strain_hessian(ak, m_strain_measure);
 		const double gk = Strain::strain_gradient(ak, m_strain_measure);
 		//force
-		const double fk = m_Ec[k] * Ac * ek * gk + m_sr[k] * Ac;
-		const double Kk = m_Ec[k] * Ac / Lk * (gk * gk + ek * hk);
+		const uint32_t nk = k == 0 ? m_nc : 1;
+		const double fk = Ec * Ac * ek * gk + nk * Ac * sr;
+		const double Kk = Ec * Ac / Lk * (gk * gk + ek * hk);
 		const math::mat3 Ak = (Kk - fk / lk) * tk.outer(tk) + fk / lk * I;
 		//stiffness
 		K.span(0, 0) += Ak;
@@ -266,11 +239,11 @@ void Tensegrity::stiffness(math::matrix& K) const
 		K.span(3, 3) -= rk.spin() * Ak * rk.spin();
 	}
 	//external force
-	for(uint32_t i = 0; i < m_pk.size(); i++)
+	for(uint32_t k = 0; k < m_pk.size(); k++)
 	{
 		//force
-		const math::vec3 ck = qr.rotate(m_ak[i] - zr);
-		const math::vec3 pk = m_solver->m_l_new * m_pk[i];
+		const math::vec3 ck = qr.rotate(m_ak[k] - zr);
+		const math::vec3 pk = m_solver->m_l_new * m_pk[k];
 		//stiffness
 		K.span(3, 3) -= pk.spin() * ck.spin();
 	}
@@ -284,6 +257,8 @@ void Tensegrity::internal_force(math::vector& fi) const
 {
 	//data
 	fi.zeros();
+	const double sr = m_residual_stress;
+	const double Ec = m_elastic_modulus;
 	const double dc = m_cables_diameter;
 	const double Ac = M_PI * dc * dc / 4;
 	const math::vec3 zr(0, 0, m_height_total);
@@ -305,7 +280,8 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const double ek = Strain::strain(ak, m_strain_measure);
 		const double gk = Strain::strain_gradient(ak, m_strain_measure);
 		//axial force
-		const double fk = m_Ec[k] * Ac * ek * gk + Ac * m_sr[k];
+		const uint32_t nk = k == 0 ? m_nc : 1;
+		const double fk = Ec * Ac * ek * gk + nk * Ac * sr;
 		//internal force
 		fi.span(0, 0, 3, 1) += fk * tk;
 		fi.span(3, 0, 3, 1) += fk * qr.rotate(z2 - zr).cross(tk);

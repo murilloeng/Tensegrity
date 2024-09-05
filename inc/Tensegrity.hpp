@@ -34,6 +34,9 @@ public:
 	double twist_angle(double);
 	double twist_angle(void) const;
 
+	double yield_stress(double);
+	double yield_stress(void) const;
+
 	double height_total(double);
 	double height_total(void) const;
 
@@ -49,17 +52,11 @@ public:
 	double cables_diameter(double);
 	double cables_diameter(void) const;
 
-	const double* yield_stress(double);
-	const double* yield_stress(void) const;
-	const double* yield_stress(const double*);
+	double residual_stress(double);
+	double residual_stress(void) const;
 
-	const double* residual_stress(double);
-	const double* residual_stress(void) const;
-	const double* residual_stress(const double*);
-
-	const double* elastic_modulus(double);
-	const double* elastic_modulus(void) const;
-	const double* elastic_modulus(const double*);
+	double elastic_modulus(double);
+	double elastic_modulus(void) const;
 
 	Strain::strain_measure strain_measure(void) const;
 	Strain::strain_measure strain_measure(Strain::strain_measure);
@@ -73,27 +70,27 @@ public:
 	void internal_force(math::vector&) const;
 	void external_force(math::vector&) const;
 
+private:
 	//friends
 	friend class Solver;
 
-private:
 	//position
 	math::vec3 position(uint32_t, bool, bool) const;
 
 	//data
-	double* m_Ec;
-	double* m_sr;
-	double* m_sy;
 	uint32_t m_nc;
 	bool m_inelastic;
 	char m_label[200];
 	double m_rod_length;
 	double m_twist_angle;
+	double m_yield_stress;
 	double m_height_total;
 	double m_height_center;
 	double m_plate_diameter;
 	double m_plate_thickness;
 	double m_cables_diameter;
+	double m_residual_stress;
+	double m_elastic_modulus;
 
 	std::vector<math::vec3> m_ak;
 	std::vector<math::vec3> m_pk;

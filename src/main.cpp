@@ -34,7 +34,6 @@ void fun_force(double* f, const double* d, void** args)
 	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
 	//force
 	((Tensegrity*) args[0])->internal_force(fm);
-	math::vec3(f + 3) = math::vec3(d + 3).rotation_gradient(math::vec3(f + 3), true);
 }
 void fun_stiffness(double* K, const double* d, void** args)
 {
@@ -46,11 +45,6 @@ void fun_stiffness(double* K, const double* d, void** args)
 	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
 	//stiffness
 	((Tensegrity*) args[0])->stiffness(Km);
-	//rotation
-	const math::mat3 T = math::vec3(d + 3).rotation_gradient();
-	Km.span(0, 3, 3, 3) = Km.span(0, 3, 3, 3) * T;
-	Km.span(3, 0, 3, 3) = T.transpose() * Km.span(0, 3, 3, 3);
-	Km.span(3, 3, 3, 3) = T.transpose() * Km.span(0, 3, 3, 3) * T;
 }
 
 void test_force(void)
