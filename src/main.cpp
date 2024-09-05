@@ -14,20 +14,109 @@
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
-static void setup(Tensegrity& tensegrity)
+void fun_energy(double* U, const double* d, void** args)
 {
-	//tensegrity.m_nc = 3;		//number of cables			3, 4, 5, 6
-	//tensegrity.m_Ht = 3.20e-01; //module height				0.32 -> (0.20, 0.44)
-	//tensegrity.m_Hc = 1.40e-01;	//central cable height		0.14 -> (0.08, 0.20)
-	//tensegrity.m_Rr = 1.40e-01;	//plate radius				0.14 -> (0.08, 0.20)
-	//tensegrity.m_Ec = 2.00e+11;	//cables elastic modulus
-	//tensegrity.m_dc = 1.50e-03;	//cables diameter			0.0015 -> (0.001, 0.002)
-	//tensegrity.m_sr = 0.00e+00;	//pre-tension
-	//tensegrity.m_q0 = 0.00e+00; //twist angle
+	//data
+	double* sd = ((Tensegrity*) args[0])->solver()->m_state_new;
+	//state
+	math::vector(sd + 0, 3) = d;
+	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
+	//energy
+	U[0] = ((Tensegrity*) args[0])->internal_energy();
+}
+void fun_force(double* f, const double* d, void** args)
+{
+	//data
+	math::vector fm(f, 6);
+	double* sd = ((Tensegrity*) args[0])->solver()->m_state_new;
+	//state
+	math::vector(sd + 0, 3) = d;
+	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
+	//force
+	((Tensegrity*) args[0])->internal_force(fm);
+	math::vec3(f + 3) = math::vec3(d + 3).rotation_gradient(math::vec3(f + 3), true);
+}
+void fun_stiffness(double* K, const double* d, void** args)
+{
+	//data
+	math::matrix Km(K, 6, 6);
+	double* sd = ((Tensegrity*) args[0])->solver()->m_state_new;
+	//state
+	math::vector(sd + 0, 3) = d;
+	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
+	//stiffness
+	((Tensegrity*) args[0])->stiffness(Km);
+	//rotation
+	const math::mat3 T = math::vec3(d + 3).rotation_gradient();
+	Km.span(0, 3, 3, 3) = Km.span(0, 3, 3, 3) * T;
+	Km.span(3, 0, 3, 3) = T.transpose() * Km.span(0, 3, 3, 3);
+	Km.span(3, 3, 3, 3) = T.transpose() * Km.span(0, 3, 3, 3) * T;
 }
 
-int main(int argc, char** argv)
+void test_force(void)
 {
+	//data
+	Tensegrity tensegrity;
+	const uint32_t nt = 10000;
+	math::vector d(6), fa(6), fn(6);
+	//setup
+	void* args[] = {&tensegrity};
+	tensegrity.elastic_modulus(2.00e+11);
+	tensegrity.residual_stress(0.00e+00);
+	//test
+	srand(uint32_t(time(nullptr)));
+	for(uint32_t i = 0; i < nt; i++)
+	{
+		d.randu();
+		fun_force(fa.data(), d.data(), args);
+		math::ndiff(fun_energy, fn.data(), d.data(), args, 1, 6, 1e-5);
+		if((fa - fn).norm() < 1e-5 * fa.norm())
+		{
+			printf("%d: ok!\n", i);
+		}
+		else
+		{
+			printf("%d: not ok!\n", i);
+			(fa - fn).print("fe", 1e-5);
+			break;
+		}
+	}
+}
+void test_stiffness(void)
+{
+	//data
+	math::vector d(6);
+	Tensegrity tensegrity;
+	const uint32_t nt = 10000;
+	math::matrix Ka(6, 6), Kn(6, 6);
+	//setup
+	void* args[] = {&tensegrity};
+	tensegrity.elastic_modulus(2.00e+11);
+	tensegrity.residual_stress(0.00e+00);
+	//test
+	srand(uint32_t(time(nullptr)));
+	for(uint32_t i = 0; i < nt; i++)
+	{
+		d.randu();
+		fun_stiffness(Ka.data(), d.data(), args);
+		math::ndiff(fun_force, Kn.data(), d.data(), args, 6, 6, 1e-5);
+		if((Ka - Kn).norm() < 1e-5 * Ka.norm())
+		{
+			printf("%d: ok!\n", i);
+		}
+		else
+		{
+			printf("%d: not ok!\n", i);
+			(Ka - Kn).print("Ke", 1e-5 * Ka.norm());
+			break;
+		}
+	}
+}
+
+int main(void)
+{
+	//test
+	test_stiffness();
 	//return
 	return EXIT_SUCCESS;
 }

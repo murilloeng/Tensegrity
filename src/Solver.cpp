@@ -14,7 +14,7 @@ double bisection(double s, void** args)
 	//data
 	Solver* solver = (Solver*) args[0];
 	const double dxr = *(double*) args[1];
-	const unsigned index = *(unsigned*) args[2];
+	const uint32_t index = *(uint32_t*) args[2];
 	//state
 	solver->m_dx[index] = dxr + s;
 	//residue
@@ -96,7 +96,7 @@ void Solver::record(void)
 	//solver
 	m_solver_data[m_step] = !m_type ? m_l_new : m_step * m_T / m_step_max;
 	//cables
-	for(unsigned i = 0; i <= m_tensegrity->m_nc; i++)
+	for(uint32_t i = 0; i <= m_tensegrity->m_nc; i++)
 	{
 		m_cables_data[(m_tensegrity->m_nc + 1) * m_step + i] = 0;
 	}
@@ -104,11 +104,11 @@ void Solver::record(void)
 void Solver::finish(void)
 {
 	//data
-	const unsigned sizes[] = {7, m_tensegrity->m_nc + 1, 1, 3, 6, 6};
+	const uint32_t sizes[] = {7, m_tensegrity->m_nc + 1, 1, 3, 6, 6};
 	const char* labels[] = {"state", "cables", "solver", "energy", "velocity", "acceleration"};
 	const double* data[] = {m_state_data, m_cables_data, m_solver_data, m_energy_data, m_velocity_data, m_acceleration_data};
 	//write
-	for(unsigned i = 0; i < 6; i++)
+	for(uint32_t i = 0; i < 6; i++)
 	{
 		//path
 		char path[200];
@@ -116,9 +116,9 @@ void Solver::finish(void)
 		//file
 		FILE* file = fopen(path, "w");
 		//write
-		for(unsigned j = 0; j <= m_step_max; j++)
+		for(uint32_t j = 0; j <= m_step_max; j++)
 		{
-			for(unsigned k = 0; k < sizes[i]; k++)
+			for(uint32_t k = 0; k < sizes[i]; k++)
 			{
 				fprintf(file, "%+.6e ", data[i][sizes[i] * j + k]);
 			}
@@ -169,7 +169,7 @@ void Solver::solve_static(void)
 	m_tensegrity->external_force(m_fe);
 	//data
 	double dxr;
-	unsigned index = 0;
+	uint32_t index = 0;
 	math::bisection solver;
 	const double fr = m_fe.norm();
 	void* args[] = {this, &dxr, &index};

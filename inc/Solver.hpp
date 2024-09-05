@@ -24,9 +24,9 @@ public:
 	bool m_log;
 	double m_T;
 	double m_dl;
-	unsigned m_type;
-	unsigned m_step_max;
-	unsigned m_iteration_max;
+	uint32_t m_type;
+	uint32_t m_step_max;
+	uint32_t m_iteration_max;
 
 	double m_state_old[7];
 	double m_state_new[7];
@@ -57,8 +57,8 @@ public:
 	double m_ddl;
 	double m_l_old;
 	double m_l_new;
-	unsigned m_step;
-	unsigned m_iteration;
+	uint32_t m_step;
+	uint32_t m_iteration;
 
 	math::vector m_r;
 	math::vector m_fn;
