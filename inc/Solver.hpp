@@ -30,10 +30,6 @@ public:
 
 	double m_state_old[7];
 	double m_state_new[7];
-	double m_velocity_old[6];
-	double m_velocity_new[6];
-	double m_acceleration_old[6];
-	double m_acceleration_new[6];
 
 public:
 	//solver
@@ -44,8 +40,6 @@ public:
 	void restore(void);
 	void clear_state(void);
 	void update_state(void);
-	void solve_static(void);
-	void solve_dynamic(void);
 
 	//formulation
 	void compute_residue(void);
@@ -79,6 +73,4 @@ public:
 	double* m_cables_data;
 	double* m_solver_data;
 	double* m_energy_data;
-	double* m_velocity_data;
-	double* m_acceleration_data;
 };
