@@ -147,6 +147,26 @@ Strain::strain_measure Tensegrity::strain_measure(Strain::strain_measure strain_
 	return m_strain_measure = strain_measure;
 }
 
+//loads
+void Tensegrity::remove_load(uint32_t index)
+{
+	m_pk.erase(m_pk.begin() + index);
+	m_ak.erase(m_ak.begin() + index);
+}
+void Tensegrity::add_load(math::vec3 pk, math::vec3 ak)
+{
+	m_pk.push_back(pk);
+	m_ak.push_back(ak);
+}
+const std::vector<math::vec3>& Tensegrity::loads(void) const
+{
+	return m_pk;
+}
+const std::vector<math::vec3>& Tensegrity::loads_position(void) const
+{
+	return m_ak;
+}
+
 //formulation
 double Tensegrity::internal_energy(void) const
 {
@@ -181,11 +201,9 @@ double Tensegrity::potential_energy(void) const
 {
 	//data
 	double V = 0;
-	const double T = m_solver->m_T;
 	const double Ht = m_height_total;
 	const uint32_t s = m_solver->m_step;
 	const uint32_t ns = m_solver->m_step_max;
-	const double t = m_solver->m_type * s * T / ns;
 	const math::vec3 qr(m_solver->m_state_new + 3);
 	//potential energy
 	const math::vec3 zr(0, 0, Ht);

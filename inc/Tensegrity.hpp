@@ -61,6 +61,12 @@ public:
 	Strain::strain_measure strain_measure(void) const;
 	Strain::strain_measure strain_measure(Strain::strain_measure);
 
+	//loads
+	void remove_load(uint32_t);
+	void add_load(math::vec3, math::vec3);
+	const std::vector<math::vec3>& loads(void) const;
+	const std::vector<math::vec3>& loads_position(void) const;
+
 	//formulation
 	double internal_energy(void) const;
 	double potential_energy(void) const;

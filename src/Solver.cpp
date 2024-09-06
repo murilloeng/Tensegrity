@@ -7,10 +7,12 @@
 #include "Tensegrity/inc/Tensegrity.hpp"
 
 //constructors
-Solver::Solver(Tensegrity* tensegrity) : m_log(true), 
-	m_T(1.00e+00), m_dl(1.00e-03), m_type(0), m_step_max(1000), m_iteration_max(10), 
+Solver::Solver(Tensegrity* tensegrity) :
+	m_dl(1.00e-03), m_step_max(1000), m_iteration_max(10), 
 	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6), m_tensegrity(tensegrity), m_state_data(nullptr), m_cables_data(nullptr), m_solver_data(nullptr), m_energy_data(nullptr)
 {
+	m_state_old = new double[7];
+	m_state_new = new double[7];
 	memset(m_state_old, 0, 7 * sizeof(double));
 	memset(m_state_new, 0, 7 * sizeof(double));
 	m_state_old[3] = m_state_new[3] = 1.00e+00;
@@ -19,10 +21,49 @@ Solver::Solver(Tensegrity* tensegrity) : m_log(true),
 //destructor
 Solver::~Solver(void)
 {
+	delete[] m_state_old;
+	delete[] m_state_new;
 	delete[] m_state_data;
 	delete[] m_cables_data;
 	delete[] m_solver_data;
 	delete[] m_energy_data;
+}
+
+//data
+uint32_t Solver::step_max(void) const
+{
+	return m_step_max;
+}
+uint32_t Solver::step_max(uint32_t step_max)
+{
+	return m_step_max = step_max;
+}
+
+uint32_t Solver::iteration_max(void) const
+{
+	return m_iteration_max;
+}
+uint32_t Solver::iteration_max(uint32_t iteration_max)
+{
+	return m_iteration_max = iteration_max;
+}
+
+double Solver::load_predictor(double dl)
+{
+	return m_dl = dl;
+}
+double Solver::load_predictor(void) const
+{
+	return m_dl;
+}
+
+const double* Solver::state(void) const
+{
+	return m_state_new;
+}
+const double* Solver::state(const double* state_new)
+{
+	return (const double*) memcpy(m_state_new, state_new, 7 * sizeof(double));
 }
 
 //solve
@@ -56,7 +97,7 @@ void Solver::record(void)
 	// m_tensegrity->compute_energy();
 	memcpy(m_state_data + 7 * m_step, m_state_new, 7 * sizeof(double));
 	//solver
-	m_solver_data[m_step] = !m_type ? m_l_new : m_step * m_T / m_step_max;
+	m_solver_data[m_step] = m_l_new;
 	//cables
 	for(uint32_t i = 0; i <= m_tensegrity->m_nc; i++)
 	{

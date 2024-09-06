@@ -17,32 +17,32 @@
 void fun_energy(double* U, const double* d, void** args)
 {
 	//data
-	double* sd = ((Tensegrity*) args[0])->solver()->m_state_new;
-	//state
-	math::vector(sd + 0, 3) = d;
-	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
+	double sd[7];
+	math::vec3(sd + 0) = math::vec3(d + 0);
+	math::quat(sd + 3) = math::vec3(d + 3).quaternion();
+	((Tensegrity*) args[0])->solver()->state(sd);
 	//energy
 	U[0] = ((Tensegrity*) args[0])->internal_energy();
 }
 void fun_force(double* f, const double* d, void** args)
 {
 	//data
+	double sd[7];
 	math::vector fm(f, 6);
-	double* sd = ((Tensegrity*) args[0])->solver()->m_state_new;
-	//state
-	math::vector(sd + 0, 3) = d;
-	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
+	math::vec3(sd + 0) = math::vec3(d + 0);
+	math::quat(sd + 3) = math::vec3(d + 3).quaternion();
+	((Tensegrity*) args[0])->solver()->state(sd);
 	//force
 	((Tensegrity*) args[0])->internal_force(fm);
 }
 void fun_stiffness(double* K, const double* d, void** args)
 {
 	//data
+	double sd[7];
 	math::matrix Km(K, 6, 6);
-	double* sd = ((Tensegrity*) args[0])->solver()->m_state_new;
-	//state
-	math::vector(sd + 0, 3) = d;
-	math::vector(sd + 3, 4) = math::vec3(d + 3).quaternion();
+	math::vec3(sd + 0) = math::vec3(d + 0);
+	math::quat(sd + 3) = math::vec3(d + 3).quaternion();
+	((Tensegrity*) args[0])->solver()->state(sd);
 	//stiffness
 	((Tensegrity*) args[0])->stiffness(Km);
 }
@@ -57,6 +57,7 @@ void test_force(void)
 	void* args[] = {&tensegrity};
 	tensegrity.elastic_modulus(2.00e+11);
 	tensegrity.residual_stress(0.00e+00);
+	tensegrity.strain_measure(Strain::strain_measure::logarithmic);
 	//test
 	srand(uint32_t(time(nullptr)));
 	for(uint32_t i = 0; i < nt; i++)
@@ -87,6 +88,7 @@ void test_stiffness(void)
 	void* args[] = {&tensegrity};
 	tensegrity.elastic_modulus(2.00e+11);
 	tensegrity.residual_stress(0.00e+00);
+	tensegrity.strain_measure(Strain::strain_measure::logarithmic);
 	//test
 	srand(uint32_t(time(nullptr)));
 	for(uint32_t i = 0; i < nt; i++)
