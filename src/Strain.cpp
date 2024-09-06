@@ -60,9 +60,9 @@ double Strain::logarithmic_strain(double s)
 }
 double Strain::logarithmic_strain_hessian(double s)
 {
-	return 1 / s;
+	return -1 / s / s;
 }
 double Strain::logarithmic_strain_gradient(double s)
 {
-	return -1 / s / s;
+	return 1 / s;
 }
