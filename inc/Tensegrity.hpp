@@ -31,6 +31,9 @@ public:
 	double rod_length(double);
 	double rod_length(void) const;
 
+	const char* label(void) const;
+	const char* label(const char*);
+
 	double twist_angle(double);
 	double twist_angle(void) const;
 
@@ -64,6 +67,9 @@ public:
 	//loads
 	void remove_load(uint32_t);
 	void add_load(math::vec3, math::vec3);
+	
+	void load(uint32_t, math::vec3);
+	void load_position(uint32_t, math::vec3);
 	const std::vector<math::vec3>& loads(void) const;
 	const std::vector<math::vec3>& loads_position(void) const;
 
@@ -79,6 +85,9 @@ public:
 private:
 	//friends
 	friend class Solver;
+
+	//cables
+	double cable_force(uint32_t) const;
 
 	//position
 	math::vec3 position(uint32_t, bool, bool) const;

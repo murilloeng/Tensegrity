@@ -18,6 +18,11 @@ public:
 	~Solver(void);
 
 	//data
+	bool log(bool);
+	bool log(void) const;
+
+	bool equilibrium(void) const;
+
 	uint32_t step_max(uint32_t);
 	uint32_t step_max(void) const;
 
@@ -41,6 +46,7 @@ private:
 	void finish(void);
 	void update(void);
 	void restore(void);
+	void log_step(void);
 	void clear_state(void);
 	void update_state(void);
 
@@ -74,6 +80,7 @@ private:
 	math::vector m_ddxt;
 	math::vector m_ddxr;
 
+	bool m_log;
 	bool m_equilibrium;
 	double* m_state_old;
 	double* m_state_new;

@@ -30,6 +30,20 @@ Solver::~Solver(void)
 }
 
 //data
+bool Solver::log(bool log)
+{
+	return m_log = log;
+}
+bool Solver::log(void) const
+{
+	return m_log;
+}
+
+bool Solver::equilibrium(void) const
+{
+	return m_equilibrium;
+}
+
 uint32_t Solver::step_max(void) const
 {
 	return m_step_max;
@@ -69,7 +83,44 @@ const double* Solver::state(const double* state_new)
 //solve
 void Solver::solve(void)
 {
-	return;
+	setup();
+	record();
+	for(m_step = 1; m_step <= m_step_max; m_step++)
+	{
+		m_equilibrium = false;
+		m_l_new = m_l_old + m_dl;
+		m_tensegrity->stiffness(m_Kt);
+		m_Kt.solve(m_dx, m_dl * m_fe);
+		for(m_iteration = 0; m_iteration < m_iteration_max; m_iteration++)
+		{
+			//state
+			m_tensegrity->internal_force(m_fi);
+			m_tensegrity->external_force(m_fe);
+			//residue
+			m_r = m_l_new * m_fe - m_fi;
+			if(m_r.norm() < 1e-5 * m_fe.norm())
+			{
+				update();
+				record();
+				log_step();
+				m_equilibrium = true;
+				break;
+			}
+			//state
+			m_ddl = 0;
+			m_tensegrity->stiffness(m_Kt);
+			//update
+			m_Kt.solve(m_ddxr, m_r);
+			m_Kt.solve(m_ddxt, m_fe);
+			m_dx += m_ddxr + m_ddl * m_ddxt;
+			update_state();
+		}
+		if(!m_equilibrium)
+		{
+			break;
+		}
+	}
+	finish();
 }
 
 //solver
@@ -80,6 +131,7 @@ void Solver::setup(void)
 	m_l_new = m_l_old = 0;
 	m_equilibrium = false;
 	//memory
+	clear_state();
 	delete[] m_state_data;
 	delete[] m_cables_data;
 	delete[] m_solver_data;
@@ -88,30 +140,29 @@ void Solver::setup(void)
 	m_solver_data = new double[1 * (m_step_max + 1)];
 	m_energy_data = new double[3 * (m_step_max + 1)];
 	m_cables_data = new double[(m_tensegrity->m_nc + 1) * (m_step_max + 1)];
-	//initial
-	memcpy(m_state_new, m_state_old, 7 * sizeof(double));
-	memcpy(m_state_data, m_state_old, 7 * sizeof(double));
 }
 void Solver::record(void)
 {
-	// m_tensegrity->compute_energy();
-	memcpy(m_state_data + 7 * m_step, m_state_new, 7 * sizeof(double));
-	//solver
+	if(!m_log) return;
 	m_solver_data[m_step] = m_l_new;
-	//cables
-	for(uint32_t i = 0; i <= m_tensegrity->m_nc; i++)
+	m_energy_data[3 * m_step + 0] = 0;
+	m_energy_data[3 * m_step + 1] = 0;
+	m_energy_data[3 * m_step + 2] = 0;
+	for(uint32_t k = 0; k <= m_tensegrity->m_nc; k++)
 	{
-		m_cables_data[(m_tensegrity->m_nc + 1) * m_step + i] = 0;
+		m_cables_data[(m_tensegrity->m_nc + 1) * m_step + k] = m_tensegrity->cable_force(k);
 	}
+	memcpy(m_state_data + 7 * m_step, m_state_new, 7 * sizeof(double));
 }
 void Solver::finish(void)
 {
 	//data
+	if(!m_log) return;
 	const uint32_t sizes[] = {7, m_tensegrity->m_nc + 1, 1, 3};
 	const char* labels[] = {"state", "cables", "solver", "energy"};
 	const double* data[] = {m_state_data, m_cables_data, m_solver_data, m_energy_data};
 	//write
-	for(uint32_t i = 0; i < 6; i++)
+	for(uint32_t i = 0; i < sizeof(sizes) / sizeof(uint32_t); i++)
 	{
 		//path
 		char path[200];
@@ -140,6 +191,13 @@ void Solver::restore(void)
 {
 	m_l_new = m_l_old;
 	memcpy(m_state_new, m_state_old, 7 * sizeof(double));
+}
+void Solver::log_step(void)
+{
+	if(m_log)
+	{
+		printf("step: %04d iterations: %02d load: %+.2e\n", m_step, m_iteration, m_l_new);
+	}
 }
 void Solver::clear_state(void)
 {

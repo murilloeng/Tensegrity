@@ -14,14 +14,14 @@ Tensegrity::Tensegrity(void) : m_nc(3), m_inelastic(false), m_solver(new Solver(
 	//data
 	m_rod_length = 5.00e-02;
 	m_twist_angle = 0.00e+00;
-	m_yield_stress = 0.00e+00;
+	m_yield_stress = 4.00e+08;
 	m_height_total = 3.20e-01;
 	m_height_center = 1.40e-01;
 	m_plate_diameter = 2.80e-01;
 	m_plate_thickness = 5.00e-03;
 	m_cables_diameter = 1.50e-03;
 	m_residual_stress = 0.00e+00;
-	m_elastic_modulus = 0.00e+00;
+	m_elastic_modulus = 2.00e+11;
 	//setup
 	sprintf(m_label, "Tensegrity");
 	m_strain_measure = Strain::strain_measure::quadratic;
@@ -55,6 +55,16 @@ double Tensegrity::rod_length(void) const
 double Tensegrity::rod_length(double rod_length)
 {
 	return m_rod_length = rod_length;
+}
+
+const char* Tensegrity::label(void) const
+{
+	return m_label;
+}
+const char* Tensegrity::label(const char* label)
+{
+	sprintf(m_label, "%s", label);
+	return m_label;
 }
 
 double Tensegrity::twist_angle(void) const
@@ -158,6 +168,15 @@ void Tensegrity::add_load(math::vec3 pk, math::vec3 ak)
 	m_pk.push_back(pk);
 	m_ak.push_back(ak);
 }
+
+void Tensegrity::load(uint32_t index, math::vec3 pk)
+{
+	m_pk[index] = pk;
+}
+void Tensegrity::load_position(uint32_t index, math::vec3 ak)
+{
+	m_ak[index] = ak;
+}
 const std::vector<math::vec3>& Tensegrity::loads(void) const
 {
 	return m_pk;
@@ -190,9 +209,11 @@ double Tensegrity::internal_energy(void) const
 		//strain
 		const double ak = lk / Lk;
 		const double ek = Strain::strain(ak, m_strain_measure);
+		const double gk = Strain::strain_gradient(ak, m_strain_measure);
 		//energy
 		const uint32_t nk = k == 0 ? m_nc : 1;
-		U += Ac * Lk * (Ec / 2 * ek * ek + nk * ak * sr);
+		const double fk = fmax(Ec * Ac * ek * gk + sr * Ac, 0);
+		U += bool(fk) * Ac * Lk * (Ec / 2 * ek * ek + nk * ak * sr);
 	}
 	//return
 	return U;
@@ -246,8 +267,8 @@ void Tensegrity::stiffness(math::matrix& K) const
 		const double gk = Strain::strain_gradient(ak, m_strain_measure);
 		//force
 		const uint32_t nk = k == 0 ? m_nc : 1;
-		const double fk = Ec * Ac * ek * gk + nk * Ac * sr;
-		const double Kk = Ec * Ac / Lk * (gk * gk + ek * hk);
+		const double fk = fmax(Ec * Ac * ek * gk + nk * Ac * sr, 0);
+		const double Kk = bool(fk) * Ec * Ac / Lk * (gk * gk + ek * hk);
 		const math::mat3 Ak = (Kk - fk / lk) * tk.outer(tk) + fk / lk * I;
 		//stiffness
 		K.span(0, 0) += Ak;
@@ -299,7 +320,7 @@ void Tensegrity::internal_force(math::vector& fi) const
 		const double gk = Strain::strain_gradient(ak, m_strain_measure);
 		//axial force
 		const uint32_t nk = k == 0 ? m_nc : 1;
-		const double fk = Ec * Ac * ek * gk + nk * Ac * sr;
+		const double fk = fmax(Ec * Ac * ek * gk + nk * sr * Ac, 0);
 		//internal force
 		fi.span(0, 0, 3, 1) += fk * tk;
 		fi.span(3, 0, 3, 1) += fk * qr.rotate(z2 - zr).cross(tk);
@@ -318,6 +339,31 @@ void Tensegrity::external_force(math::vector& fe) const
 		math::vec3(fe.data() + 0) += m_pk[i];
 		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i]);
 	}
+}
+
+//cables
+double Tensegrity::cable_force(uint32_t index) const
+{
+	//data
+	const double sr = m_residual_stress;
+	const double Ec = m_elastic_modulus;
+	const double dc = m_cables_diameter;
+	const double Ac = M_PI * dc * dc / 4;
+	//position
+	const math::vec3 z1 = position(index, 0, 0);
+	const math::vec3 z2 = position(index, 1, 0);
+	const math::vec3 x1 = position(index, 0, 1);
+	const math::vec3 x2 = position(index, 1, 1);
+	//lengths
+	const double Lk = (z2 - z1).norm();
+	const double lk = (x2 - x1).norm();
+	//strain
+	const double ak = lk / Lk;
+	const double ek = Strain::strain(ak, m_strain_measure);
+	const double gk = Strain::strain_gradient(ak, m_strain_measure);
+	//return
+	const uint32_t nk = index == 0 ? m_nc : 1;
+	return fmax(Ec * Ac * ek * gk + nk * sr * Ac, 0);
 }
 
 //position

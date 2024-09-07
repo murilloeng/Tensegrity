@@ -1,27 +1,20 @@
-# #data
-i1 = 7 * (index_1 - 1) + 1
-i2 = 7 * (index_1 - 1) + 1 + index_2
-labels_2 = "F_1 F_2 F_3 M_1 M_2 M_3"
-labels_1 = "u_1 u_2 u_3 t_1 t_2 t_3"
+labels = "u_1 u_2 u_3 t_1 t_2 t_3"
 
-#setup
+set pm3d
 set grid
+set view map
 set key above
+unset surface
+set xlabel "x_1"
+set ylabel "x_2"
+set size ratio 1
 set format x '%.2f'
-set format y '%.2e'
-set xlabel word(labels_1, index_1)
-set ylabel word(labels_2, index_2) norotate
+set format y '%.2f'
+set format cb '%.2e'
+set title word(labels, index)
+set palette rgbformulae 33, 13, 10
 
-#plot
-plot 'data/force.txt' using (column(i1)) : (column(i2)) with lines linecolor rgb "#0000ff" notitle
+Rr = 0.14
+splot 'data/force.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index + 2)) notitle
 
-#range
-min(a, b) = a < b ? a : b
-max(a, b) = a > b ? a : b
-set yrange [min(GPVAL_Y_MIN, -1) : max(GPVAL_Y_MAX, +1)]
-replot
-
-#plot
-set terminal pdf
-set output sprintf("data/force-%s-%s.pdf", word(labels_1, index_1), word(labels_2, index_2))
 replot
