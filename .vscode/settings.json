@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"*.dat": "plaintext",
-		"vector": "cpp"
+		"vector": "cpp",
+		"filesystem": "cpp"
 	}
 }

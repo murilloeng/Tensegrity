@@ -8,9 +8,9 @@
 
 //math
 #include "Math/inc/misc/misc.hpp"
-#include "Math/inc/misc/bits.hpp"
 
 //Tensegrity
+#include "Tensegrity/inc/Test.hpp"
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
@@ -109,87 +109,18 @@ void test_stiffness(void)
 	}
 }
 
-void force(void)
-{
-	//data
-	const uint32_t nc = 6;
-	const uint32_t nr = 100;
-	const uint32_t na = 100;
-	const uint32_t nt = omp_get_max_threads();
-	Tensegrity* tensegrity = new Tensegrity[nt];
-	//data
-	const double Pr = 1.00e+03;
-	const double fr = 2.00e+01;
-	const double Ht = tensegrity[0].height_total();
-	const double dp = tensegrity[0].plate_diameter();
-	const double dc = tensegrity[0].cables_diameter();
-	//setup
-	const double Ac = M_PI * dc * dc / 4;
-	for(uint32_t i = 0; i < nt; i++)
-	{
-		tensegrity[i].cables(nc);
-		tensegrity[i].residual_stress(fr / Ac);
-		tensegrity[i].add_load({0, 0, -Pr}, {});
-	}
-	//solve
-	using namespace std::chrono;
-	double* state = new double[8 * nr * na];
-	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	for(int32_t i = 0; i < nr; i++)
-	{
-		bool test = true;
-		#pragma omp parallel for
-		for(int32_t j = 0; j < na; j++)
-		{
-			//data
-			const double t = 2 * M_PI * j / na;
-			const double r = dp / 2 * (i + 1) / nr;
-			const int32_t ti = omp_get_thread_num();
-			//load
-			tensegrity[ti].load_position(0, {r * cos(t), r * sin(t), Ht});
-			//solve
-			tensegrity[ti].solver()->solve();
-			printf("radius: %02d angle: %02d\n", i, j);
-			const double* ts = tensegrity[ti].solver()->state();
-			const math::vec3 vt = math::quat(ts + 3).pseudo();
-			if(!tensegrity[ti].solver()->equilibrium()) test = false;
-			state[8 * (na * i + j) + 0] = r;
-			state[8 * (na * i + j) + 1] = t;
-			state[8 * (na * i + j) + 2] = ts[0];
-			state[8 * (na * i + j) + 3] = ts[1];
-			state[8 * (na * i + j) + 4] = ts[2];
-			state[8 * (na * i + j) + 5] = vt[0];
-			state[8 * (na * i + j) + 6] = vt[1];
-			state[8 * (na * i + j) + 7] = vt[2];
-		}
-		if(!test) break;
-	}
-	high_resolution_clock::time_point t2 = high_resolution_clock::now();
-	const double td = (double) duration_cast<milliseconds>(t2 - t1).count() / 1000;
-	printf("Solution time: %.2lf s\n", td);
-	//flush
-	FILE* file = fopen("data/force.txt", "w");
-	for(uint32_t i = 0; i < nr; i++)
-	{
-		for(uint32_t j = 0; j <= na; j++)
-		{
-			for(uint32_t k = 0; k < 8; k++)
-			{
-				fprintf(file, "%+.6e ", state[8 * (na * i + j % na) + k]);
-			}
-			fprintf(file, "\n");
-		}
-		fprintf(file, "\n");
-	}
-	fclose(file);
-	delete[] state;
-	delete[] tensegrity;
-}
-
 int main(void)
 {
-	//test
-	force();
+	//data
+	Test test;
+	test.cables(6);
+	test.mesh_angle(100);
+	test.mesh_radius(100);
+	//data
+	test.force(1.00e+03);
+	test.tension(1.00e+02);
+	//solve
+	test.solve();
 	//return
 	return EXIT_SUCCESS;
 }

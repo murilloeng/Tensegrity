@@ -187,6 +187,30 @@ const std::vector<math::vec3>& Tensegrity::loads_position(void) const
 }
 
 //formulation
+double Tensegrity::cable_force(uint32_t index) const
+{
+	//data
+	const double sr = m_residual_stress;
+	const double Ec = m_elastic_modulus;
+	const double dc = m_cables_diameter;
+	const double Ac = M_PI * dc * dc / 4;
+	//position
+	const math::vec3 z1 = position(index, 0, 0);
+	const math::vec3 z2 = position(index, 1, 0);
+	const math::vec3 x1 = position(index, 0, 1);
+	const math::vec3 x2 = position(index, 1, 1);
+	//lengths
+	const double Lk = (z2 - z1).norm();
+	const double lk = (x2 - x1).norm();
+	//strain
+	const double ak = lk / Lk;
+	const double ek = Strain::strain(ak, m_strain_measure);
+	const double gk = Strain::strain_gradient(ak, m_strain_measure);
+	//return
+	const uint32_t nk = index == 0 ? m_nc : 1;
+	return fmax(Ec * Ac * ek * gk + nk * sr * Ac, 0);
+}
+
 double Tensegrity::internal_energy(void) const
 {
 	//data
@@ -222,12 +246,9 @@ double Tensegrity::potential_energy(void) const
 {
 	//data
 	double V = 0;
-	const double Ht = m_height_total;
-	const uint32_t s = m_solver->m_step;
-	const uint32_t ns = m_solver->m_step_max;
+	const math::vec3 zr(0, 0, m_height_total);
 	const math::vec3 qr(m_solver->m_state_new + 3);
 	//potential energy
-	const math::vec3 zr(0, 0, Ht);
 	for(uint32_t i = 0; i < m_pk.size(); i++)
 	{
 		V -= qr.rotate(m_ak[i] - zr).inner(m_pk[i]);
@@ -339,31 +360,6 @@ void Tensegrity::external_force(math::vector& fe) const
 		math::vec3(fe.data() + 0) += m_pk[i];
 		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i]);
 	}
-}
-
-//cables
-double Tensegrity::cable_force(uint32_t index) const
-{
-	//data
-	const double sr = m_residual_stress;
-	const double Ec = m_elastic_modulus;
-	const double dc = m_cables_diameter;
-	const double Ac = M_PI * dc * dc / 4;
-	//position
-	const math::vec3 z1 = position(index, 0, 0);
-	const math::vec3 z2 = position(index, 1, 0);
-	const math::vec3 x1 = position(index, 0, 1);
-	const math::vec3 x2 = position(index, 1, 1);
-	//lengths
-	const double Lk = (z2 - z1).norm();
-	const double lk = (x2 - x1).norm();
-	//strain
-	const double ak = lk / Lk;
-	const double ek = Strain::strain(ak, m_strain_measure);
-	const double gk = Strain::strain_gradient(ak, m_strain_measure);
-	//return
-	const uint32_t nk = index == 0 ? m_nc : 1;
-	return fmax(Ec * Ac * ek * gk + nk * sr * Ac, 0);
 }
 
 //position

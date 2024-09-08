@@ -11,10 +11,11 @@ set size ratio 1
 set format x '%.2f'
 set format y '%.2f'
 set format cb '%.2e'
-set title word(labels, index)
 set palette rgbformulae 33, 13, 10
 
-Rr = 0.14
-splot 'data/force.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(index + 2)) notitle
-
-replot
+do for [i = 1 : 6] {
+	set terminal pdf
+	set title word(labels, i)
+	set output sprintf('state_%d.pdf', i)
+	splot 'state.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(i + 2)) notitle
+}

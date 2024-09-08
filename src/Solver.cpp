@@ -85,6 +85,7 @@ void Solver::solve(void)
 {
 	setup();
 	record();
+	m_tensegrity->external_force(m_fe);
 	for(m_step = 1; m_step <= m_step_max; m_step++)
 	{
 		m_equilibrium = false;

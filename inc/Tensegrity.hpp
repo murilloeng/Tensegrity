@@ -74,6 +74,8 @@ public:
 	const std::vector<math::vec3>& loads_position(void) const;
 
 	//formulation
+	double cable_force(uint32_t) const;
+
 	double internal_energy(void) const;
 	double potential_energy(void) const;
 	
@@ -85,9 +87,6 @@ public:
 private:
 	//friends
 	friend class Solver;
-
-	//cables
-	double cable_force(uint32_t) const;
 
 	//position
 	math::vec3 position(uint32_t, bool, bool) const;
