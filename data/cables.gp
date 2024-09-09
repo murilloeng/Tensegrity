@@ -11,16 +11,16 @@ set format y '%.2f'
 set format cb '%.2e'
 set palette rgbformulae 33, 13, 10
 
+R = 0.14
+set terminal pdf
+set for [i = 1 : nc] arrow from 0, 0 to R * cos(2 * pi * i / nc + pi / nc), R * sin(2 * pi * i / nc + pi / nc) front nohead dashtype 2
+
 do for [i = 1 : nc + 1] {
-	set terminal windows
-	set title sprintf("Cable %d", i)
-	splot 'cables.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(i + 2)) notitle
-	R = 0.14
 	x = i == 1 ? 0 : R * cos(2 * pi * (i - 1) / nc)
 	y = i == 1 ? 0 : R * sin(2 * pi * (i - 1) / nc)
-	set terminal pdf
+	set title sprintf("Cable %d", i)
 	set output sprintf('cables_%d.pdf', i - 1)
 	set label 1 "" at x, y point pointtype 7 linecolor rgb "#000000" front
-	replot
+	splot 'cables.txt' using ($1 * cos($2)) : ($1 * sin($2)) : (column(i + 2)) notitle
 	unset label 1
 }

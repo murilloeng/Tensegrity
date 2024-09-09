@@ -114,7 +114,6 @@ void Test::solve(void)
 			//solve
 			tensegrity.load_position(0, {r * cos(t), r * sin(t), Ht});
 			tensegrity.solver()->solve();
-			printf("radius: %d angle: %d\n", i, j);
 			if(!tensegrity.solver()->equilibrium()) test = false;
 			//save
 			m_data_state[8 * (i * na + j) + 0] = r;
@@ -137,6 +136,7 @@ void Test::solve(void)
 			m_data_energy[3 * (i * na + j) + 2] = tensegrity.internal_energy();
 		}
 		if(!test) break;
+		printf("radius: %d\n", i);
 	}
 	write_state();
 	write_cables();

@@ -11,7 +11,10 @@ set format y '%.2f'
 set format cb '%.2e'
 set palette rgbformulae 33, 13, 10
 
+R = 0.14
 set terminal pdf
+set for [i = 1 : nc] arrow from 0, 0 to R * cos(2 * pi * i / nc + pi / nc), R * sin(2 * pi * i / nc + pi / nc) front nohead dashtype 2
+
 set output 'energy.pdf'
 set title 'Internal Energy'
 splot 'energy.txt' using ($1 * cos($2)) : ($1 * sin($2)) : ($3) notitle
