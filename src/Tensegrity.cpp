@@ -187,6 +187,33 @@ const std::vector<math::vec3>& Tensegrity::loads_position(void) const
 }
 
 //formulation
+void Tensegrity::modes(void) const
+{
+	//data
+	math::vector s(std::min(6U, m_nc + 1));
+	const math::vec3 zr(0, 0, m_height_total);
+	math::matrix A(6, m_nc + 1), U(6, 6), V(m_nc + 1, m_nc + 1);
+	//assembly
+	for(uint32_t k = 0; k < m_nc + 1; k++)
+	{
+		//position
+		const math::vec3 z1 = position(k, 0, 0);
+		const math::vec3 z2 = position(k, 1, 0);
+		//direction
+		const math::vec3 r = z2 - zr;
+		const math::vec3 t = (z2 - z1).normalize();
+		//assembly
+		A.span(0, k, 3, 1) = t;
+		A.span(3, k, 3, 1) = r.cross(t);
+	}
+	//decomposition
+	A.svd(U, V, s);
+	//print
+	A.print("A");
+	U.print("U");
+	V.transpose().print("V");
+	s.print("s");
+}
 double Tensegrity::cable_force(uint32_t index) const
 {
 	//data
@@ -360,6 +387,27 @@ void Tensegrity::external_force(math::vector& fe) const
 		math::vec3(fe.data() + 0) += m_pk[i];
 		math::vec3(fe.data() + 3) += qr.rotate(m_ak[i] - zr).cross(m_pk[i]);
 	}
+}
+
+//operators
+Tensegrity& Tensegrity::operator=(const Tensegrity& tensegrity)
+{
+	m_nc = tensegrity.m_nc;
+	*m_solver = *tensegrity.m_solver;
+	strcpy(m_label, tensegrity.m_label);
+	m_inelastic = tensegrity.m_inelastic;
+	m_rod_length = tensegrity.m_rod_length;
+	m_twist_angle = tensegrity.m_twist_angle;
+	m_yield_stress = tensegrity.m_yield_stress;
+	m_height_total = tensegrity.m_height_total;
+	m_height_center = tensegrity.m_height_center;
+	m_strain_measure = tensegrity.m_strain_measure;
+	m_plate_diameter = tensegrity.m_plate_diameter;
+	m_plate_thickness = tensegrity.m_plate_thickness;
+	m_cables_diameter = tensegrity.m_cables_diameter;
+	m_residual_stress = tensegrity.m_residual_stress;
+	m_elastic_modulus = tensegrity.m_elastic_modulus;
+	return *this;
 }
 
 //position

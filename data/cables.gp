@@ -12,10 +12,13 @@ set format cb '%.2e'
 set palette rgbformulae 33, 13, 10
 
 R = 0.14
+dt = pi / nc
+a(i) = 2 * dt * i
+
 set terminal pdf
-set for [i = 1 : nc] label "" at 0, 0 front point pointtype 6
-set for [i = 1 : nc] label "" at R * cos(2 * pi * i / nc), R * sin(2 * pi * i / nc) front point pointtype 6
-set for [i = 1 : nc] arrow from 0, 0 to R * cos(2 * pi * i / nc + pi / nc), R * sin(2 * pi * i / nc + pi / nc) front nohead dashtype 2
+set label "" at 0, 0 front point pointtype 6
+set for [i = 1 : nc] label "" at R * cos(a(i)), R * sin(a(i)) front point pointtype 6
+set for [i = 1 : nc] arrow from 0, 0 to R * cos(a(i) + dt), R * sin(a(i) + dt) front nohead dashtype 2
 
 do for [i = 1 : nc + 1] {
 	set title sprintf("Cable %d", i)

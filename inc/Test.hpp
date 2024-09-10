@@ -24,8 +24,8 @@ public:
 	double tension(double);
 	double tension(void) const;
 
-	uint16_t cables(uint32_t);
-	uint16_t cables(void) const;
+	uint32_t cables(uint32_t);
+	uint32_t cables(void) const;
 
 	uint16_t mesh_angle(uint32_t);
 	uint16_t mesh_angle(void) const;
@@ -48,11 +48,9 @@ private:
 
 	//data
 	double m_force;
-	double m_tension;
 
 	Tensegrity m_base;
 
-	uint32_t m_cables;
 	uint32_t m_mesh_angle;
 	uint32_t m_mesh_radius;
 

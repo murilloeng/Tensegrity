@@ -74,6 +74,7 @@ public:
 	const std::vector<math::vec3>& loads_position(void) const;
 
 	//formulation
+	void modes(void) const;
 	double cable_force(uint32_t) const;
 
 	double internal_energy(void) const;
@@ -83,6 +84,9 @@ public:
 	
 	void internal_force(math::vector&) const;
 	void external_force(math::vector&) const;
+
+	//operators
+	Tensegrity& operator=(const Tensegrity&);
 
 private:
 	//friends

@@ -80,6 +80,16 @@ const double* Solver::state(const double* state_new)
 	return (const double*) memcpy(m_state_new, state_new, 7 * sizeof(double));
 }
 
+//operators
+Solver& Solver::operator=(const Solver& solver)
+{
+	m_dl = solver.m_dl;
+	m_log = solver.m_log;
+	m_step_max = solver.m_step_max;
+	m_iteration_max = solver.m_iteration_max;
+	return *this;
+}
+
 //solve
 void Solver::solve(void)
 {

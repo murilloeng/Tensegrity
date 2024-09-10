@@ -35,11 +35,13 @@ public:
 	const double* state(void) const;
 	const double* state(const double*);
 
+	//operators
+	Solver& operator=(const Solver&);
+
 	//solve
 	void solve(void);
 
 private:
-	
 	//solver
 	void setup(void);
 	void record(void);

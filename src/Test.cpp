@@ -10,7 +10,7 @@
 
 //constructors
 Test::Test(void) : 
-	m_cables(3), m_mesh_angle(100), m_mesh_radius(100), m_force(0.00e+00), m_tension(0.00e+00),
+	m_mesh_angle(100), m_mesh_radius(100), m_force(0.00e+00),
 	m_data_state(nullptr), m_data_cables(nullptr), m_data_energy(nullptr)
 {
 	m_base.solver()->log(false);
@@ -41,20 +41,24 @@ double Test::force(double force)
 
 double Test::tension(void) const
 {
-	return m_tension;
+	const double dc = m_base.cables_diameter();
+	const double sr = m_base.residual_stress();
+	return M_PI / 4 * dc * dc * sr;
 }
 double Test::tension(double tension)
 {
-	return m_tension = tension;
+	const double dc = m_base.cables_diameter();
+	m_base.residual_stress(tension / (M_PI / 4 * dc * dc));
+	return tension;
 }
 
-uint16_t Test::cables(void) const
+uint32_t Test::cables(uint32_t cables)
 {
-	return m_cables;
+	return m_base.cables(cables);
 }
-uint16_t Test::cables(uint32_t cables)
+uint32_t Test::cables(void) const
 {
-	return m_cables = cables;
+	return m_base.cables();
 }
 
 uint16_t Test::mesh_angle(void) const
@@ -79,10 +83,11 @@ uint16_t Test::mesh_radius(uint32_t mesh_radius)
 void Test::solve(void)
 {
 	//data
+	bool test;
 	using namespace std::chrono;
-	const uint32_t nc = m_cables;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
+	const uint32_t nc = m_base.cables();
 	const uint32_t nt = omp_get_max_threads();
 	const double Ht = m_base.height_total();
 	const double dp = m_base.plate_diameter();
@@ -93,17 +98,15 @@ void Test::solve(void)
 	m_base.cable_force(nc);
 	for(uint32_t i = 0; i < nt; i++)
 	{
-		tensegrities[i].cables(nc);
+		tensegrities[i] = m_base;
 		const double Ac = M_PI * dc * dc / 4;
-		tensegrities[i].solver()->log(false);
 		tensegrities[i].add_load({0, 0, -m_force}, {});
-		tensegrities[i].residual_stress(m_tension / Ac);
 	}
 	//solve
 	setup();
 	for(uint32_t i = 0; i < nr; i++)
 	{
-		bool test = true;
+		test = true;
 		#pragma omp parallel for
 		for(int32_t j = 0; j < int32_t(na); j++)
 		{
@@ -138,9 +141,12 @@ void Test::solve(void)
 		if(!test) break;
 		printf("radius: %d\n", i);
 	}
-	write_state();
-	write_cables();
-	write_energy();
+	if(test)
+	{
+		write_state();
+		write_cables();
+		write_energy();
+	}
 	const high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	const double td = (double) duration_cast<milliseconds>(t2 - t1).count();
 	printf("Solution computed in %lf seconds\n", td / 1e3);
@@ -150,9 +156,9 @@ void Test::solve(void)
 void Test::setup(void)
 {
 	//data
-	const uint32_t nc = m_cables;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
+	const uint32_t nc = m_base.cables();
 	//memory
 	delete[] m_data_state;
 	delete[] m_data_cables;
@@ -170,9 +176,9 @@ void Test::write_state(void) const
 	//data
 	char path[200];
 	this->path(path);
-	const uint32_t nc = m_cables;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
+	const uint32_t nc = m_base.cables();
 	sprintf(path, "%s/state.txt", path);
 	//file
 	FILE* file = fopen(path, "w");
@@ -197,9 +203,9 @@ void Test::write_cables(void) const
 	//data
 	char path[200];
 	this->path(path);
-	const uint32_t nc = m_cables;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
+	const uint32_t nc = m_base.cables();
 	sprintf(path, "%s/cables.txt", path);
 	//file
 	FILE* file = fopen(path, "w");
@@ -224,9 +230,9 @@ void Test::write_energy(void) const
 	//data
 	char path[200];
 	this->path(path);
-	const uint32_t nc = m_cables;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
+	const uint32_t nc = m_base.cables();
 	sprintf(path, "%s/energy.txt", path);
 	//file
 	FILE* file = fopen(path, "w");
@@ -250,8 +256,8 @@ void Test::write_energy(void) const
 //path
 void Test::path(char* path) const
 {
-	const uint32_t nc = m_cables;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
-	sprintf(path, "data/%d_%d_%d_%.2e_%.2e", nc, na, nr, m_force, m_tension);
+	const uint32_t nc = m_base.cables();
+	sprintf(path, "data/%d_%d_%d_%.2e_%.2e", nc, na, nr, m_force, tension());
 }
