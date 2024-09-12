@@ -24,6 +24,7 @@ Solver::Solver(Tensegrity* tensegrity) :
 //destructor
 Solver::~Solver(void)
 {
+	delete m_strategy;
 	delete[] m_state_old;
 	delete[] m_state_new;
 	delete[] m_state_data;
