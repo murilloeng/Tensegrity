@@ -6,14 +6,14 @@
 //tensegrity
 #include "Tensegrity/inc/Tensegrity.hpp"
 
-class Test
+class Map
 {
 public:
 	//constructors
-	Test(void);
+	Map(void);
 
 	//destructor
-	~Test(void);
+	~Map(void);
 
 	//data
 	Tensegrity& base(void);

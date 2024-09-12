@@ -4,6 +4,7 @@
 
 //tensegrity
 #include "Tensegrity/inc/Solver.hpp"
+#include "Tensegrity/inc/Strategy.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
 //constructors
@@ -44,6 +45,15 @@ bool Solver::equilibrium(void) const
 	return m_equilibrium;
 }
 
+Strategy* Solver::strategy(void) const
+{
+	return m_strategy;
+}
+Strategy* Solver::strategy(strategy_type type)
+{
+	return Strategy::create(m_strategy, type);
+}
+
 uint32_t Solver::step_max(void) const
 {
 	return m_step_max;
@@ -78,6 +88,29 @@ const double* Solver::state(void) const
 const double* Solver::state(const double* state_new)
 {
 	return (const double*) memcpy(m_state_new, state_new, 7 * sizeof(double));
+}
+
+//increments
+double Solver::load_predictor(void) const
+{
+	return m_dl;
+}
+double Solver::load_corrector(void) const
+{
+	return m_ddl;
+}
+
+const math::vector& Solver::dof_predictor(void) const
+{
+	return m_dxt;
+}
+const math::vector& Solver::dof_increment(void) const
+{
+	return m_dx;
+}
+const math::vector& Solver::dof_corrector(bool type) const
+{
+	return type ? m_ddxt : m_ddxr;
 }
 
 //operators

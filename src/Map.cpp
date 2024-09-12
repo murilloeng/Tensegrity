@@ -5,11 +5,11 @@
 #include <filesystem>
 
 //tensegrity
-#include "Tensegrity/inc/Test.hpp"
+#include "Tensegrity/inc/Map.hpp"
 #include "Tensegrity/inc/Solver.hpp"
 
 //constructors
-Test::Test(void) : 
+Map::Map(void) : 
 	m_mesh_angle(100), m_mesh_radius(100), m_force(0.00e+00),
 	m_data_state(nullptr), m_data_cables(nullptr), m_data_energy(nullptr)
 {
@@ -17,7 +17,7 @@ Test::Test(void) :
 }
 
 //destructor
-Test::~Test(void)
+Map::~Map(void)
 {
 	delete[] m_data_state;
 	delete[] m_data_cables;
@@ -25,62 +25,62 @@ Test::~Test(void)
 }
 
 //data
-Tensegrity& Test::base(void)
+Tensegrity& Map::base(void)
 {
 	return m_base;
 }
 
-double Test::force(void) const
+double Map::force(void) const
 {
 	return m_force;
 }
-double Test::force(double force)
+double Map::force(double force)
 {
 	return m_force = force;
 }
 
-double Test::tension(void) const
+double Map::tension(void) const
 {
 	const double dc = m_base.cables_diameter();
 	const double sr = m_base.residual_stress();
 	return M_PI / 4 * dc * dc * sr;
 }
-double Test::tension(double tension)
+double Map::tension(double tension)
 {
 	const double dc = m_base.cables_diameter();
 	m_base.residual_stress(tension / (M_PI / 4 * dc * dc));
 	return tension;
 }
 
-uint32_t Test::cables(uint32_t cables)
+uint32_t Map::cables(uint32_t cables)
 {
 	return m_base.cables(cables);
 }
-uint32_t Test::cables(void) const
+uint32_t Map::cables(void) const
 {
 	return m_base.cables();
 }
 
-uint16_t Test::mesh_angle(void) const
+uint16_t Map::mesh_angle(void) const
 {
 	return m_mesh_angle;
 }
-uint16_t Test::mesh_angle(uint32_t mesh_angle)
+uint16_t Map::mesh_angle(uint32_t mesh_angle)
 {
 	return m_mesh_angle = mesh_angle;
 }
 
-uint16_t Test::mesh_radius(void) const
+uint16_t Map::mesh_radius(void) const
 {
 	return m_mesh_radius;
 }
-uint16_t Test::mesh_radius(uint32_t mesh_radius)
+uint16_t Map::mesh_radius(uint32_t mesh_radius)
 {
 	return m_mesh_radius = mesh_radius;
 }
 
 //solve
-void Test::solve(void)
+void Map::solve(void)
 {
 	//data
 	bool test;
@@ -153,7 +153,7 @@ void Test::solve(void)
 }
 
 //setup
-void Test::setup(void)
+void Map::setup(void)
 {
 	//data
 	const uint32_t na = m_mesh_angle;
@@ -171,7 +171,7 @@ void Test::setup(void)
 	this->path(path);
 	std::filesystem::create_directory(path);
 }
-void Test::write_state(void) const
+void Map::write_state(void) const
 {
 	//data
 	char path[200];
@@ -198,7 +198,7 @@ void Test::write_state(void) const
 	//close
 	fclose(file);
 }
-void Test::write_cables(void) const
+void Map::write_cables(void) const
 {
 	//data
 	char path[200];
@@ -225,7 +225,7 @@ void Test::write_cables(void) const
 	//close
 	fclose(file);
 }
-void Test::write_energy(void) const
+void Map::write_energy(void) const
 {
 	//data
 	char path[200];
@@ -254,10 +254,10 @@ void Test::write_energy(void) const
 }
 
 //path
-void Test::path(char* path) const
+void Map::path(char* path) const
 {
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
 	const uint32_t nc = m_base.cables();
-	sprintf(path, "data/%d_%d_%d_%.2e_%.2e", nc, na, nr, m_force, tension());
+	sprintf(path, "data/Map-%d-%d-%d-%d", nc, na, nr, tension() > m_force / 2);
 }

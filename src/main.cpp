@@ -10,7 +10,7 @@
 #include "Math/inc/misc/misc.hpp"
 
 //Tensegrity
-#include "Tensegrity/inc/Test.hpp"
+#include "Tensegrity/inc/Map.hpp"
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
@@ -112,15 +112,15 @@ void test_stiffness(void)
 int main(void)
 {
 	//data
-	Test test;
-	test.cables(6);
-	test.mesh_angle(100);
-	test.mesh_radius(100);
+	Map map;
+	map.cables(6);
+	map.mesh_angle(100);
+	map.mesh_radius(100);
 	//data
-	test.force(1.00e+03);
-	test.tension(1.00e+02);
+	map.force(1.00e+03);
+	map.tension(1.00e+02);
 	//solve
-	test.solve();
+	map.solve();
 	//return
 	return EXIT_SUCCESS;
 }

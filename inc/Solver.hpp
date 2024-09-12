@@ -3,7 +3,9 @@
 //math
 #include "Math/inc/linear/vector.hpp"
 
+class Strategy;
 class Tensegrity;
+enum class strategy_type : uint32_t;
 
 class Solver
 {
@@ -23,6 +25,9 @@ public:
 
 	bool equilibrium(void) const;
 
+	Strategy* strategy(void) const;
+	Strategy* strategy(strategy_type);
+
 	uint32_t step_max(uint32_t);
 	uint32_t step_max(void) const;
 
@@ -34,6 +39,14 @@ public:
 
 	const double* state(void) const;
 	const double* state(const double*);
+
+	//increments
+	double load_predictor(void) const;
+	double load_corrector(void) const;
+
+	const math::vector& dof_predictor(void) const;
+	const math::vector& dof_increment(void) const;
+	const math::vector& dof_corrector(bool) const;
 
 	//operators
 	Solver& operator=(const Solver&);
@@ -91,5 +104,6 @@ private:
 	double* m_solver_data;
 	double* m_energy_data;
 
+	Strategy* m_strategy;
 	Tensegrity* m_tensegrity;
 };
