@@ -41,7 +41,6 @@ public:
 	const double* state(const double*);
 
 	//increments
-	double load_predictor(void) const;
 	double load_corrector(void) const;
 
 	const math::vector& dof_predictor(void) const;

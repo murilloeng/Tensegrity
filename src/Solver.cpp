@@ -94,10 +94,6 @@ const double* Solver::state(const double* state_new)
 }
 
 //increments
-double Solver::load_predictor(void) const
-{
-	return m_dl;
-}
 double Solver::load_corrector(void) const
 {
 	return m_ddl;
