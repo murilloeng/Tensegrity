@@ -65,6 +65,8 @@ private:
 	void update(void);
 	void restore(void);
 	void log_step(void);
+	void predictor(void);
+	void corrector(void);
 	void clear_state(void);
 	void update_state(void);
 

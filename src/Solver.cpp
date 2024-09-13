@@ -9,7 +9,7 @@
 
 //constructors
 Solver::Solver(Tensegrity* tensegrity) :
-	m_dl(1.00e-03), m_step_max(1000), m_iteration_max(10), 
+	m_dl0(1.00e-03), m_step_max(1000), m_iteration_max(10), 
 	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6), m_tensegrity(tensegrity), m_state_data(nullptr), m_cables_data(nullptr), m_solver_data(nullptr), m_energy_data(nullptr)
 {
 	m_strategy = nullptr;
@@ -132,13 +132,9 @@ void Solver::solve(void)
 {
 	setup();
 	record();
-	m_tensegrity->external_force(m_fe);
 	for(m_step = 1; m_step <= m_step_max; m_step++)
 	{
-		m_equilibrium = false;
-		m_l_new = m_l_old + m_dl;
-		m_tensegrity->stiffness(m_Kt);
-		m_Kt.solve(m_dx, m_dl * m_fe);
+		predictor();
 		for(m_iteration = 0; m_iteration < m_iteration_max; m_iteration++)
 		{
 			//state
@@ -154,14 +150,8 @@ void Solver::solve(void)
 				m_equilibrium = true;
 				break;
 			}
-			//state
-			m_ddl = 0;
-			m_tensegrity->stiffness(m_Kt);
 			//update
-			m_Kt.solve(m_ddxr, m_r);
-			m_Kt.solve(m_ddxt, m_fe);
-			m_dx += m_ddxr + m_ddl * m_ddxt;
-			update_state();
+			corrector();
 		}
 		if(!m_equilibrium)
 		{
@@ -246,6 +236,34 @@ void Solver::log_step(void)
 	{
 		printf("step: %04d iterations: %02d load: %+.2e\n", m_step, m_iteration, m_l_new);
 	}
+}
+void Solver::predictor(void)
+{
+	//state
+	m_equilibrium = false;
+	m_tensegrity->stiffness(m_Kt);
+	m_tensegrity->external_force(m_fe);
+	//tangent
+	m_Kt.solve(m_dxt, m_fe);
+	m_dl = m_step == 1 ? m_dl0 : m_strategy->load_predictor(this);
+	//update
+	m_dx = m_dl * m_dxt;
+	m_l_new = m_l_old + m_dl;
+}
+void Solver::corrector(void)
+{
+	//state
+	m_tensegrity->stiffness(m_Kt);
+	//increments
+	m_Kt.solve(m_ddxr, m_r);
+	m_Kt.solve(m_ddxt, m_fe);
+	m_ddl = m_strategy->load_corrector(this);
+	//increment
+	m_dl += m_ddl;
+	m_dx += m_ddxr + m_ddl * m_ddxt;
+	//update
+	update_state();
+	m_l_new = m_l_old + m_dl;
 }
 void Solver::clear_state(void)
 {

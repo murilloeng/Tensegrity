@@ -113,7 +113,7 @@ int main(void)
 {
 	//data
 	Map map;
-	map.cables(6);
+	map.cables(3);
 	map.mesh_angle(100);
 	map.mesh_radius(100);
 	//data
