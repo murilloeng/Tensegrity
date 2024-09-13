@@ -1,5 +1,8 @@
 #pragma once
 
+//std
+#include <cstdint>
+
 //math
 #include "Math/inc/linear/vector.hpp"
 
