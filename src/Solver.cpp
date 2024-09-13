@@ -75,13 +75,13 @@ uint32_t Solver::iteration_max(uint32_t iteration_max)
 	return m_iteration_max = iteration_max;
 }
 
-double Solver::load_predictor(double dl)
+double Solver::load_increment(double dl0)
 {
-	return m_dl = dl;
+	return m_dl0 = dl0;
 }
-double Solver::load_predictor(void) const
+double Solver::load_increment(void) const
 {
-	return m_dl;
+	return m_dl0;
 }
 
 const double* Solver::state(void) const
@@ -94,6 +94,10 @@ const double* Solver::state(const double* state_new)
 }
 
 //increments
+double Solver::load_predictor(void) const
+{
+	return m_dl;
+}
 double Solver::load_corrector(void) const
 {
 	return m_ddl;

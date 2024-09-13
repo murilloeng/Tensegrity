@@ -34,14 +34,15 @@ public:
 	uint32_t iteration_max(uint32_t);
 	uint32_t iteration_max(void) const;
 
-	double load_predictor(double);
-	double load_predictor(void) const;
+	double load_increment(double);
+	double load_increment(void) const;
 
 	const double* state(void) const;
 	const double* state(const double*);
 
 	//increments
 	double load_corrector(void) const;
+	double load_predictor(void) const;
 
 	const math::vector& dof_predictor(void) const;
 	const math::vector& dof_increment(void) const;
@@ -71,6 +72,7 @@ private:
 
 	//data
 	double m_dl;
+	double m_dl0;
 	double m_ddl;
 	double m_l_old;
 	double m_l_new;
