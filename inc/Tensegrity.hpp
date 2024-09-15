@@ -72,6 +72,9 @@ public:
 	void show_model(int32_t&, char**);
 	void show_deformed(int32_t&, char**);
 
+	void draw_model(canvas::Scene*) const;
+	void draw_deformed(canvas::Scene*) const;
+
 	//loads
 	void remove_load(uint32_t);
 	void add_load(math::vec3, math::vec3);
@@ -99,10 +102,6 @@ public:
 private:
 	//friends
 	friend class Solver;
-
-	//draw
-	void draw_model(canvas::Scene*) const;
-	void draw_deformed(canvas::Scene*) const;
 
 	//position
 	math::vec3 position(uint32_t, bool, bool) const;

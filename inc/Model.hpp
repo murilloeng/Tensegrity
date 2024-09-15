@@ -16,7 +16,14 @@ public:
 	//destructor
 	~Model(void);
 
+	//update
+	void update(void);
+
 private:
+	//events
+	void keyPressEvent(QKeyEvent*) override;
+
+	//data
 	Canvas* m_canvas;
 	const Tensegrity* m_tensegrity;
 };

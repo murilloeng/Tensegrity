@@ -171,16 +171,47 @@ Strain::strain_measure Tensegrity::strain_measure(Strain::strain_measure strain_
 void Tensegrity::show_model(int32_t& argc, char** argv)
 {
 	//application
+	QSurfaceFormat format;
 	QApplication application(argc, argv);
+	//surface
+	format.setSamples(4);
+	QSurfaceFormat::setDefaultFormat(format);
 	//window
 	Model model(this);
 	model.showMaximized();
 	//execute
+	model.update();
 	application.exec();
 }
 void Tensegrity::show_deformed(int32_t& argc, char** argv)
 {
 	show_model(argc, argv);
+}
+
+void Tensegrity::draw_model(canvas::Scene* scene) const
+{
+	//data
+	const float Ht = (float) m_height_total;
+	const float dp = (float) m_plate_diameter;
+	const float tp = (float) m_plate_thickness;
+	canvas::objects::Cylinder* plate_1 = new canvas::objects::Cylinder;
+	canvas::objects::Cylinder* plate_2 = new canvas::objects::Cylinder;
+	//plates
+	plate_1->height(tp);
+	plate_2->height(tp);
+	plate_1->radius(dp / 2);
+	plate_2->radius(dp / 2);
+	plate_2->shift({0, 0, Ht});
+	plate_1->color_fill("blue");
+	plate_2->color_fill("blue");
+	//objects
+	scene->clear_objects(true);
+	scene->add_object(plate_1);
+	scene->add_object(plate_2);
+}
+void Tensegrity::draw_deformed(canvas::Scene* scene) const
+{
+	draw_model(scene);
 }
 
 //loads
@@ -434,31 +465,6 @@ Tensegrity& Tensegrity::operator=(const Tensegrity& tensegrity)
 	m_residual_stress = tensegrity.m_residual_stress;
 	m_elastic_modulus = tensegrity.m_elastic_modulus;
 	return *this;
-}
-
-//draw
-void Tensegrity::draw_model(canvas::Scene* scene) const
-{
-	//data
-	const float Ht = (float) m_height_total;
-	const float dp = (float) m_plate_diameter;
-	const float tp = (float) m_plate_thickness;
-	canvas::objects::Cylinder* plate_1 = new canvas::objects::Cylinder;
-	canvas::objects::Cylinder* plate_2 = new canvas::objects::Cylinder;
-	//plates
-	plate_1->height(tp);
-	plate_2->height(tp);
-	plate_1->radius(dp / 2);
-	plate_2->radius(dp / 2);
-	plate_2->shift({0, 0, Ht});
-	//objects
-	scene->clear_objects(true);
-	scene->add_object(plate_1);
-	scene->add_object(plate_2);
-}
-void Tensegrity::draw_deformed(canvas::Scene* scene) const
-{
-	draw_model(scene);
 }
 
 //position
