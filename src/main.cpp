@@ -12,6 +12,7 @@
 //Tensegrity
 #include "Tensegrity/inc/Map.hpp"
 #include "Tensegrity/inc/Solver.hpp"
+#include "Tensegrity/inc/Strategy.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
 void fun_energy(double* U, const double* d, void** args)
@@ -109,18 +110,28 @@ void test_stiffness(void)
 	}
 }
 
-int main(void)
+int main(int32_t argc, char* argv[])
 {
-	//data
-	Map map;
-	map.cables(3);
-	map.mesh_angle(100);
-	map.mesh_radius(100);
-	//data
-	map.force(1.00e+03);
-	map.tension(1.00e+02);
-	//solve
-	map.solve();
+	// //data
+	// Tensegrity tensegrity;
+	// const double fr = 1.00e+02;
+	// const double Pr = 1.00e+03;
+	// const double Ht = tensegrity.height_total();
+	// const double dp = tensegrity.plate_diameter();
+	// const double dc = tensegrity.cables_diameter();
+	// //tension
+	// const double Ac = M_PI * dc * dc / 4;
+	// tensegrity.residual_stress(fr / Ac);
+	// //loads
+	// tensegrity.add_load({0, 0, -Pr}, {dp / 2, 0, Ht});
+	// //solver
+	// tensegrity.solver()->step_max(800000);
+	// tensegrity.solver()->strategy(strategy_type::arc_length);
+	// //solve
+	// tensegrity.solver()->solve();
+
+	Tensegrity tensegrity;
+	tensegrity.show_model(argc, argv);
 	//return
 	return EXIT_SUCCESS;
 }

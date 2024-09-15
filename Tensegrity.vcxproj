@@ -133,7 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..;../external/cpp/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../external/cpp/inc;%QT_HOME%/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -143,15 +143,17 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;dist/$(platform)/$(configuration)/Canvas.lib;%QT_HOME%/lib/Qt6Gui.lib;%QT_HOME%/lib/Qt6Core.lib;%QT_HOME%/lib/Qt6Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4204 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\external\cpp\dll\x64\libblas.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\liblapack.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\libgfortran-3.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
+      <Command>copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\glew32.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\freetype.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\liblapack.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgfortran-3.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgcc_s_sjlj-1.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(configuration) &gt; nul</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -166,7 +168,7 @@ copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_USE_MATH_DEFINES;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..;../external/cpp/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;../external/cpp/inc;%QT_HOME%/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -178,15 +180,17 @@ copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;dist/$(platform)/$(configuration)/Canvas.lib;%QT_HOME%/lib/Qt6Gui.lib;%QT_HOME%/lib/Qt6Core.lib;%QT_HOME%/lib/Qt6Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4204 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\external\cpp\dll\x64\libblas.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\liblapack.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\libgfortran-3.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\libgcc_s_sjlj-1.dll dist\x64\Debug &gt; nul
-copy ..\external\cpp\dll\x64\libquadmath-0.dll dist\x64\Debug &gt; nul</Command>
+      <Command>copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\glew32.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\freetype.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\liblapack.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgfortran-3.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgcc_s_sjlj-1.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(configuration) &gt; nul</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>

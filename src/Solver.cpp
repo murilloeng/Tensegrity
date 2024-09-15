@@ -12,6 +12,7 @@ Solver::Solver(Tensegrity* tensegrity) :
 	m_dl0(1.00e-03), m_step_max(1000), m_iteration_max(10), 
 	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6), m_tensegrity(tensegrity), m_state_data(nullptr), m_cables_data(nullptr), m_solver_data(nullptr), m_energy_data(nullptr)
 {
+	m_log = true;
 	m_strategy = nullptr;
 	m_state_old = new double[7];
 	m_state_new = new double[7];

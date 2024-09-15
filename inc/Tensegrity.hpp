@@ -8,6 +8,9 @@
 #include "Math/inc/linear/quat.hpp"
 #include "Math/inc/linear/mat3.hpp"
 
+//canvas
+#include "Canvas/inc/Scene/Scene.hpp"
+
 //tensegrity
 #include "Tensegrity/inc/Strain.hpp"
 
@@ -64,6 +67,10 @@ public:
 	Strain::strain_measure strain_measure(void) const;
 	Strain::strain_measure strain_measure(Strain::strain_measure);
 
+	//draw
+	void show_model(int32_t&, char**);
+	void show_deformed(int32_t&, char**);
+
 	//loads
 	void remove_load(uint32_t);
 	void add_load(math::vec3, math::vec3);
@@ -91,6 +98,10 @@ public:
 private:
 	//friends
 	friend class Solver;
+
+	//draw
+	void draw_model(canvas::Scene*) const;
+	void draw_deformed(canvas::Scene*) const;
 
 	//position
 	math::vec3 position(uint32_t, bool, bool) const;
