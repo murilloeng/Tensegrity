@@ -24,6 +24,7 @@ Tensegrity::Tensegrity(void) : m_nc(3), m_inelastic(false), m_solver(new Solver(
 	//data
 	m_rod_length = 5.00e-02;
 	m_twist_angle = 0.00e+00;
+	m_rod_thicknes = 1.00e-02;
 	m_yield_stress = 4.00e+08;
 	m_height_total = 3.20e-01;
 	m_height_center = 1.40e-01;
@@ -81,6 +82,16 @@ double Tensegrity::twist_angle(void) const
 {
 	return m_twist_angle;
 }
+
+double Tensegrity::rod_thickness(void) const
+{
+	return m_rod_thicknes;
+}
+double Tensegrity::rod_thickness(double rod_thickness)
+{
+	return m_rod_thicknes = rod_thickness;
+}
+
 double Tensegrity::twist_angle(double twist_angle)
 {
 	return m_twist_angle = twist_angle;
@@ -191,9 +202,17 @@ void Tensegrity::show_deformed(int32_t& argc, char** argv)
 void Tensegrity::draw_model(canvas::Scene* scene) const
 {
 	//data
+	const float er  =(float) m_rod_length;
+	const float tr = (float) m_rod_thicknes;
 	const float Ht = (float) m_height_total;
+	const float Hc = (float) m_height_center;
 	const float dp = (float) m_plate_diameter;
 	const float tp = (float) m_plate_thickness;
+	const float Hr = (Ht + Hc) / 2;
+	canvas::objects::Cube* rod_1 = new canvas::objects::Cube;
+	canvas::objects::Cube* rod_2 = new canvas::objects::Cube;
+	canvas::objects::Cube* rod_3 = new canvas::objects::Cube;
+	canvas::objects::Cube* rod_4 = new canvas::objects::Cube;
 	canvas::objects::Cylinder* plate_1 = new canvas::objects::Cylinder;
 	canvas::objects::Cylinder* plate_2 = new canvas::objects::Cylinder;
 	//plates
@@ -204,8 +223,43 @@ void Tensegrity::draw_model(canvas::Scene* scene) const
 	plate_2->shift({0, 0, Ht});
 	plate_1->color_fill("blue");
 	plate_2->color_fill("blue");
-	//objects
+	//rods
+	rod_1->color_fill("blue");
+	rod_2->color_fill("blue");
+	rod_3->color_fill("blue");
+	rod_4->color_fill("blue");
+	rod_2->scale({er, tr, tr});
+	rod_4->scale({er, tr, tr});
+	rod_2->shift({(er - tr) / 2, 0, Hr});
+	rod_4->shift({(tr - er) / 2, 0, Ht - Hr});
+	rod_1->scale({tr, tr, (2 * Hr + tr - tp) / 2});
+	rod_3->scale({tr, tr, (2 * Hr + tr - tp) / 2});
+	rod_1->shift({+er, 0, (2 * Hr + tr + tp) / 4});
+	rod_3->shift({-er, 0, (2 * Hr + tr - tp) / 4 + Ht - Hr - tp});
+	//cables
 	scene->clear_objects(true);
+	for(uint32_t k = 0; k < m_nc + 1; k++)
+	{
+		const float t = 2 * float(M_PI) * k / m_nc;
+		canvas::objects::Line* cable = new canvas::objects::Line;
+		cable->color_stroke("green");
+		if(k == 0)
+		{
+			cable->point(1, {0, 0, Hr + tr / 2});
+			cable->point(0, {0, 0, Ht - Hr + tr / 2});
+		}
+		else
+		{
+			cable->point(0, {dp / 2 * cosf(t), dp / 2 * sinf(t), tp / 2});
+			cable->point(1, {dp / 2 * cosf(t), dp / 2 * sinf(t), Ht - tp / 2});
+		}
+		scene->add_object(cable);
+	}
+	//objects
+	scene->add_object(rod_1);
+	scene->add_object(rod_2);
+	scene->add_object(rod_3);
+	scene->add_object(rod_4);
 	scene->add_object(plate_1);
 	scene->add_object(plate_2);
 }

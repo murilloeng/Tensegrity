@@ -41,6 +41,9 @@ public:
 	double twist_angle(double);
 	double twist_angle(void) const;
 
+	double rod_thickness(double);
+	double rod_thickness(void) const;
+
 	double yield_stress(double);
 	double yield_stress(void) const;
 
@@ -112,6 +115,7 @@ private:
 	char m_label[200];
 	double m_rod_length;
 	double m_twist_angle;
+	double m_rod_thicknes;
 	double m_yield_stress;
 	double m_height_total;
 	double m_height_center;
