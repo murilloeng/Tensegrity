@@ -24,8 +24,9 @@
     <ClInclude Include="inc\Canvas.hpp" />
     <ClInclude Include="inc\Strain.hpp" />
     <ClInclude Include="inc\Solver.hpp" />
-    <ClInclude Include="inc\Tensegrity.hpp" />
+    <ClInclude Include="inc\Deformed.hpp" />
     <ClInclude Include="inc\Strategy.hpp" />
+    <ClInclude Include="inc\Tensegrity.hpp" />
     <ClInclude Include="inc\Arc_Length.hpp" />
     <ClInclude Include="inc\Control_Dof.hpp" />
     <ClInclude Include="inc\Control_Load.hpp" />
@@ -37,8 +38,9 @@
     <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\Strain.cpp" />
     <ClCompile Include="src\Solver.cpp" />
-    <ClCompile Include="src\Tensegrity.cpp" />
+    <ClCompile Include="src\Deformed.cpp" />
     <ClCompile Include="src\Strategy.cpp" />
+    <ClCompile Include="src\Tensegrity.cpp" />
     <ClCompile Include="src\Arc_Length.cpp" />
     <ClCompile Include="src\Control_Dof.cpp" />
     <ClCompile Include="src\Control_Load.cpp" />

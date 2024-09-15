@@ -4,6 +4,7 @@
 #include "QtOpenGLWidgets/QOpenGLWidget"
 
 class Model;
+class Deformed;
 namespace canvas
 {
 	class Scene;
@@ -39,4 +40,5 @@ private:
 
 	//friends
 	friend class Model;
+	friend class Deformed;
 };

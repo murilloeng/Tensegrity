@@ -16,6 +16,7 @@
 //Tensegrity
 #include "Tensegrity/inc/Model.hpp"
 #include "Tensegrity/inc/Solver.hpp"
+#include "Tensegrity/inc/Deformed.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
 //constructors
@@ -196,7 +197,18 @@ void Tensegrity::show_model(int32_t& argc, char** argv)
 }
 void Tensegrity::show_deformed(int32_t& argc, char** argv)
 {
-	show_model(argc, argv);
+	//application
+	QSurfaceFormat format;
+	QApplication application(argc, argv);
+	//surface
+	format.setSamples(4);
+	QSurfaceFormat::setDefaultFormat(format);
+	//window
+	Deformed deformed(this);
+	deformed.showMaximized();
+	//execute
+	deformed.update();
+	application.exec();
 }
 
 void Tensegrity::draw_model(canvas::Scene* scene) const

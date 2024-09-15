@@ -131,7 +131,7 @@ int main(int32_t argc, char* argv[])
 	// tensegrity.solver()->solve();
 
 	Tensegrity tensegrity;
-	tensegrity.show_model(argc, argv);
+	tensegrity.show_deformed(argc, argv);
 	//return
 	return EXIT_SUCCESS;
 }
