@@ -2,17 +2,19 @@
 #include <cmath>
 
 //qt
-#include <QtGui/QWindow>
 #include <QtWidgets/QApplication>
 
 //math
 #include "Math/inc/misc/misc.hpp"
 
+//canvas
+#include "Canvas/inc/Scene/Scene.hpp"
 #include "Canvas/inc/Objects/1D/Line.hpp"
 #include "Canvas/inc/Objects/3D/Cube.hpp"
 #include "Canvas/inc/Objects/3D/Cylinder.hpp"
 
 //Tensegrity
+#include "Tensegrity/inc/Model.hpp"
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
@@ -171,22 +173,14 @@ void Tensegrity::show_model(int32_t& argc, char** argv)
 	//application
 	QApplication application(argc, argv);
 	//window
-	QWindow window;
-	//show
-	window.showMaximized();
+	Model model(this);
+	model.showMaximized();
 	//execute
 	application.exec();
 }
 void Tensegrity::show_deformed(int32_t& argc, char** argv)
 {
-	//application
-	QApplication application(argc, argv);
-	//window
-	QWindow window;
-	//show
-	window.showMaximized();
-	//execute
-	application.exec();
+	show_model(argc, argv);
 }
 
 //loads

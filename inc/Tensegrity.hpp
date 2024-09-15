@@ -8,13 +8,14 @@
 #include "Math/inc/linear/quat.hpp"
 #include "Math/inc/linear/mat3.hpp"
 
-//canvas
-#include "Canvas/inc/Scene/Scene.hpp"
-
 //tensegrity
 #include "Tensegrity/inc/Strain.hpp"
 
 class Solver;
+namespace canvas
+{
+	class Scene;
+}
 
 class Tensegrity
 {

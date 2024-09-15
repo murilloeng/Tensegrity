@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Map.hpp" />
+    <ClInclude Include="inc\Model.hpp" />
+    <ClInclude Include="inc\Canvas.hpp" />
     <ClInclude Include="inc\Strain.hpp" />
     <ClInclude Include="inc\Solver.hpp" />
     <ClInclude Include="inc\Tensegrity.hpp" />
@@ -31,6 +33,8 @@
   <ItemGroup>
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\Strain.cpp" />
     <ClCompile Include="src\Solver.cpp" />
     <ClCompile Include="src\Tensegrity.cpp" />
@@ -143,7 +147,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenGL32.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;dist/$(platform)/$(configuration)/Canvas.lib;%QT_HOME%/lib/Qt6Gui.lib;%QT_HOME%/lib/Qt6Core.lib;%QT_HOME%/lib/Qt6Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;dist/$(platform)/$(configuration)/Canvas.lib;%QT_HOME%/lib/Qt6Guid.lib;%QT_HOME%/lib/Qt6Cored.lib;%QT_HOME%/lib/Qt6Widgetsd.lib;%QT_HOME%/lib/Qt6OpenGLWidgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4204 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
@@ -180,7 +184,7 @@ copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(config
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenGL32.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;dist/$(platform)/$(configuration)/Canvas.lib;%QT_HOME%/lib/Qt6Gui.lib;%QT_HOME%/lib/Qt6Core.lib;%QT_HOME%/lib/Qt6Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;../external/cpp/lib/x64/glew32.lib;../external/cpp/lib/x64/freetype.lib;../external/cpp/lib/x64/liblapack.lib;dist/$(platform)/$(configuration)/Math.lib;dist/$(platform)/$(configuration)/Canvas.lib;%QT_HOME%/lib/Qt6Gui.lib;%QT_HOME%/lib/Qt6Core.lib;%QT_HOME%/lib/Qt6Widgets.lib;%QT_HOME%/lib/Qt6OpenGLWidgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4204 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
