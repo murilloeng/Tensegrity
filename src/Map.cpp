@@ -1,5 +1,6 @@
 //std
 #include <omp.h>
+#include <cmath>
 #include <cstdio>
 #include <chrono>
 #include <filesystem>
@@ -10,7 +11,7 @@
 
 //constructors
 Map::Map(void) : 
-	m_mesh_angle(100), m_mesh_radius(100), m_force(0.00e+00),
+	m_force(0.00e+00), m_mesh_angle(100), m_mesh_radius(100), 
 	m_data_state(nullptr), m_data_cables(nullptr), m_data_energy(nullptr)
 {
 	m_base.solver()->log(false);
@@ -174,14 +175,15 @@ void Map::setup(void)
 void Map::write_state(void) const
 {
 	//data
-	char path[200];
-	this->path(path);
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
 	const uint32_t nc = m_base.cables();
-	sprintf(path, "%s/state.txt", path);
+	char folder_path[200], file_path[200];
+	//path
+	path(folder_path);
+	sprintf(file_path, "%s/state.txt", folder_path);
 	//file
-	FILE* file = fopen(path, "w");
+	FILE* file = fopen(file_path, "w");
 	//write
 	for(uint32_t i = 0; i < nr; i++)
 	{
@@ -201,14 +203,15 @@ void Map::write_state(void) const
 void Map::write_cables(void) const
 {
 	//data
-	char path[200];
-	this->path(path);
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
 	const uint32_t nc = m_base.cables();
-	sprintf(path, "%s/cables.txt", path);
+	char folder_path[200], file_path[200];
+	//path
+	path(folder_path);
+	sprintf(file_path, "%s/cables.txt", folder_path);
 	//file
-	FILE* file = fopen(path, "w");
+	FILE* file = fopen(file_path, "w");
 	//write
 	for(uint32_t i = 0; i < nr; i++)
 	{
@@ -228,14 +231,15 @@ void Map::write_cables(void) const
 void Map::write_energy(void) const
 {
 	//data
-	char path[200];
-	this->path(path);
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
 	const uint32_t nc = m_base.cables();
-	sprintf(path, "%s/energy.txt", path);
+	char folder_path[200], file_path[200];
+	//path
+	path(folder_path);
+	sprintf(file_path, "%s/energy.txt", folder_path);
 	//file
-	FILE* file = fopen(path, "w");
+	FILE* file = fopen(file_path, "w");
 	//write
 	for(uint32_t i = 0; i < nr; i++)
 	{

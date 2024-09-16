@@ -19,7 +19,7 @@ public:
 	Strategy(void);
 
 	//destructor
-	~Strategy(void);
+	virtual ~Strategy(void);
 
 	//type
 	virtual strategy_type type(void) const = 0;
