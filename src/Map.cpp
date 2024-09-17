@@ -126,8 +126,8 @@ void Map::solve(void)
 			m_data_energy[3 * (i * na + j) + 1] = t;
 			m_data_cables[(nc + 3) * (i * na + j) + 0] = r;
 			m_data_cables[(nc + 3) * (i * na + j) + 1] = t;
-			const math::vec3 ud = tensegrity.solver()->state();
-			const math::vec3 rd = math::quat(tensegrity.solver()->state() + 3).pseudo();
+			const math::vec3 ud = tensegrity.solver()->state(true);
+			const math::vec3 rd = math::quat(tensegrity.solver()->state(true) + 3).pseudo();
 			for(uint32_t k = 0; k < 3; k++)
 			{
 				m_data_state[8 * (i * na + j) + k + 2] = ud[k];

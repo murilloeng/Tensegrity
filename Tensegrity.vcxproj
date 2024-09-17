@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="inc\Map.hpp" />
     <ClInclude Include="inc\Path.hpp" />
+    <ClInclude Include="inc\tests.hpp" />
     <ClInclude Include="inc\Model.hpp" />
     <ClInclude Include="inc\Window.hpp" />
     <ClInclude Include="inc\Canvas.hpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Path.cpp" />
+    <ClCompile Include="src\tests.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\Canvas.cpp" />

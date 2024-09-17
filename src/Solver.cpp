@@ -18,6 +18,7 @@ Solver::Solver(Tensegrity* tensegrity) :
 	m_dl0 = 1.00e-03;
 	m_step_max = 1000;
 	m_iteration_max = 10;
+	m_stop_condition = 0;
 	m_strategy = nullptr;
 	m_equilibrium = false;
 	m_state_data = nullptr;
@@ -104,6 +105,15 @@ uint32_t Solver::iteration_max(uint32_t iteration_max)
 	return m_iteration_max = iteration_max;
 }
 
+uint32_t Solver::stop_condition(void) const
+{
+	return m_stop_condition;
+}
+uint32_t Solver::stop_condition(uint32_t stop_condition)
+{
+	return m_stop_condition = stop_condition;
+}
+
 double Solver::load_increment(double dl0)
 {
 	return m_dl0 = dl0;
@@ -113,13 +123,23 @@ double Solver::load_increment(void) const
 	return m_dl0;
 }
 
-const double* Solver::state(void) const
+double Solver::load(bool step) const
 {
-	return m_state_new;
+	return step ? m_l_new : m_l_old;
 }
-const double* Solver::state(const double* state_new)
+double Solver::load(bool step, double load)
 {
-	return (const double*) memcpy(m_state_new, state_new, 7 * sizeof(double));
+	return (step ? m_l_new : m_l_old) = load;
+}
+
+const double* Solver::state(bool step) const
+{
+	return step ? m_state_new : m_state_old;
+}
+const double* Solver::state(bool step, const double* state)
+{
+	memcpy(step ? m_state_new : m_state_old, state, 7 * sizeof(double));
+	return step ? m_state_new : m_state_old;
 }
 
 //increments
@@ -173,24 +193,34 @@ void Solver::solve(void)
 			m_r = m_l_new * m_fe - m_fi;
 			if(m_r.norm() < 1e-5 * m_fe.norm())
 			{
+				stop();
 				update();
 				record();
 				log_step();
-				m_equilibrium = true;
 				break;
 			}
 			//update
 			corrector();
 		}
-		if(!m_equilibrium || m_l_new < 0)
-		{
-			break;
-		}
+		if(m_stop) break;
 	}
 	finish();
 }
 
 //solver
+void Solver::stop(void)
+{
+	//data
+	const bool c1 = m_l_new < 0;
+	const bool c2 = m_l_new < m_l_old;
+	const bool c3 = m_dx[m_watch_dof] < 0;
+	//check
+	m_stop = false;
+	m_equilibrium = true;
+	m_stop = m_stop || (m_stop_condition & uint32_t(::stop_condition::dof_decrease) && c3);
+	m_stop = m_stop || (m_stop_condition & uint32_t(::stop_condition::load_decrease) && c2);
+	m_stop = m_stop || (m_stop_condition & uint32_t(::stop_condition::load_negative) && c1);
+}
 void Solver::setup(void)
 {
 	//setup
@@ -271,6 +301,7 @@ void Solver::log_step(void)
 void Solver::predictor(void)
 {
 	//state
+	m_stop = true;
 	m_equilibrium = false;
 	m_tensegrity->stiffness(m_Kt);
 	m_tensegrity->external_force(m_fe);

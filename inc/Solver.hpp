@@ -11,9 +11,18 @@ class Strategy;
 class Tensegrity;
 enum class strategy_type : uint32_t;
 
+enum class stop_condition : uint32_t
+{
+	dof_decrease,
+	load_decrease,
+	load_negative,
+	last
+};
+
 class Solver
 {
 	//friends
+	friend class Deformed;
 	friend class Tensegrity;
 
 public:
@@ -44,11 +53,18 @@ public:
 	uint32_t iteration_max(uint32_t);
 	uint32_t iteration_max(void) const;
 
+	uint32_t stop_condition(uint32_t);
+	uint32_t stop_condition(void) const;
+
 	double load_increment(double);
 	double load_increment(void) const;
 
-	const double* state(void) const;
-	const double* state(const double*);
+	//state
+	double load(bool) const;
+	double load(bool, double);
+
+	const double* state(bool) const;
+	const double* state(bool, const double*);
 
 	//increments
 	double load_corrector(void) const;
@@ -66,6 +82,7 @@ public:
 
 private:
 	//solver
+	void stop(void);
 	void setup(void);
 	void record(void);
 	void finish(void);
@@ -89,6 +106,7 @@ private:
 	uint32_t m_watch_dof;
 	uint32_t m_iteration;
 	uint32_t m_iteration_max;
+	uint32_t m_stop_condition;
 
 	math::vector m_r;
 	math::vector m_fn;
@@ -106,6 +124,7 @@ private:
 
 	bool m_log;
 	bool m_save;
+	bool m_stop;
 	bool m_equilibrium;
 	double* m_state_old;
 	double* m_state_new;
@@ -116,7 +135,4 @@ private:
 
 	Strategy* m_strategy;
 	Tensegrity* m_tensegrity;
-
-	//friends
-	friend class Deformed;
 };
