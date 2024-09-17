@@ -29,6 +29,9 @@ public:
 	//data
 	Solver* solver(void) const;
 
+	double tension(double);
+	double tension(void) const;
+
 	uint32_t cables(uint32_t);
 	uint32_t cables(void) const;
 
@@ -72,11 +75,9 @@ public:
 	Strain::strain_measure strain_measure(Strain::strain_measure);
 
 	//draw
-	void show_model(int32_t&, char**);
-	void show_deformed(int32_t&, char**);
-
+	void show(int32_t&, char**);
 	void draw_model(canvas::Scene*) const;
-	void draw_deformed(canvas::Scene*) const;
+	void draw_deformed(canvas::Scene*, uint32_t) const;
 
 	//loads
 	void remove_load(uint32_t);

@@ -20,7 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Map.hpp" />
+    <ClInclude Include="inc\Path.hpp" />
     <ClInclude Include="inc\Model.hpp" />
+    <ClInclude Include="inc\Window.hpp" />
     <ClInclude Include="inc\Canvas.hpp" />
     <ClInclude Include="inc\Strain.hpp" />
     <ClInclude Include="inc\Solver.hpp" />
@@ -34,7 +36,9 @@
   <ItemGroup>
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\Strain.cpp" />
     <ClCompile Include="src\Solver.cpp" />

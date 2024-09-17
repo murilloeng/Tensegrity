@@ -6,6 +6,7 @@
 //math
 #include "Math/inc/linear/vector.hpp"
 
+class Deformed;
 class Strategy;
 class Tensegrity;
 enum class strategy_type : uint32_t;
@@ -112,4 +113,7 @@ private:
 
 	Strategy* m_strategy;
 	Tensegrity* m_tensegrity;
+
+	//friends
+	friend class Deformed;
 };

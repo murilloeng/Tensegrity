@@ -15,6 +15,7 @@
 
 //Tensegrity
 #include "Tensegrity/inc/Model.hpp"
+#include "Tensegrity/inc/Window.hpp"
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Deformed.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
@@ -49,6 +50,20 @@ Tensegrity::~Tensegrity(void)
 Solver* Tensegrity::solver(void) const
 {
 	return m_solver;
+}
+
+double Tensegrity::tension(double fr)
+{
+	const double dc = m_cables_diameter;
+	const double sr = m_residual_stress;
+	m_residual_stress = fr / (M_PI_4 * dc * dc);
+	return fr;
+}
+double Tensegrity::tension(void) const
+{
+	const double dc = m_cables_diameter;
+	const double sr = m_residual_stress;
+	return sr * M_PI / 4 * dc * dc;
 }
 
 uint32_t Tensegrity::cables(void) const
@@ -180,7 +195,7 @@ Strain::strain_measure Tensegrity::strain_measure(Strain::strain_measure strain_
 }
 
 //draw
-void Tensegrity::show_model(int32_t& argc, char** argv)
+void Tensegrity::show(int32_t& argc, char** argv)
 {
 	//application
 	QSurfaceFormat format;
@@ -189,32 +204,17 @@ void Tensegrity::show_model(int32_t& argc, char** argv)
 	format.setSamples(4);
 	QSurfaceFormat::setDefaultFormat(format);
 	//window
-	Model model(this);
-	model.showMaximized();
+	Window window(this);
+	window.showMaximized();
+	//update
+	window.model()->update();
 	//execute
-	model.update();
 	application.exec();
 }
-void Tensegrity::show_deformed(int32_t& argc, char** argv)
-{
-	//application
-	QSurfaceFormat format;
-	QApplication application(argc, argv);
-	//surface
-	format.setSamples(4);
-	QSurfaceFormat::setDefaultFormat(format);
-	//window
-	Deformed deformed(this);
-	deformed.showMaximized();
-	//execute
-	deformed.update();
-	application.exec();
-}
-
 void Tensegrity::draw_model(canvas::Scene* scene) const
 {
 	//data
-	const float er  =(float) m_rod_length;
+	const float er =(float) m_rod_length;
 	const float tr = (float) m_rod_thicknes;
 	const float Ht = (float) m_height_total;
 	const float Hc = (float) m_height_center;
@@ -275,9 +275,83 @@ void Tensegrity::draw_model(canvas::Scene* scene) const
 	scene->add_object(plate_1);
 	scene->add_object(plate_2);
 }
-void Tensegrity::draw_deformed(canvas::Scene* scene) const
+void Tensegrity::draw_deformed(canvas::Scene* scene, uint32_t step) const
 {
-	draw_model(scene);
+	//data
+	const float er =(float) m_rod_length;
+	const float tr = (float) m_rod_thicknes;
+	const float Ht = (float) m_height_total;
+	const float Hc = (float) m_height_center;
+	const float dp = (float) m_plate_diameter;
+	const float tp = (float) m_plate_thickness;
+	const float Hr = (Ht + Hc) / 2;
+	canvas::objects::Cube* rod_1 = new canvas::objects::Cube;
+	canvas::objects::Cube* rod_2 = new canvas::objects::Cube;
+	canvas::objects::Cube* rod_3 = new canvas::objects::Cube;
+	canvas::objects::Cube* rod_4 = new canvas::objects::Cube;
+	canvas::objects::Cylinder* plate_1 = new canvas::objects::Cylinder;
+	canvas::objects::Cylinder* plate_2 = new canvas::objects::Cylinder;
+	//state
+	const math::vec3 z(0, 0, -Ht);
+	const math::vec3 u(m_solver->m_state_data + 7 * step);
+	const math::quat q(m_solver->m_state_data + 7 * step + 3);
+	const canvas::vec3 cz(0, 0, Ht);
+	const canvas::vec3 cu(u[0], u[1], u[2]);
+	const canvas::quat cr(q[0], q[1], q[2], q[3]);
+	//plates
+	plate_1->height(tp);
+	plate_2->height(tp);
+	plate_1->radius(dp / 2);
+	plate_2->radius(dp / 2);
+	plate_2->shift({0, 0, Ht});
+	plate_1->color_fill("blue");
+	plate_2->color_fill("blue");
+	//rods
+	rod_1->color_fill("blue");
+	rod_2->color_fill("blue");
+	rod_3->color_fill("blue");
+	rod_4->color_fill("blue");
+	rod_2->scale({er, tr, tr});
+	rod_4->scale({er, tr, tr});
+	rod_2->shift({(er - tr) / 2, 0, Hr});
+	rod_4->shift({(tr - er) / 2, 0, Ht - Hr});
+	rod_1->scale({tr, tr, (2 * Hr + tr - tp) / 2});
+	rod_3->scale({tr, tr, (2 * Hr + tr - tp) / 2});
+	rod_1->shift({+er, 0, (2 * Hr + tr + tp) / 4});
+	rod_3->shift({-er, 0, (2 * Hr + tr - tp) / 4 + Ht - Hr - tp});
+	//cables
+	scene->clear_objects(true);
+	for(uint32_t k = 0; k < m_nc + 1; k++)
+	{
+		const float t = 2 * float(M_PI) * k / m_nc;
+		canvas::objects::Line* cable = new canvas::objects::Line;
+		cable->color_stroke("green");
+		if(k == 0)
+		{
+			cable->point(1, {0, 0, Hr + tr / 2});
+			cable->point(0, canvas::mat4::shifting(cu) * canvas::mat4::rotation(cz, cr) * canvas::vec3(0, 0, Ht - Hr + tr / 2));
+		}
+		else
+		{
+			cable->point(0, {dp / 2 * cosf(t), dp / 2 * sinf(t), tp / 2});
+			cable->point(1, canvas::mat4::shifting(cu) * canvas::mat4::rotation(cz, cr) * canvas::vec3(dp / 2 * cosf(t), dp / 2 * sinf(t), Ht - tp / 2));
+		}
+		scene->add_object(cable);
+	}
+	//deformation
+	rod_3->rotate(cz, cr);
+	rod_4->rotate(cz, cr);
+	plate_2->rotate(cz, cr);
+	rod_3->shift(cu);
+	rod_4->shift(cu);
+	plate_2->shift(cu);
+	//objects
+	scene->add_object(rod_1);
+	scene->add_object(rod_2);
+	scene->add_object(rod_3);
+	scene->add_object(rod_4);
+	scene->add_object(plate_1);
+	scene->add_object(plate_2);
 }
 
 //loads

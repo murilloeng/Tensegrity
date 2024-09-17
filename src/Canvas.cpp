@@ -130,6 +130,7 @@ void Canvas::mousePressEvent(QMouseEvent* event)
 			m_scene->camera().callback_mouse(canvas_buttons[i], true, x1, x2);
 		}
 	}
+	setFocus(Qt::FocusReason::MouseFocusReason);
 	//update
 	update();
 }

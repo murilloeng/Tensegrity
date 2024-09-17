@@ -1,17 +1,17 @@
 #pragma once
 
 //qt
-#include "QtWidgets/QMainWindow"
+#include "QtWidgets/QWidget"
 
 //tensegrity
 #include "Tensegrity/inc/Canvas.hpp"
 #include "Tensegrity/inc/Tensegrity.hpp"
 
-class Model : public QMainWindow
+class Model : public QWidget
 {
 public:
 	//constructors
-	Model(const Tensegrity*);
+	Model(QWidget*, const Tensegrity*);
 
 	//destructor
 	~Model(void);

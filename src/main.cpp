@@ -131,7 +131,12 @@ int main(int32_t argc, char* argv[])
 	// tensegrity.solver()->solve();
 
 	Tensegrity tensegrity;
-	tensegrity.show_deformed(argc, argv);
+	const double Ht = tensegrity.height_center();
+	const double dp = tensegrity.plate_diameter();
+	tensegrity.tension(1.00e+02);
+	tensegrity.add_load({0, 0, -4.00e+03}, {dp / 2, 0, Ht});
+	tensegrity.solver()->solve();
+	tensegrity.show(argc, argv);
 	//return
 	return EXIT_SUCCESS;
 }

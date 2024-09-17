@@ -10,16 +10,13 @@
 #include "Tensegrity/inc/Canvas.hpp"
 
 //constructors
-Model::Model(const Tensegrity* tensegrity) : m_tensegrity(tensegrity)
+Model::Model(QWidget* parent, const Tensegrity* tensegrity) : QWidget(parent), m_tensegrity(tensegrity)
 {
 	//data
 	m_canvas = new Canvas(this);
-	QWidget* layout = new QWidget(this);
-	QGridLayout* grid_layout = new QGridLayout(layout);
+	QGridLayout* grid_layout = new QGridLayout(this);
 	//canvas
 	grid_layout->addWidget(m_canvas, 0, 0);
-	//central
-	setCentralWidget(layout);
 }
 
 //destructor
@@ -39,12 +36,5 @@ void Model::update(void)
 //events
 void Model::keyPressEvent(QKeyEvent* event)
 {
-	if(event->key() == Qt::Key_Escape)
-	{
-		close();
-	}
-	else
-	{
-		m_canvas->keyPressEvent(event);
-	}
+	m_canvas->keyPressEvent(event);
 }
