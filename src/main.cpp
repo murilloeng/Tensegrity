@@ -110,33 +110,81 @@ void test_stiffness(void)
 	}
 }
 
-int main(int32_t argc, char* argv[])
+void nonlinear_vertical_radial(uint32_t nc)
 {
-	// //data
-	// Tensegrity tensegrity;
-	// const double fr = 1.00e+02;
-	// const double Pr = 1.00e+03;
-	// const double Ht = tensegrity.height_total();
-	// const double dp = tensegrity.plate_diameter();
-	// const double dc = tensegrity.cables_diameter();
-	// //tension
-	// const double Ac = M_PI * dc * dc / 4;
-	// tensegrity.residual_stress(fr / Ac);
-	// //loads
-	// tensegrity.add_load({0, 0, -Pr}, {dp / 2, 0, Ht});
-	// //solver
-	// tensegrity.solver()->step_max(800000);
-	// tensegrity.solver()->strategy(strategy_type::arc_length);
-	// //solve
-	// tensegrity.solver()->solve();
-
+	//data
+	char label[200];
 	Tensegrity tensegrity;
+	const uint32_t nr = 10;
+	const double fr = 1.00e+02;
+	const double Pr = 1.00e+03;
+	const double dl = 4.00e-02;
 	const double Ht = tensegrity.height_center();
 	const double dp = tensegrity.plate_diameter();
-	tensegrity.tension(1.00e+02);
-	tensegrity.add_load({0, 0, -4.00e+03}, {dp / 2, 0, Ht});
-	tensegrity.solver()->solve();
-	tensegrity.show(argc, argv);
+	//setup
+	tensegrity.cables(nc);
+	tensegrity.tension(fr);
+	tensegrity.solver()->log(false);
+	tensegrity.solver()->watch_dof(2);
+	tensegrity.solver()->step_max(200000);
+	tensegrity.solver()->load_increment(dl);
+	tensegrity.add_load({0, 0, -Pr}, {dp / 2, 0, Ht});
+	tensegrity.solver()->strategy(strategy_type::arc_length);
+	//solve
+	for(uint32_t i = 0; i < nr; i++)
+	{
+		//print
+		printf("position: %d\n", i);
+		sprintf(label, "vertical/radial/%d/model-%d", tensegrity.cables(), i);
+		//setup
+		tensegrity.label(label);
+		tensegrity.load_position(0, {dp / 2 * (i + 1) / nr, 0, Ht});
+		//solve
+		tensegrity.solver()->solve();
+	}
+}
+void nonlinear_vertical_angular(uint32_t nc)
+{
+	//data
+	char label[200];
+	Tensegrity tensegrity;
+	const uint32_t na = 10;
+	const double fr = 1.00e+02;
+	const double Pr = 1.00e+03;
+	const double dl = 4.00e-02;
+	const double Ht = tensegrity.height_center();
+	const double dp = tensegrity.plate_diameter();
+	//setup
+	tensegrity.cables(nc);
+	tensegrity.tension(fr);
+	tensegrity.solver()->log(false);
+	tensegrity.solver()->watch_dof(2);
+	tensegrity.solver()->step_max(200000);
+	tensegrity.solver()->load_increment(dl);
+	tensegrity.add_load({0, 0, -Pr}, {dp / 2, 0, Ht});
+	tensegrity.solver()->strategy(strategy_type::arc_length);
+	//solve
+	for(uint32_t i = 0; i <= na; i++)
+	{
+		//print
+		printf("angle: %d\n", i);
+		sprintf(label, "vertical/angular/%d/model-%d", tensegrity.cables(), i);
+		//setup
+		tensegrity.label(label);
+		const double t = M_PI / 3 * i / na;
+		tensegrity.load_position(0, {dp / 2 * cos(t), dp / 2 * sin(t), Ht});
+		//solve
+		tensegrity.solver()->solve();
+	}
+}
+
+int main(int32_t argc, char* argv[])
+{
+	//test
+	nonlinear_vertical_angular(3);
+	nonlinear_vertical_angular(4);
+	nonlinear_vertical_angular(5);
+	nonlinear_vertical_angular(6);
 	//return
 	return EXIT_SUCCESS;
 }

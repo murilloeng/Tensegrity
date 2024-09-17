@@ -27,6 +27,9 @@ public:
 	bool log(bool);
 	bool log(void) const;
 
+	bool save(bool);
+	bool save(void) const;
+
 	bool equilibrium(void) const;
 
 	Strategy* strategy(void) const;
@@ -34,6 +37,9 @@ public:
 
 	uint32_t step_max(uint32_t);
 	uint32_t step_max(void) const;
+
+	uint32_t watch_dof(uint32_t);
+	uint32_t watch_dof(void) const;
 
 	uint32_t iteration_max(uint32_t);
 	uint32_t iteration_max(void) const;
@@ -71,11 +77,6 @@ private:
 	void clear_state(void);
 	void update_state(void);
 
-	//formulation
-	void compute_residue(void);
-	void compute_load_predictor(void);
-	void compute_load_corrector(void);
-
 	//data
 	double m_dl;
 	double m_dl0;
@@ -85,6 +86,7 @@ private:
 
 	uint32_t m_step;
 	uint32_t m_step_max;
+	uint32_t m_watch_dof;
 	uint32_t m_iteration;
 	uint32_t m_iteration_max;
 
@@ -103,6 +105,7 @@ private:
 	math::vector m_ddxr;
 
 	bool m_log;
+	bool m_save;
 	bool m_equilibrium;
 	double* m_state_old;
 	double* m_state_new;

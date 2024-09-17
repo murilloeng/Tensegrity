@@ -14,6 +14,7 @@ Solver::Solver(Tensegrity* tensegrity) :
 	m_r(6), m_fn(6), m_fi(6), m_fe(6), m_Kt(6, 6), m_Ct(6, 6), m_Mt(6, 6), m_dx(6), m_dxt(6), m_ddxt(6), m_ddxr(6), m_tensegrity(tensegrity)
 {
 	m_log = true;
+	m_save = true;
 	m_dl0 = 1.00e-03;
 	m_step_max = 1000;
 	m_iteration_max = 10;
@@ -53,6 +54,15 @@ bool Solver::log(void) const
 	return m_log;
 }
 
+bool Solver::save(bool save)
+{
+	return m_save = save;
+}
+bool Solver::save(void) const
+{
+	return m_save;
+}
+
 bool Solver::equilibrium(void) const
 {
 	return m_equilibrium;
@@ -74,6 +84,15 @@ uint32_t Solver::step_max(void) const
 uint32_t Solver::step_max(uint32_t step_max)
 {
 	return m_step_max = step_max;
+}
+
+uint32_t Solver::watch_dof(void) const
+{
+	return m_watch_dof;
+}
+uint32_t Solver::watch_dof(uint32_t watch_dof)
+{
+	return m_watch_dof = watch_dof;
 }
 
 uint32_t Solver::iteration_max(void) const
@@ -163,7 +182,7 @@ void Solver::solve(void)
 			//update
 			corrector();
 		}
-		if(!m_equilibrium)
+		if(!m_equilibrium || m_l_new < 0)
 		{
 			break;
 		}
@@ -191,7 +210,7 @@ void Solver::setup(void)
 }
 void Solver::record(void)
 {
-	if(!m_log) return;
+	if(!m_save) return;
 	m_solver_data[m_step] = m_l_new;
 	m_energy_data[3 * m_step + 0] = 0;
 	m_energy_data[3 * m_step + 1] = 0;
@@ -205,7 +224,7 @@ void Solver::record(void)
 void Solver::finish(void)
 {
 	//data
-	if(!m_log) return;
+	if(!m_save) return;
 	const uint32_t sizes[] = {7, m_tensegrity->m_nc + 1, 1, 3};
 	const char* labels[] = {"state", "cables", "solver", "energy"};
 	const double* data[] = {m_state_data, m_cables_data, m_solver_data, m_energy_data};
@@ -214,11 +233,11 @@ void Solver::finish(void)
 	{
 		//path
 		char path[200];
-		sprintf(path, "data/%s_%s.txt", m_tensegrity->m_label, labels[i]);
+		sprintf(path, "data/%s-%s.txt", m_tensegrity->m_label, labels[i]);
 		//file
 		FILE* file = fopen(path, "w");
 		//write
-		for(uint32_t j = 0; j <= m_step_max; j++)
+		for(uint32_t j = 0; j <= m_step; j++)
 		{
 			for(uint32_t k = 0; k < sizes[i]; k++)
 			{
@@ -244,7 +263,9 @@ void Solver::log_step(void)
 {
 	if(m_log)
 	{
-		printf("step: %04d iterations: %02d load: %+.2e\n", m_step, m_iteration, m_l_new);
+		const math::vec3 r = math::quat(m_state_new + 3).pseudo();
+		const double dof = m_watch_dof < 3 ? m_state_new[m_watch_dof] : r[m_watch_dof - 3];
+		printf("step: %04d iterations: %02d load: %+.2e dof: %+.2e\n", m_step, m_iteration, m_l_new, dof);
 	}
 }
 void Solver::predictor(void)
@@ -293,33 +314,4 @@ void Solver::update_state(void)
 	//update
 	u_new = u_old + du_new;
 	q_new = q_old * dt_new.quaternion();
-}
-
-//formulation
-void Solver::compute_residue(void)
-{
-	//state
-	update_state();
-	m_tensegrity->stiffness(m_Kt);
-	m_tensegrity->internal_force(m_fi);
-	m_tensegrity->external_force(m_fe);
-	//residue
-	m_r = m_fe - m_fi;
-}
-void Solver::compute_load_predictor(void)
-{
-	return;
-	// if(m_step != 1)
-	// {
-	// 	m_dl = math::sign(m_dxt.inner(m_dx)) * m_dx.norm() / m_dxt.norm();
-	// }
-}
-void Solver::compute_load_corrector(void)
-{
-	m_ddl = 0;
-	// const double s = m_ddxt.inner(m_dx);
-	// const double a = m_ddxt.inner(m_ddxt);
-	// const double b = m_ddxt.inner(m_ddxr + m_dx);
-	// const double c = m_ddxr.inner(m_ddxr + 2 * m_dx);
-	// m_ddl = -b / a + math::sign(s) * sqrt(pow(b / a, 2) - c / a);
 }
