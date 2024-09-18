@@ -267,7 +267,7 @@ void Solver::finish(void)
 		//file
 		FILE* file = fopen(path, "w");
 		//write
-		for(uint32_t j = 0; j <= m_step; j++)
+		for(uint32_t j = 0; j <= std::min(m_step, m_step_max); j++)
 		{
 			for(uint32_t k = 0; k < sizes[i]; k++)
 			{

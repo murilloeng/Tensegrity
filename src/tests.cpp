@@ -132,7 +132,7 @@ void load_nonlinear_vertical_radial(uint32_t nc)
 	{
 		//print
 		printf("position: %d\n", i);
-		sprintf(string, "vertical/radial/%d", nc);
+		sprintf(string, "data/vertical/radial/%d", nc);
 		std::filesystem::create_directories(string);
 		sprintf(string, "vertical/radial/%d/model-%d", nc, i);
 		//setup
@@ -168,7 +168,7 @@ void load_nonlinear_vertical_angular(uint32_t nc)
 	{
 		//print
 		printf("angle: %d\n", i);
-		sprintf(string, "vertical/angular/%d", nc);
+		sprintf(string, "data/vertical/angular/%d", nc);
 		std::filesystem::create_directories(string);
 		sprintf(string, "vertical/angular/%d/model-%d", nc, i);
 		//setup
@@ -258,4 +258,41 @@ void load_nonlinear_vertical_angular_peak(uint32_t nc)
 		fprintf(file, "%.6e %.6e\n", a * nc, tensegrity.solver()->load(false));
 	}
 	fclose(file);
+}
+
+void load_nonlinear_horizontal_radial(uint32_t nc, bool mode)
+{
+	//data
+	char string[200];
+	Tensegrity tensegrity;
+	const uint32_t nr = 10;
+	const double fr = 1.00e+02;
+	const double Pr = 1.00e+03;
+	const double dl = 1.00e-03;
+	const double Ht = tensegrity.height_total();
+	const double dp = tensegrity.plate_diameter();
+	//setup
+	tensegrity.cables(nc);
+	tensegrity.tension(fr);
+	tensegrity.solver()->log(false);
+	tensegrity.solver()->watch_dof(mode);
+	tensegrity.solver()->step_max(200000);
+	tensegrity.solver()->load_increment(dl);
+	tensegrity.solver()->strategy(strategy_type::arc_length);
+	tensegrity.add_load({!mode * Pr, mode * Pr, 0}, {dp / 2, 0, Ht});
+	tensegrity.solver()->stop_condition(uint32_t(stop_condition::load_negative));
+	//solve
+	for(uint32_t i = 0; i < nr; i++)
+	{
+		//print
+		printf("position: %d\n", i);
+		sprintf(string, "data/horizontal-%d/radial/%d", mode, nc);
+		std::filesystem::create_directories(string);
+		sprintf(string, "horizontal-%d/radial/%d/model-%d", mode, nc, i);
+		//setup
+		tensegrity.label(string);
+		tensegrity.load_position(0, {dp / 2 * (i + 1) / nr, 0, Ht});
+		//solve
+		tensegrity.solver()->solve();
+	}
 }

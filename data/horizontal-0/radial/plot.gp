@@ -12,7 +12,7 @@ set cblabel "r (cm)"
 set palette rgbformulae 33, 13, 10
 set cbrange [dp / 2 / nr : dp / 2]
 set xlabel sprintf("%s (cm)", word(labels, dof_index))
-set output sprintf('%d/vertical-radial-%d-%d.pdf', nc, nc, dof_index)
+set output sprintf('%d/horizontal-0-radial-%d-%d.pdf', nc, nc, dof_index)
 
 #plot
 plot for [i = 1 : nr] data_file(i) using (100 * column(dof_index)) : ($8) with lines linecolor palette frac real(i - 1) / (nr - 1) notitle
