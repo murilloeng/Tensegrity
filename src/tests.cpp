@@ -6,6 +6,7 @@
 #include "Math/inc/misc/misc.hpp"
 
 //tensegrity
+#include "Tensegrity/inc/Map.hpp"
 #include "Tensegrity/inc/tests.hpp"
 #include "Tensegrity/inc/Solver.hpp"
 #include "Tensegrity/inc/Strategy.hpp"
@@ -71,6 +72,23 @@ void test_stiffness(void)
 			break;
 		}
 	}
+}
+
+void map_vertical(uint32_t nc, double fr)
+{
+	//data
+	Map map;
+	const uint32_t na = 100;
+	const uint32_t nr = 100;
+	const double Pr = 1.00e+03;
+	//setup
+	map.force(Pr);
+	map.cables(nc);
+	map.tension(fr);
+	map.mesh_angle(na);
+	map.mesh_radius(nr);
+	//solve
+	map.solve();
 }
 
 void fun_energy(double* U, const double* d, void** args)
@@ -284,8 +302,7 @@ void load_nonlinear_horizontal_radial(uint32_t nc, bool mode)
 	//solve
 	for(uint32_t i = 0; i < nr; i++)
 	{
-		//print
-		printf("position: %d\n", i);
+		//files
 		sprintf(string, "data/horizontal-%d/radial/%d", mode, nc);
 		std::filesystem::create_directories(string);
 		sprintf(string, "horizontal-%d/radial/%d/model-%d", mode, nc, i);
@@ -294,5 +311,7 @@ void load_nonlinear_horizontal_radial(uint32_t nc, bool mode)
 		tensegrity.load_position(0, {dp / 2 * (i + 1) / nr, 0, Ht});
 		//solve
 		tensegrity.solver()->solve();
+		//print
+		printf("cables: %d position: %d check: %d\n", nc, i, tensegrity.solver()->load(true) < 0);
 	}
 }

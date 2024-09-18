@@ -24,6 +24,9 @@ public:
 	double tension(double);
 	double tension(void) const;
 
+	uint32_t mode(uint32_t);
+	uint32_t mode(void) const;
+
 	uint32_t cables(uint32_t);
 	uint32_t cables(void) const;
 
@@ -51,6 +54,7 @@ private:
 
 	Tensegrity m_base;
 
+	uint32_t m_mode;
 	uint32_t m_mesh_angle;
 	uint32_t m_mesh_radius;
 

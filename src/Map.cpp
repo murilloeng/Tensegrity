@@ -11,7 +11,7 @@
 
 //constructors
 Map::Map(void) : 
-	m_force(0.00e+00), m_mesh_angle(100), m_mesh_radius(100), 
+	m_force(0.00e+00), m_mode(0), m_mesh_angle(100), m_mesh_radius(100), 
 	m_data_state(nullptr), m_data_cables(nullptr), m_data_energy(nullptr)
 {
 	m_base.solver()->log(false);
@@ -42,15 +42,20 @@ double Map::force(double force)
 
 double Map::tension(void) const
 {
-	const double dc = m_base.cables_diameter();
-	const double sr = m_base.residual_stress();
-	return M_PI / 4 * dc * dc * sr;
+	return m_base.tension();
 }
 double Map::tension(double tension)
 {
-	const double dc = m_base.cables_diameter();
-	m_base.residual_stress(tension / (M_PI / 4 * dc * dc));
-	return tension;
+	return m_base.tension(tension);
+}
+
+uint32_t Map::mode(void) const
+{
+	return m_mode;
+}
+uint32_t Map::mode(uint32_t mode)
+{
+	return m_mode = mode;
 }
 
 uint32_t Map::cables(uint32_t cables)
@@ -85,6 +90,7 @@ void Map::solve(void)
 {
 	//data
 	bool test;
+	const double Pr = m_force;
 	using namespace std::chrono;
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
@@ -96,11 +102,9 @@ void Map::solve(void)
 	Tensegrity* tensegrities = new Tensegrity[nt];
 	const high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	//setup
-	m_base.cable_force(nc);
 	for(uint32_t i = 0; i < nt; i++)
 	{
 		tensegrities[i] = m_base;
-		const double Ac = M_PI * dc * dc / 4;
 		tensegrities[i].add_load({0, 0, -m_force}, {});
 	}
 	//solve
@@ -117,6 +121,8 @@ void Map::solve(void)
 			Tensegrity& tensegrity = tensegrities[omp_get_thread_num()];
 			//solve
 			tensegrity.load_position(0, {r * cos(t), r * sin(t), Ht});
+			if(m_mode == 1) tensegrity.load(0, {+Pr * cos(t), +Pr * sin(t), 0});
+			if(m_mode == 2) tensegrity.load(0, {-Pr * sin(t), +Pr * cos(t), 0});
 			tensegrity.solver()->solve();
 			if(!tensegrity.solver()->equilibrium()) test = false;
 			//save
@@ -263,5 +269,5 @@ void Map::path(char* path) const
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
 	const uint32_t nc = m_base.cables();
-	sprintf(path, "data/Map-%d-%d-%d-%d", nc, na, nr, tension() > m_force / 2);
+	sprintf(path, "data/Map-%d-%d-%d-%d-%d", m_mode, nc, na, nr, tension() > m_force / 2);
 }
