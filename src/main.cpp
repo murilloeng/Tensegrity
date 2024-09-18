@@ -19,12 +19,14 @@
 int main(int32_t argc, char* argv[])
 {
 	//test
-	map_vertical(4, 1.00e+02);
-	map_vertical(5, 1.00e+02);
-	map_vertical(6, 1.00e+02);
-	map_vertical(4, 1.00e+03);
-	map_vertical(5, 1.00e+03);
-	map_vertical(6, 1.00e+03);
+	map(2, 3, 1.00e+02);
+	map(2, 4, 1.00e+02);
+	map(2, 5, 1.00e+02);
+	map(2, 6, 1.00e+02);
+	map(2, 3, 1.00e+03);
+	map(2, 4, 1.00e+03);
+	map(2, 5, 1.00e+03);
+	map(2, 6, 1.00e+03);
 	//return
 	return EXIT_SUCCESS;
 }

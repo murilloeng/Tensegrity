@@ -74,7 +74,7 @@ void test_stiffness(void)
 	}
 }
 
-void map_vertical(uint32_t nc, double fr)
+void map(uint32_t mode, uint32_t nc, double fr)
 {
 	//data
 	Map map;
@@ -83,6 +83,7 @@ void map_vertical(uint32_t nc, double fr)
 	const double Pr = 1.00e+03;
 	//setup
 	map.force(Pr);
+	map.mode(mode);
 	map.cables(nc);
 	map.tension(fr);
 	map.mesh_angle(na);

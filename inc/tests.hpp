@@ -6,7 +6,7 @@
 void test_force(void);
 void test_stiffness(void);
 
-void map_vertical(uint32_t, double);
+void map(uint32_t, uint32_t, double);
 
 void fun_force(double*, const double*, void**);
 void fun_energy(double*, const double*, void**);

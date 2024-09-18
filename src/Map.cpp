@@ -146,7 +146,7 @@ void Map::solve(void)
 			m_data_energy[3 * (i * na + j) + 2] = tensegrity.internal_energy();
 		}
 		if(!test) break;
-		printf("radius: %d\n", i);
+		printf("mode: %d cables: %d radius: %d\n", m_mode, m_base.cables(), i);
 	}
 	if(test)
 	{
