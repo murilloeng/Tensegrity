@@ -105,7 +105,7 @@ void Map::solve(void)
 	for(uint32_t i = 0; i < nt; i++)
 	{
 		tensegrities[i] = m_base;
-		tensegrities[i].add_load({0, 0, -m_force}, {});
+		tensegrities[i].add_load({0, 0, -Pr}, {});
 	}
 	//solve
 	setup();
@@ -269,5 +269,5 @@ void Map::path(char* path) const
 	const uint32_t na = m_mesh_angle;
 	const uint32_t nr = m_mesh_radius;
 	const uint32_t nc = m_base.cables();
-	sprintf(path, "data/Map-%d-%d-%d-%d-%d", m_mode, nc, na, nr, tension() > m_force / 2);
+	sprintf(path, "data/maps/%d-%d-%d-%d-%d", m_mode, nc, na, nr, tension() > m_force / 2);
 }

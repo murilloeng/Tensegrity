@@ -19,14 +19,10 @@
 int main(int32_t argc, char* argv[])
 {
 	//test
-	map(2, 3, 1.00e+02);
-	map(2, 4, 1.00e+02);
-	map(2, 5, 1.00e+02);
-	map(2, 6, 1.00e+02);
-	map(2, 3, 1.00e+03);
-	map(2, 4, 1.00e+03);
-	map(2, 5, 1.00e+03);
-	map(2, 6, 1.00e+03);
+	load_nonlinear_vertical_radial_peak(7);
+	load_nonlinear_vertical_radial_peak(8);
+	load_nonlinear_vertical_radial_peak(9);
+	load_nonlinear_vertical_radial_peak(10);
 	//return
 	return EXIT_SUCCESS;
 }
