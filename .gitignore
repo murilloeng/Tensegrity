@@ -4,6 +4,7 @@
 !*.ui
 !*.gp
 !*.py
+!*.bat
 !*.cpp
 !*.hpp
 !*.sln
